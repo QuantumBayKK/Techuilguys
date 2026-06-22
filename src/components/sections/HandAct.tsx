@@ -4,11 +4,12 @@ import { motion } from "framer-motion";
 import { DEALERS, dealerById, type DealerId } from "@/data/dealers";
 import { handFor } from "@/data/projects";
 import ProjectShowcase from "@/components/cards/ProjectShowcase";
+import RippleReveal from "@/components/ui/RippleReveal";
 
 /**
- * Act III — the dealt hand, scrolled. The chosen dealer's five cards come
- * first; then "the rest of the deck" (the other dealer's hand). Every card is
- * a project with a live embedded demo. No clicks — pure scroll.
+ * Act III — the dealt hand, scrolled. The chosen dealer's three cards come
+ * first; then "the rest of the deck" (the other dealer's hand). Each section
+ * ripples into view like a pebble dropped in a pond. Pure scroll.
  */
 export default function HandAct({ dealer }: { dealer: DealerId }) {
   const chosen = dealerById(dealer);
@@ -18,14 +19,18 @@ export default function HandAct({ dealer }: { dealer: DealerId }) {
 
   return (
     <div id="the-hand" className="relative">
-      <HandHeader
-        no="01"
-        eyebrow={`Dealt by ${chosen.name} ${chosen.suit}`}
-        title="Your hand"
-        sub={`Three jobs we actually shipped — ${chosen.rank.toLowerCase()}. Read 'em.`}
-      />
+      <RippleReveal>
+        <HandHeader
+          no="01"
+          eyebrow={`Dealt by ${chosen.name} ${chosen.suit}`}
+          title="Your hand"
+          sub={`Three jobs we actually shipped — ${chosen.rank.toLowerCase()}. Read 'em.`}
+        />
+      </RippleReveal>
       {mine.map((p, i) => (
-        <ProjectShowcase key={p.id} project={p} number={i + 1} flip={i % 2 === 1} />
+        <RippleReveal key={p.id}>
+          <ProjectShowcase project={p} number={i + 1} flip={i % 2 === 1} />
+        </RippleReveal>
       ))}
 
       <div className="my-10 flex items-center gap-4 px-6">
@@ -36,14 +41,18 @@ export default function HandAct({ dealer }: { dealer: DealerId }) {
         <span className="h-px flex-1 bg-[var(--color-line)]" />
       </div>
 
-      <HandHeader
-        no="02"
-        eyebrow={`${other.name}'s hand ${other.suit}`}
-        title="The other three"
-        sub={other.tagline}
-      />
+      <RippleReveal>
+        <HandHeader
+          no="02"
+          eyebrow={`${other.name}'s hand ${other.suit}`}
+          title="The other three"
+          sub={other.tagline}
+        />
+      </RippleReveal>
       {theirs.map((p, i) => (
-        <ProjectShowcase key={p.id} project={p} number={i + 1} flip={i % 2 === 1} />
+        <RippleReveal key={p.id}>
+          <ProjectShowcase project={p} number={i + 1} flip={i % 2 === 1} />
+        </RippleReveal>
       ))}
     </div>
   );

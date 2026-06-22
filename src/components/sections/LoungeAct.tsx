@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import PixelCat from "@/components/pixel/PixelCat";
 import Founders from "@/components/sections/Founders";
 import Marquee from "@/components/ui/Marquee";
+import RippleReveal from "@/components/ui/RippleReveal";
 
 /**
  * Act IV — the lounge. The story lands here: the living ASCII cat, the contact
@@ -14,7 +15,7 @@ export default function LoungeAct() {
     <section className="relative">
       <Marquee text="Two dealers · One table · Cinematic, engineered software" />
 
-      <div className="mx-auto max-w-4xl px-6 py-28 text-center">
+      <RippleReveal className="mx-auto max-w-4xl px-6 py-28 text-center">
         <motion.h2
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -63,7 +64,7 @@ export default function LoungeAct() {
             </a>
           </div>
         </div>
-      </div>
+      </RippleReveal>
 
       <footer className="border-t border-[var(--color-line)] px-6 py-8 text-center text-[10px] uppercase tracking-[0.3em] text-[var(--color-faint)]">
         Techuila Guys — built in the browser · ♠ ♣

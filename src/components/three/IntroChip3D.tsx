@@ -1,42 +1,24 @@
 "use client";
 
-import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { DEALERS, type Dealer, type DealerId } from "@/data/dealers";
 
 /**
- * The loader, as a real 3D model: a poker chip spins up (the "loading" beat),
- * shatters into a burst of shards, and the shards resolve into the two dealer
- * cards (Kailosh & Keni). Once formed the cards are LIVE — hover lifts them,
- * click deals you that hand. Pure time-driven state machine (no physics) for a
- * steady 60fps, capped DPR, tiny scene.
- *
- * Timeline (seconds):
- *   0.0–1.9  SPIN     chip accelerates around its axis at a 3/4 tilt
- *   1.9–2.8  SHATTER  chip → 32 wedge shards explode outward + tumble + fade
- *   2.6–3.8  FORM     two dealer cards rise from the burst, flip to face you
- *   3.8+     PICK     cards float + react to hover; click to choose
+ * The loader flourish: a 3D poker chip spins up (the "dealing in…" beat) and
+ * shatters into a burst of 32 wedge shards that tumble outward and fade. When
+ * the shatter is underway it calls `onDone`, and the parent (IntroPick) hands
+ * off to the real HTML dealer cards which rise out of the burst. Pure
+ * time-driven state machine (no physics) + capped DPR for a steady 60fps.
  */
 
 const SHARDS = 32;
-const T = {
-  shatter: 1.9,
-  shatterDur: 0.9,
-  form: 2.6,
-  formDur: 1.2,
-};
+const T = { shatter: 1.7, shatterDur: 1.0 };
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 const easeInCubic = (t: number) => t * t * t;
-const easeOutBack = (t: number) => {
-  const c1 = 1.70158;
-  const c3 = c1 + 1;
-  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
-};
 
-/* ---------- chip face texture (cream→brass, spots, suits, wordmark) ---------- */
 function makeChipTexture() {
   const S = 512;
   const c = document.createElement("canvas");
@@ -92,115 +74,16 @@ function makeChipTexture() {
   return tex;
 }
 
-/* ---------- a dealer card composited to a canvas texture ---------- */
-function useCardTexture(d: Dealer) {
-  const [tex, setTex] = useState<THREE.CanvasTexture | null>(null);
-  useEffect(() => {
-    let alive = true;
-    const img = new window.Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      if (!alive) return;
-      const W = 512;
-      const H = Math.round(W * 1.466);
-      const c = document.createElement("canvas");
-      c.width = W;
-      c.height = H;
-      const x = c.getContext("2d")!;
-
-      x.fillStyle = "#0e0b08";
-      x.fillRect(0, 0, W, H);
-
-      const ir = img.width / img.height;
-      const cr = W / H;
-      let dw = W,
-        dh = H,
-        dx = 0,
-        dy = 0;
-      if (ir > cr) {
-        dh = H;
-        dw = H * ir;
-        dx = (W - dw) / 2;
-      } else {
-        dw = W;
-        dh = W / ir;
-        dy = (H - dh) / 2;
-      }
-      x.drawImage(img, dx, dy, dw, dh);
-
-      const grade = x.createLinearGradient(0, 0, 0, H);
-      grade.addColorStop(0, "rgba(8,6,4,0.15)");
-      grade.addColorStop(0.55, "rgba(8,6,4,0)");
-      grade.addColorStop(1, "rgba(8,6,4,0.9)");
-      x.fillStyle = grade;
-      x.fillRect(0, 0, W, H);
-
-      x.strokeStyle = "rgba(201,162,75,0.85)";
-      x.lineWidth = 10;
-      x.strokeRect(16, 16, W - 32, H - 32);
-      x.strokeStyle = "rgba(201,162,75,0.35)";
-      x.lineWidth = 3;
-      x.strokeRect(30, 30, W - 60, H - 60);
-
-      x.fillStyle = "#c9a24b";
-      x.textBaseline = "top";
-      x.font = `bold ${W * 0.11}px Georgia, serif`;
-      x.textAlign = "left";
-      x.fillText(d.suit, 40, 36);
-      x.save();
-      x.translate(W - 40, H - 36);
-      x.rotate(Math.PI);
-      x.fillText(d.suit, 0, 0);
-      x.restore();
-
-      x.textAlign = "left";
-      x.fillStyle = "#ff9d2f";
-      x.font = `bold ${W * 0.14}px Georgia, serif`;
-      x.fillText(d.name.toUpperCase(), 44, H - 168);
-      x.fillStyle = "#c9a24b";
-      x.font = `${W * 0.05}px Georgia, serif`;
-      x.fillText(d.rank.toUpperCase(), 46, H - 86);
-
-      const t = new THREE.CanvasTexture(c);
-      t.anisotropy = 8;
-      t.colorSpace = THREE.SRGBColorSpace;
-      setTex(t);
-    };
-    img.src = d.portrait;
-    return () => {
-      alive = false;
-    };
-  }, [d]);
-  return tex;
-}
-
-/* ---------- the scene ---------- */
-function Scene({
-  onReady,
-  onPick,
-  picked,
-}: {
-  onReady?: () => void;
-  onPick?: (id: DealerId) => void;
-  picked: DealerId | null;
-}) {
+function Scene({ onDone }: { onDone?: () => void }) {
   const tilt = useRef<THREE.Group>(null);
   const chip = useRef<THREE.Group>(null);
   const shardGroup = useRef<THREE.Group>(null);
   const shardRefs = useRef<(THREE.Mesh | null)[]>([]);
-  const cards = useRef<THREE.Group>(null);
-  const cardRefs = useRef<(THREE.Group | null)[]>([]);
   const flash = useRef<THREE.PointLight>(null);
-  const readyRef = useRef(false);
-  const readyFired = useRef(false);
-  const [hovered, setHovered] = useState<number | null>(null);
+  const doneFired = useRef(false);
 
   const { viewport } = useThree();
-
   const chipTex = useMemo(() => makeChipTexture(), []);
-  const texA = useCardTexture(DEALERS[0]);
-  const texB = useCardTexture(DEALERS[1]);
-  const cardTex = [texA, texB];
 
   const shards = useMemo(() => {
     const arr = [];
@@ -227,13 +110,14 @@ function Scene({
     return arr;
   }, []);
 
-  const chipMats = useMemo(() => {
-    return [
+  const chipMats = useMemo(
+    () => [
       new THREE.MeshStandardMaterial({ color: "#b89a5e", metalness: 0.6, roughness: 0.35 }),
       new THREE.MeshStandardMaterial({ map: chipTex, metalness: 0.35, roughness: 0.45 }),
       new THREE.MeshStandardMaterial({ color: "#9a814d", metalness: 0.5, roughness: 0.4 }),
-    ];
-  }, [chipTex]);
+    ],
+    [chipTex]
+  );
 
   const shardMat = useMemo(
     () =>
@@ -249,12 +133,9 @@ function Scene({
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
-
-    const s = THREE.MathUtils.clamp(viewport.width / 8, 0.5, 1.15);
+    const s = THREE.MathUtils.clamp(viewport.width / 8, 0.55, 1.2);
     if (tilt.current) tilt.current.scale.setScalar(s);
-    if (cards.current) cards.current.scale.setScalar(s);
 
-    // ----- SPIN -----
     const spinning = t < T.shatter;
     if (chip.current) {
       chip.current.visible = spinning;
@@ -267,18 +148,17 @@ function Scene({
       tilt.current.rotation.z = spinning ? Math.sin(t * 1.6) * 0.04 : 0;
     }
 
-    // ----- SHATTER -----
     const e = clamp01((t - T.shatter) / T.shatterDur);
     const showShards = t >= T.shatter && e < 1;
     if (shardGroup.current) shardGroup.current.visible = showShards;
     if (showShards) {
-      const spread = easeOutCubic(e) * 4.2;
+      const spread = easeOutCubic(e) * 4.6;
       shardMat.opacity = 1 - easeInCubic(e);
       for (let i = 0; i < shards.length; i++) {
         const m = shardRefs.current[i];
         const sh = shards[i];
         if (!m) continue;
-        m.position.set(sh.dirX * spread, sh.yOff * easeOutCubic(e) * 1.4, sh.dirZ * spread);
+        m.position.set(sh.dirX * spread, sh.yOff * easeOutCubic(e) * 1.5, sh.dirZ * spread);
         const rot = e * sh.spin;
         m.rotation.set(sh.ax * rot, sh.ay * rot, sh.az * rot);
         m.scale.setScalar(1 - e * 0.55);
@@ -286,95 +166,15 @@ function Scene({
     }
 
     if (flash.current) {
-      flash.current.intensity = clamp01(1 - Math.abs(t - T.shatter) / 0.22) * 22;
+      flash.current.intensity = clamp01(1 - Math.abs(t - T.shatter) / 0.22) * 24;
     }
 
-    // ----- FORM + PICK -----
-    const f = clamp01((t - T.form) / T.formDur);
-    if (cards.current) cards.current.visible = f > 0;
-    if (f > 0) {
-      const targetX = 1.05;
-      for (let i = 0; i < 2; i++) {
-        const g = cardRefs.current[i];
-        if (!g) continue;
-        const dir = i === 0 ? -1 : 1;
-        const fi = clamp01(f - i * 0.06);
-        const rise = easeOutCubic(fi);
-        const back = easeOutBack(clamp01(fi));
-
-        if (fi < 1) {
-          // forming
-          g.position.set(dir * targetX * rise, (1 - rise) * -0.25, 0);
-          g.rotation.set(0, (1 - back) * dir * Math.PI * 0.6, 0);
-          g.scale.setScalar(0.2 + back * 0.8);
-        } else {
-          // formed → idle + interactive
-          const it = t - (T.form + T.formDur);
-          const chosen = picked != null && DEALERS[i].id === picked;
-          const dimmed = picked != null && !chosen;
-          const hov = hovered === i && picked == null;
-
-          let ty = Math.sin(it * 1.1 + i * 1.6) * 0.05;
-          let tz = 0;
-          let tScale = 1;
-          let trotY = Math.sin(it * 0.6 + i) * 0.12;
-          if (hov) {
-            tScale = 1.09;
-            tz = 0.18;
-            trotY = 0;
-            ty += 0.06;
-          }
-          if (chosen) {
-            tScale = 1.28;
-            tz = 0.7;
-            trotY = 0;
-          }
-          if (dimmed) {
-            tScale = 0.82;
-            tz = -0.4;
-            ty -= 0.15;
-          }
-
-          g.position.x = THREE.MathUtils.lerp(g.position.x, dir * targetX, 0.12);
-          g.position.y = THREE.MathUtils.lerp(g.position.y, ty, 0.12);
-          g.position.z = THREE.MathUtils.lerp(g.position.z, tz, 0.12);
-          const cur = g.scale.x;
-          g.scale.setScalar(THREE.MathUtils.lerp(cur, tScale, 0.12));
-          g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, trotY, 0.1);
-          g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, Math.cos(it * 0.5 + i) * 0.05, 0.1);
-        }
-      }
-
-      const cg = cards.current;
-      if (cg && picked == null) {
-        cg.rotation.y = THREE.MathUtils.lerp(cg.rotation.y, state.pointer.x * 0.16, 0.06);
-        cg.rotation.x = THREE.MathUtils.lerp(cg.rotation.x, -state.pointer.y * 0.09, 0.06);
-      }
-
-      if (!readyFired.current && f >= 1) {
-        readyFired.current = true;
-        readyRef.current = true;
-        onReady?.();
-      }
+    // hand off to the HTML cards partway through the burst
+    if (!doneFired.current && t >= T.shatter + T.shatterDur * 0.45) {
+      doneFired.current = true;
+      onDone?.();
     }
   });
-
-  const overCard = (i: number) => (e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    if (!readyRef.current || picked != null) return;
-    setHovered(i);
-    document.body.style.cursor = "pointer";
-  };
-  const outCard = () => {
-    setHovered(null);
-    document.body.style.cursor = "";
-  };
-  const clickCard = (i: number) => (e: ThreeEvent<MouseEvent>) => {
-    e.stopPropagation();
-    if (!readyRef.current || picked != null) return;
-    document.body.style.cursor = "";
-    onPick?.(DEALERS[i].id);
-  };
 
   return (
     <>
@@ -403,50 +203,11 @@ function Scene({
           ))}
         </group>
       </group>
-
-      <group ref={cards} visible={false} position={[0, 0, 0.6]}>
-        {DEALERS.map((d, i) => (
-          <group
-            key={d.id}
-            ref={(el) => {
-              cardRefs.current[i] = el;
-            }}
-            onPointerOver={overCard(i)}
-            onPointerOut={outCard}
-            onClick={clickCard(i)}
-          >
-            <mesh>
-              <planeGeometry args={[1.35, 1.98]} />
-              {cardTex[i] ? (
-                <meshBasicMaterial map={cardTex[i]!} toneMapped={false} side={THREE.DoubleSide} />
-              ) : (
-                <meshBasicMaterial color="#14110c" side={THREE.DoubleSide} />
-              )}
-            </mesh>
-            <mesh position={[0, 0, -0.012]}>
-              <planeGeometry args={[1.42, 2.05]} />
-              <meshStandardMaterial
-                color={hovered === i ? "#ff9d2f" : "#1a1610"}
-                metalness={0.5}
-                roughness={0.4}
-              />
-            </mesh>
-          </group>
-        ))}
-      </group>
     </>
   );
 }
 
-export default function IntroChip3D({
-  onReady,
-  onPick,
-  picked,
-}: {
-  onReady?: () => void;
-  onPick?: (id: DealerId) => void;
-  picked: DealerId | null;
-}) {
+export default function IntroChip3D({ onDone }: { onDone?: () => void }) {
   return (
     <Canvas
       dpr={[1, 2]}
@@ -454,7 +215,7 @@ export default function IntroChip3D({
       camera={{ position: [0, 0, 6], fov: 42 }}
       style={{ width: "100%", height: "100%" }}
     >
-      <Scene onReady={onReady} onPick={onPick} picked={picked} />
+      <Scene onDone={onDone} />
     </Canvas>
   );
 }
