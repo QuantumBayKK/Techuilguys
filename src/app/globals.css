@@ -437,6 +437,15 @@ html.lenis body {
   will-change: transform;
 }
 
+/* sound-chip toggle */
+.chip-turn { animation: chipturn 6s linear infinite; }
+@keyframes chipturn { to { transform: rotate(360deg); } }
+.snd-wave { animation: sndwave 1.8s ease-in-out infinite; transform-origin: 24px 24px; }
+@keyframes sndwave {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
 /* ASCII cat overlays */
 .cat-heart {
   animation: heartfloat 1.6s ease-in-out infinite;
@@ -467,6 +476,8 @@ html.lenis body {
   .cat-bob,
   .ember,
   .status-pulse,
+  .chip-turn,
+  .snd-wave,
   .demo--live * {
     animation: none !important;
   }

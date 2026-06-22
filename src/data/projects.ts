@@ -93,27 +93,6 @@ export const PROJECTS: Project[] = [
     repo: "https://github.com/Sk1zmo/ATLAS",
   },
   {
-    id: "k3",
-    dealer: "kailosh",
-    rank: "Q",
-    suit: "spades",
-    demo: "terminal",
-    image: "/projects/sm1ly.png",
-    imageAlt: "sm1ly — offensive-security recon terminal with a risk score",
-    title: "sm1ly",
-    subtitle: "Offensive-Security Recon",
-    blurb:
-      "One command unveils an entire attack surface — network, web, OSINT and cloud — and collapses it into a single explainable risk score.",
-    role: "Offensive Security · Orchestration",
-    outcomes: "Six tools, one interface · weighted risk · JSON report",
-    skills: [
-      { group: "Recon", items: ["nmap", "rustscan", "httpx", "nuclei", "amass", "trivy"] },
-      { group: "Core", items: ["Python", "subprocess", "Risk modelling"] },
-      { group: "Env", items: ["PowerShell", "WSL"] },
-    ],
-    repo: "https://github.com/Sk1zmo/sm1ly",
-  },
-  {
     id: "k4",
     dealer: "kailosh",
     rank: "J",
@@ -133,27 +112,6 @@ export const PROJECTS: Project[] = [
       { group: "App", items: ["Expo", "React Native", "Docker Compose"] },
     ],
     repo: "https://github.com/Sk1zmo/Anemoi",
-  },
-  {
-    id: "k5",
-    dealer: "kailosh",
-    rank: "10",
-    suit: "spades",
-    demo: "voice",
-    image: "/projects/cheri.png",
-    imageAlt: "Cheri — on-device private voice assistant",
-    title: "Cheri",
-    subtitle: "On-Device Voice AI",
-    blurb:
-      "You speak; it answers aloud — a private assistant that keeps its mind on your own machine.",
-    role: "Mobile AI · Local-first",
-    outcomes: "On-device TTS · self-hosted LLM over LAN · privacy-preserving",
-    skills: [
-      { group: "Android", items: ["Kotlin", "Jetpack Compose", "Material 3"] },
-      { group: "Net", items: ["OkHttp", "TextToSpeech"] },
-      { group: "Backend", items: ["Node", "Express"] },
-    ],
-    repo: "https://github.com/Sk1zmo/Cheri",
   },
 
   // ---- Keni's hand (Clubs) ----
@@ -176,26 +134,6 @@ export const PROJECTS: Project[] = [
       { group: "Systems", items: ["C", "IPsec", "IKEv2", "strongSwan"] },
     ],
     repo: "https://github.com/KenidoesCode/ipsec-pqc-ikev2",
-  },
-  {
-    id: "n2",
-    dealer: "keni",
-    rank: "K",
-    suit: "clubs",
-    demo: "chain",
-    image: "/projects/qrmf-x.png",
-    imageAlt: "qrmf-x — quantum-resistant multi-chain middleware",
-    title: "qrmf-x",
-    subtitle: "Quantum-Resistant Multi-Chain Middleware",
-    blurb:
-      "A middleware layer that brings quantum-resistant verification to multi-chain blockchain environments.",
-    role: "Web3 · Protocol Design",
-    outcomes: "PQC verification · multi-chain interoperability",
-    skills: [
-      { group: "Crypto", items: ["Post-quantum", "Verification systems"] },
-      { group: "Web3", items: ["JavaScript", "Node", "Multi-chain", "Middleware"] },
-    ],
-    repo: "https://github.com/KenidoesCode/qrmf-x",
   },
   {
     id: "n3",
@@ -237,26 +175,6 @@ export const PROJECTS: Project[] = [
       { group: "AI", items: ["LLM apps", "Founder intelligence"] },
     ],
     repo: "https://github.com/KenidoesCode/founderos",
-  },
-  {
-    id: "n5",
-    dealer: "keni",
-    rank: "10",
-    suit: "clubs",
-    demo: "quant",
-    image: "/projects/pairs-trading.png",
-    imageAlt: "Pairs-Trading-Quant — cointegrated mean-reversion spread",
-    title: "Pairs-Trading-Quant",
-    subtitle: "Statistical-Arbitrage Engine",
-    blurb:
-      "A pairs-trading strategy with cointegration testing and backtesting — statistical arbitrage on the mean-reverting spread.",
-    role: "Quant Finance",
-    outcomes: "Cointegrated pairs · mean-reversion · backtested edge",
-    skills: [
-      { group: "Quant", items: ["Statistical arbitrage", "Cointegration", "Time-series"] },
-      { group: "Data", items: ["Python", "pandas", "numpy"] },
-    ],
-    repo: "https://github.com/KenidoesCode/Pairs-Trading-Quant",
   },
 ];
 

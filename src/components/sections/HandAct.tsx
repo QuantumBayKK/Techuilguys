@@ -22,7 +22,7 @@ export default function HandAct({ dealer }: { dealer: DealerId }) {
         no="01"
         eyebrow={`Dealt by ${chosen.name} ${chosen.suit}`}
         title="Your hand"
-        sub={`Five jobs we actually shipped — ${chosen.rank.toLowerCase()}. Read 'em.`}
+        sub={`Three jobs we actually shipped — ${chosen.rank.toLowerCase()}. Read 'em.`}
       />
       {mine.map((p, i) => (
         <ProjectShowcase key={p.id} project={p} number={i + 1} flip={i % 2 === 1} />
@@ -39,7 +39,7 @@ export default function HandAct({ dealer }: { dealer: DealerId }) {
       <HandHeader
         no="02"
         eyebrow={`${other.name}'s hand ${other.suit}`}
-        title="The other five"
+        title="The other three"
         sub={other.tagline}
       />
       {theirs.map((p, i) => (
