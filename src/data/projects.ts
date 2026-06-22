@@ -2,24 +2,51 @@ import type { DealerId } from "./dealers";
 
 export type Suit = "spades" | "hearts" | "clubs" | "diamonds";
 
+/** Which embedded animated demo plays inside the card showcase. */
+export type DemoKind =
+  | "mesh"
+  | "vision"
+  | "terminal"
+  | "geo"
+  | "voice"
+  | "handshake"
+  | "chain"
+  | "zk"
+  | "founder"
+  | "quant";
+
 export type Project = {
   id: string;
   dealer: DealerId;
   /** Playing-card identity for the face. */
   rank: string;
   suit: Suit;
+  demo: DemoKind;
   title: string; // front of card
   subtitle: string; // front of card, under the title
-  blurb: string; // back: what it does (the one-liner)
-  role: string; // back
-  outcomes: string; // back
-  skills: { group: string; items: string[] }[]; // back: tech stack chips
-  link?: string;
+  blurb: string; // what it does (the one-liner)
+  role: string;
+  outcomes: string;
+  skills: { group: string; items: string[] }[]; // tech stack chips
+  /** Public source repository, if any. Renders a "Code ↗" action. */
+  repo?: string;
+  /** Live/deployed preview URL, if any. Renders a "Live ↗" action. */
+  live?: string;
+  /**
+   * Optional AI-generated hero art (or real screenshot) for the deck.
+   * Generate in Gemini, drop the file into `public/projects/`, then set the
+   * path here (e.g. `/projects/bifrost.webp`). When present it replaces the
+   * live SVG demo in the showcase; when absent the demo plays as a fallback.
+   * See `public/projects/README.md` for the exact filenames + Gemini prompts.
+   */
+  image?: string;
+  /** Alt text / caption used when `image` is set. */
+  imageAlt?: string;
 };
 
 /**
  * The real hands. Kailosh (♠) = systems / CV / security / distributed / mobile-AI.
- * Kenny (♣, GitHub @KenidoesCode) = post-quantum crypto / web3 / ZK / AI / quant.
+ * Keni (♣, GitHub @KenidoesCode) = post-quantum crypto / web3 / ZK / AI / quant.
  */
 export const PROJECTS: Project[] = [
   // ---- Kailosh's hand (Spades) ----
@@ -28,6 +55,9 @@ export const PROJECTS: Project[] = [
     dealer: "kailosh",
     rank: "A",
     suit: "spades",
+    demo: "mesh",
+    image: "/projects/bifrost.png",
+    imageAlt: "Bifrost — zero-config LAN mesh discovery",
     title: "Bifrost",
     subtitle: "Zero-Config LAN Mesh",
     blurb:
@@ -39,12 +69,16 @@ export const PROJECTS: Project[] = [
       { group: "Networking", items: ["UDP", "TCP", "Wire protocol", "Zero-config discovery"] },
       { group: "Clients", items: ["ratatui", "Flutter", "SwiftUI"] },
     ],
+    repo: "https://github.com/Sk1zmo/Bifrost",
   },
   {
     id: "k2",
     dealer: "kailosh",
     rank: "K",
     suit: "spades",
+    demo: "vision",
+    image: "/projects/atlas.png",
+    imageAlt: "ATLAS — tactical surveillance suite tracking a face across cameras",
     title: "ATLAS",
     subtitle: "Tactical Surveillance Suite",
     blurb:
@@ -56,12 +90,16 @@ export const PROJECTS: Project[] = [
       { group: "Backend", items: ["Python", "FastAPI", "SQLite", "MJPEG"] },
       { group: "Ship", items: ["PyInstaller"] },
     ],
+    repo: "https://github.com/Sk1zmo/ATLAS",
   },
   {
     id: "k3",
     dealer: "kailosh",
     rank: "Q",
     suit: "spades",
+    demo: "terminal",
+    image: "/projects/sm1ly.png",
+    imageAlt: "sm1ly — offensive-security recon terminal with a risk score",
     title: "sm1ly",
     subtitle: "Offensive-Security Recon",
     blurb:
@@ -73,12 +111,16 @@ export const PROJECTS: Project[] = [
       { group: "Core", items: ["Python", "subprocess", "Risk modelling"] },
       { group: "Env", items: ["PowerShell", "WSL"] },
     ],
+    repo: "https://github.com/Sk1zmo/sm1ly",
   },
   {
     id: "k4",
     dealer: "kailosh",
-    rank: "Q",
-    suit: "hearts",
+    rank: "J",
+    suit: "spades",
+    demo: "geo",
+    image: "/projects/anemoi.png",
+    imageAlt: "Anemoi — geospatial memory system reconstructing a journey",
     title: "Anemoi",
     subtitle: "Geospatial Memory System",
     blurb:
@@ -90,12 +132,16 @@ export const PROJECTS: Project[] = [
       { group: "Data", items: ["PostGIS", "pgvector", "Graph queries"] },
       { group: "App", items: ["Expo", "React Native", "Docker Compose"] },
     ],
+    repo: "https://github.com/Sk1zmo/Anemoi",
   },
   {
     id: "k5",
     dealer: "kailosh",
     rank: "10",
     suit: "spades",
+    demo: "voice",
+    image: "/projects/cheri.png",
+    imageAlt: "Cheri — on-device private voice assistant",
     title: "Cheri",
     subtitle: "On-Device Voice AI",
     blurb:
@@ -107,14 +153,18 @@ export const PROJECTS: Project[] = [
       { group: "Net", items: ["OkHttp", "TextToSpeech"] },
       { group: "Backend", items: ["Node", "Express"] },
     ],
+    repo: "https://github.com/Sk1zmo/Cheri",
   },
 
-  // ---- Kenny's hand (Clubs) ----
+  // ---- Keni's hand (Clubs) ----
   {
     id: "n1",
-    dealer: "kenny",
+    dealer: "keni",
     rank: "A",
     suit: "clubs",
+    demo: "handshake",
+    image: "/projects/ipsec-pqc.png",
+    imageAlt: "ipsec-pqc-ikev2 — post-quantum key exchange handshake",
     title: "ipsec-pqc-ikev2",
     subtitle: "Post-Quantum VPN Key Exchange",
     blurb:
@@ -125,12 +175,16 @@ export const PROJECTS: Project[] = [
       { group: "Crypto", items: ["ML-KEM", "Kyber", "Post-quantum"] },
       { group: "Systems", items: ["C", "IPsec", "IKEv2", "strongSwan"] },
     ],
+    repo: "https://github.com/KenidoesCode/ipsec-pqc-ikev2",
   },
   {
     id: "n2",
-    dealer: "kenny",
+    dealer: "keni",
     rank: "K",
     suit: "clubs",
+    demo: "chain",
+    image: "/projects/qrmf-x.png",
+    imageAlt: "qrmf-x — quantum-resistant multi-chain middleware",
     title: "qrmf-x",
     subtitle: "Quantum-Resistant Multi-Chain Middleware",
     blurb:
@@ -141,12 +195,16 @@ export const PROJECTS: Project[] = [
       { group: "Crypto", items: ["Post-quantum", "Verification systems"] },
       { group: "Web3", items: ["JavaScript", "Node", "Multi-chain", "Middleware"] },
     ],
+    repo: "https://github.com/KenidoesCode/qrmf-x",
   },
   {
     id: "n3",
-    dealer: "kenny",
+    dealer: "keni",
     rank: "Q",
     suit: "clubs",
+    demo: "zk",
+    image: "/projects/zk-airec.png",
+    imageAlt: "zk-airec — zero-knowledge proven recommendations",
     title: "zk-airec",
     subtitle: "Zero-Knowledge Recommendations",
     blurb:
@@ -158,12 +216,16 @@ export const PROJECTS: Project[] = [
       { group: "ML", items: ["Recommender systems", "Privacy-preserving ML"] },
       { group: "Core", items: ["JavaScript"] },
     ],
+    repo: "https://github.com/KenidoesCode/zk-airec",
   },
   {
     id: "n4",
-    dealer: "kenny",
+    dealer: "keni",
     rank: "J",
     suit: "clubs",
+    demo: "founder",
+    image: "/projects/founderos.png",
+    imageAlt: "founderos — an AI cofounder spanning idea, strategy and execution",
     title: "founderos",
     subtitle: "AI Cofounder",
     blurb:
@@ -174,12 +236,16 @@ export const PROJECTS: Project[] = [
       { group: "Product", items: ["TypeScript", "Full-stack", "Systems thinking"] },
       { group: "AI", items: ["LLM apps", "Founder intelligence"] },
     ],
+    repo: "https://github.com/KenidoesCode/founderos",
   },
   {
     id: "n5",
-    dealer: "kenny",
+    dealer: "keni",
     rank: "10",
     suit: "clubs",
+    demo: "quant",
+    image: "/projects/pairs-trading.png",
+    imageAlt: "Pairs-Trading-Quant — cointegrated mean-reversion spread",
     title: "Pairs-Trading-Quant",
     subtitle: "Statistical-Arbitrage Engine",
     blurb:
@@ -190,6 +256,7 @@ export const PROJECTS: Project[] = [
       { group: "Quant", items: ["Statistical arbitrage", "Cointegration", "Time-series"] },
       { group: "Data", items: ["Python", "pandas", "numpy"] },
     ],
+    repo: "https://github.com/KenidoesCode/Pairs-Trading-Quant",
   },
 ];
 

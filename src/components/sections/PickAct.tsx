@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import {
-  AnimatePresence,
   motion,
   useMotionValue,
   useSpring,
@@ -14,93 +13,100 @@ import { experience, useExperience } from "@/lib/experience";
 import { audio } from "@/lib/audio";
 
 /**
- * Pick your dealer. Two noir court-card portraits flank the table. Hover
- * colorizes + lights a neon rim; selecting steps that dealer forward, recedes
- * the other, and deals their hand.
+ * Act II — THE one decision. Two court-card portraits; click one and that
+ * dealer deals you their hand. Until a pick is made the page has nothing below
+ * this section, so scroll naturally stops here. Picking mounts the hand + the
+ * lounge underneath and the story scrolls on.
  */
-export default function DealerStage() {
-  const { stage } = useExperience();
+export default function PickAct() {
+  const { dealer } = useExperience();
   const [hover, setHover] = useState<string | null>(null);
-  const visible = stage === "dealers";
+  const picked = dealer !== null;
 
   const pick = (d: Dealer) => {
+    if (picked) return;
+    audio.unlock();
     audio.play("select");
-    experience.set({ dealer: d.id, stage: "dealt" });
+    audio.startBed(); // ambient room-tone + lo-fi trio for the rest of the story
+    experience.set({ dealer: d.id, started: true });
+    // hand the visitor down into the freshly-mounted hand
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        document.getElementById("the-hand")?.scrollIntoView({ behavior: "smooth" });
+      }, 450);
+    });
   };
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.section
-          key="dealers"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.5 } }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="pointer-events-none fixed inset-0 z-40 flex flex-col items-center justify-center"
-        >
-          <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="font-display absolute top-[14%] text-xs uppercase tracking-[0.5em] text-[var(--color-brass)]"
-          >
-            Pick your dealer
-          </motion.p>
+    <section className="relative flex min-h-screen flex-col items-center justify-center py-20">
+      <motion.p
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="font-display absolute top-[12%] text-xs uppercase tracking-[0.5em] text-[var(--color-brass)]"
+      >
+        {picked ? `${DEALERS.find((d) => d.id === dealer)?.name} deals you in` : "Pick your dealer"}
+      </motion.p>
 
-          <div className="flex w-full max-w-5xl items-center justify-center gap-6 px-6 sm:gap-16">
-            {DEALERS.map((d, i) => {
-              const dim = hover && hover !== d.id;
-              return (
-                <motion.button
-                  key={d.id}
-                  data-cursor="Deal"
-                  data-magnetic
-                  onMouseEnter={() => {
-                    setHover(d.id);
-                    audio.play("hover");
-                  }}
-                  onMouseLeave={() => setHover(null)}
-                  onClick={() => pick(d)}
-                  initial={{ y: 60, opacity: 0, rotateY: i === 0 ? 12 : -12 }}
-                  animate={{
-                    y: dim ? 14 : 0,
-                    opacity: dim ? 0.45 : 1,
-                    scale: hover === d.id ? 1.04 : 1,
-                    rotateY: 0,
-                  }}
-                  transition={{ delay: 0.5 + i * 0.12, type: "spring", stiffness: 120, damping: 18 }}
-                  className="pointer-events-auto group relative w-[42vw] max-w-[300px]"
-                  style={{ perspective: 1100 }}
-                >
-                  <CourtPortrait dealer={d} active={hover === d.id} />
-                </motion.button>
-              );
-            })}
-          </div>
+      <div className="flex w-full max-w-5xl items-center justify-center gap-6 px-6 sm:gap-16">
+        {DEALERS.map((d, i) => {
+          const isChosen = dealer === d.id;
+          const dim = (hover && hover !== d.id) || (picked && !isChosen);
+          return (
+            <motion.button
+              key={d.id}
+              data-cursor={picked ? undefined : "Deal"}
+              data-magnetic
+              disabled={picked}
+              onMouseEnter={() => {
+                if (picked) return;
+                setHover(d.id);
+                audio.play("hover");
+              }}
+              onMouseLeave={() => setHover(null)}
+              onClick={() => pick(d)}
+              initial={{ y: 60, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              animate={{
+                y: dim ? 14 : 0,
+                opacity: dim ? 0.4 : 1,
+                scale: isChosen ? 1.05 : hover === d.id ? 1.04 : 1,
+              }}
+              transition={{ delay: i * 0.12, type: "spring", stiffness: 120, damping: 18 }}
+              className="group relative w-[42vw] max-w-[300px]"
+              style={{ perspective: 1100 }}
+            >
+              <CourtPortrait dealer={d} active={hover === d.id || isChosen} />
+            </motion.button>
+          );
+        })}
+      </div>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            transition={{ delay: 1 }}
-            className="absolute bottom-[10%] text-[11px] tracking-wide text-[var(--color-muted)]"
-          >
-            Each dealer holds a five-card hand. Choose one to be dealt in.
-          </motion.p>
-        </motion.section>
-      )}
-    </AnimatePresence>
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.6 }}
+        className="absolute bottom-[9%] flex items-center gap-2 text-[11px] tracking-wide text-[var(--color-muted)]"
+      >
+        {picked ? (
+          <>
+            keep scrolling — read the hand
+            <span className="scroll-cue inline-block h-3 w-px bg-[var(--color-neon-amber)]" />
+          </>
+        ) : (
+          "Each dealer holds a five-card hand. Choose one to be dealt in."
+        )}
+      </motion.p>
+    </section>
   );
 }
 
 function CourtPortrait({ dealer, active }: { dealer: Dealer; active: boolean }) {
-  // pointer-driven tilt → the poster catches the light like a held card
   const px = useMotionValue(0.5);
   const py = useMotionValue(0.5);
   const rx = useSpring(useTransform(py, [0, 1], [9, -9]), { stiffness: 140, damping: 16 });
   const ry = useSpring(useTransform(px, [0, 1], [-11, 11]), { stiffness: 140, damping: 16 });
   const sheenX = useTransform(px, [0, 1], ["0%", "100%"]);
-  const suit = dealer.id === "kailosh" ? "♠" : "♣";
 
   const onMove = (e: React.PointerEvent) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -127,13 +133,12 @@ function CourtPortrait({ dealer, active }: { dealer: Dealer; active: boolean }) 
       }}
       className="relative aspect-[3/4.4] overflow-hidden rounded-[var(--radius-card)] border-2 transition-[box-shadow,border-color] duration-300"
     >
-      {/* brass court-card frame */}
       <div className="pointer-events-none absolute inset-2 z-20 rounded-[10px] border border-[var(--color-brass)]/40" />
       <span className="font-display absolute left-3 top-2 z-20 text-sm text-[var(--color-brass)]">
-        {suit}
+        {dealer.suit}
       </span>
       <span className="font-display absolute bottom-2 right-3 z-20 rotate-180 text-sm text-[var(--color-brass)]">
-        {suit}
+        {dealer.suit}
       </span>
 
       <Image
@@ -151,39 +156,25 @@ function CourtPortrait({ dealer, active }: { dealer: Dealer; active: boolean }) 
         priority
       />
 
-      {/* duotone wash that lifts on hover */}
       <div
         className="absolute inset-0 z-10 mix-blend-color transition-opacity duration-500"
         style={{
           opacity: active ? 0 : 0.45,
-          background:
-            "linear-gradient(180deg, var(--color-felt-deep), var(--color-noir))",
+          background: "linear-gradient(180deg, var(--color-felt-deep), var(--color-noir))",
         }}
       />
 
-      {/* moving light sweep */}
       <motion.div
         className="pointer-events-none absolute inset-0 z-20 mix-blend-overlay"
         style={{
           opacity: active ? 0.6 : 0,
           background: useTransform(
             sheenX,
-            (x) =>
-              `radial-gradient(40% 55% at ${x} 18%, rgba(255,230,180,0.55), transparent 70%)`
+            (x) => `radial-gradient(40% 55% at ${x} 18%, rgba(255,230,180,0.55), transparent 70%)`
           ),
         }}
       />
-      {/* chromatic edge flicker on hover */}
-      <div
-        className="pointer-events-none absolute inset-0 z-20 transition-opacity duration-300"
-        style={{
-          opacity: active ? 0.5 : 0,
-          boxShadow:
-            "inset 2px 0 6px -2px rgba(255,80,80,0.6), inset -2px 0 6px -2px rgba(80,180,255,0.6)",
-        }}
-      />
 
-      {/* bottom gradient + name (parallax layer) */}
       <div
         className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-[var(--color-noir)] via-[var(--color-noir)]/70 to-transparent p-4 pt-12"
         style={{ transform: "translateZ(30px)" }}

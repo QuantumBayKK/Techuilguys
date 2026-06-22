@@ -6,6 +6,7 @@ import { setScroll } from "@/lib/scrollSignal";
 import { initGsap, ScrollTrigger } from "@/lib/gsap";
 import { experience } from "@/lib/experience";
 import { useCapability } from "@/lib/useCapability";
+import { audio } from "@/lib/audio";
 
 export default function SmoothScroll({
   children,
@@ -19,51 +20,59 @@ export default function SmoothScroll({
     initGsap();
 
     const lenis = new Lenis({
-      duration: 1.25, // heavy, weighty momentum
-      lerp: 0.085,
+      lerp: 0.1, // single, frame-rate-independent smoothing — weighty but responsive
       smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.4,
+      wheelMultiplier: 1,
+      // Let mobile keep its native, GPU-accelerated momentum scroll: hijacking
+      // touch with JS smoothing is what makes phones feel laggy. Smooth the
+      // wheel on desktop only.
+      syncTouch: false,
+      touchMultiplier: 1.5,
     });
     lenisRef.current = lenis;
-
-    // sync GSAP ScrollTrigger
     lenis.on("scroll", ScrollTrigger.update);
 
     let raf = 0;
     let eased = 0;
     const loop = (time: number) => {
       lenis.raf(time);
-      const raw = (lenis as any).velocity ?? 0;
-      // ease toward raw; snaps back to 0 on scroll-stop (power2-ish)
+      const raw = (lenis as unknown as { velocity?: number }).velocity ?? 0;
       eased += (raw - eased) * 0.12;
       const norm = Math.max(-2, Math.min(2, eased * 0.045));
       setScroll({
         raw,
         velocity: norm,
-        progress: (lenis as any).progress ?? 0,
+        progress: (lenis as unknown as { progress?: number }).progress ?? 0,
         direction: raw > 0.01 ? 1 : raw < -0.01 ? -1 : 0,
       });
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
 
-    // Lock scroll until the experience reaches the body stage.
-    const apply = () => {
-      const inBody = experience.get().stage === "body";
-      if (inBody) lenis.start();
-      else lenis.stop();
-    };
-    apply();
-    const unsub = experience.subscribe(apply);
-
     document.documentElement.classList.add("lenis");
+
+    // Unlock audio + flag "started" on the first real user gesture.
+    const wake = () => {
+      audio.unlock();
+      experience.set({ started: true });
+      window.removeEventListener("pointerdown", wake);
+      window.removeEventListener("keydown", wake);
+      window.removeEventListener("wheel", wake);
+      window.removeEventListener("touchstart", wake);
+    };
+    window.addEventListener("pointerdown", wake);
+    window.addEventListener("keydown", wake);
+    window.addEventListener("wheel", wake, { passive: true });
+    window.addEventListener("touchstart", wake, { passive: true });
 
     return () => {
       cancelAnimationFrame(raf);
-      unsub();
       lenis.destroy();
       document.documentElement.classList.remove("lenis");
+      window.removeEventListener("pointerdown", wake);
+      window.removeEventListener("keydown", wake);
+      window.removeEventListener("wheel", wake);
+      window.removeEventListener("touchstart", wake);
     };
   }, []);
 

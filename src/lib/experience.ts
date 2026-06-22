@@ -4,38 +4,22 @@ import { useSyncExternalStore } from "react";
 import type { DealerId } from "@/data/dealers";
 
 /**
- * The whole home experience is one directed state machine. Both the WebGL
- * scene (inside the R3F reconciler) and the DOM HUD read/write it through this
- * external store — plain subscriptions, no shared React context across the
- * Canvas boundary.
+ * The experience is now a single scroll story. There is exactly ONE decision
+ * the visitor makes — which dealer deals them in — and the page scroll is held
+ * at that moment until they pick. Everything else is pure scroll.
  *
- *  gate    → entry / audio unlock
- *  intro   → chip spin → roll → drop → table reveal cinematic
- *  dealers → pick a dealer
- *  dealt   → five cards fanned in POV
- *  inspect → one card lifted, artifact mode
- *  body    → scrolled past the table into the site
+ *  dealer  : null until the visitor clicks Kailosh or Keni, then their id.
+ *            Picking unlocks the rest of the page (the hand + the lounge).
+ *  started : true once any user gesture has happened (used to unlock audio).
  */
-export type Stage =
-  | "gate"
-  | "intro"
-  | "dealers"
-  | "dealt"
-  | "inspect"
-  | "body";
-
 export type ExperienceState = {
-  stage: Stage;
   dealer: DealerId | null;
-  inspectId: string | null;
-  loaded: number; // 0..1 preload progress
+  started: boolean;
 };
 
 let state: ExperienceState = {
-  stage: "gate",
   dealer: null,
-  inspectId: null,
-  loaded: 0,
+  started: false,
 };
 
 const subs = new Set<() => void>();

@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Zilla_Slab, Inter, Pinyon_Script } from "next/font/google";
 import "./globals.css";
-import CanvasRoot from "@/components/three/CanvasRoot";
 import Cursor from "@/components/Cursor";
 import SmoothScroll from "@/components/SmoothScroll";
 import MuteToggle from "@/components/ui/MuteToggle";
+import Header from "@/components/ui/Header";
+import ScrollProgress from "@/components/ui/ScrollProgress";
+import Ambience from "@/components/Ambience";
 
 const display = Zilla_Slab({
   subsets: ["latin"],
@@ -29,7 +31,15 @@ const script = Pinyon_Script({
 export const metadata: Metadata = {
   title: "Techuila Guys — Pick your dealer",
   description:
-    "A high-end poker table where every project is a card. Pick a dealer, get dealt a hand, flip the cards. Built by Kailosh & Kenny.",
+    "A high-end poker lounge where every project is a card. Pick your dealer, read the hand, meet the cat. Built by Kailosh & Keni.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0a0907",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -41,8 +51,10 @@ export default function RootLayout({
       className={`${display.variable} ${body.variable} ${script.variable}`}
     >
       <body className="film-grain vignette grade">
-        <CanvasRoot />
+        <Ambience />
         <Cursor />
+        <ScrollProgress />
+        <Header />
         <MuteToggle />
         <SmoothScroll>{children}</SmoothScroll>
       </body>

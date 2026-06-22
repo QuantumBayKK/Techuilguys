@@ -6,9 +6,9 @@ import { useExperience } from "@/lib/experience";
 
 /** Persistent mute control — appears only after the entry gesture. */
 export default function MuteToggle() {
-  const { stage } = useExperience();
+  const { started } = useExperience();
   const [muted, setMuted] = useState(false);
-  if (stage === "gate") return null;
+  if (!started) return null;
 
   return (
     <button
