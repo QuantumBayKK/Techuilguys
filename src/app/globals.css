@@ -437,6 +437,18 @@ html.lenis body {
   will-change: transform;
 }
 
+/* loader "dealing in…" dots */
+.loading-dots::after {
+  content: "";
+  animation: loadingdots 1.4s steps(4, end) infinite;
+}
+@keyframes loadingdots {
+  0% { content: ""; }
+  25% { content: " ."; }
+  50% { content: " . ."; }
+  75% { content: " . . ."; }
+}
+
 /* sound-chip toggle */
 .chip-turn { animation: chipturn 6s linear infinite; }
 @keyframes chipturn { to { transform: rotate(360deg); } }
