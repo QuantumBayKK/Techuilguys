@@ -5,6 +5,7 @@ import { DEALERS, dealerById, type DealerId } from "@/data/dealers";
 import { handFor } from "@/data/projects";
 import ProjectShowcase from "@/components/cards/ProjectShowcase";
 import RippleReveal from "@/components/ui/RippleReveal";
+import ShaderBackdrop from "@/components/ui/ShaderBackdrop";
 
 /**
  * Act III — the dealt hand, scrolled. The chosen dealer's three cards come
@@ -18,7 +19,18 @@ export default function HandAct({ dealer }: { dealer: DealerId }) {
   const theirs = handFor(other.id);
 
   return (
-    <div id="the-hand" className="relative">
+    <div id="the-hand" className="relative isolate">
+      {/* ambient dithering felt — ripples under the whole hand, dies on phones */}
+      <ShaderBackdrop
+        shape="ripple"
+        type="8x8"
+        colorBack="#0a0907"
+        colorFront="#1b130a"
+        pxSize={3}
+        speed={0.3}
+        opacity={0.7}
+        className="-z-10"
+      />
       <RippleReveal>
         <HandHeader
           no="01"

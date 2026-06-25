@@ -2,6 +2,7 @@
 
 import IntroPick from "@/components/IntroPick";
 import HandAct from "@/components/sections/HandAct";
+import DeckGallery from "@/components/sections/DeckGallery";
 import LoungeAct from "@/components/sections/LoungeAct";
 import InspectCard from "@/components/cards/InspectCard";
 import { useExperience } from "@/lib/experience";
@@ -20,6 +21,7 @@ export default function Home() {
       {dealer && (
         <>
           <HandAct dealer={dealer} />
+          <DeckGallery />
           <LoungeAct />
         </>
       )}

@@ -14,6 +14,7 @@ import { DEALERS, type Dealer, type DealerId } from "@/data/dealers";
 import { experience, useExperience } from "@/lib/experience";
 import { useCapability } from "@/lib/useCapability";
 import { audio } from "@/lib/audio";
+import { SHUFFLE_LINES } from "@/lib/dealerPatter";
 
 /**
  * The entry. A full-screen loader: a 3D poker chip spins, shatters, and the
@@ -35,6 +36,17 @@ export default function IntroPick() {
   const [hover, setHover] = useState<DealerId | null>(null);
   const [picked, setPicked] = useState<DealerId | null>(null);
   const [gone, setGone] = useState(false);
+  const [patter, setPatter] = useState(0);
+
+  // #72 — cycle the dealer's shuffle patter while the deck loads in.
+  useEffect(() => {
+    if (shattered) return;
+    const id = window.setInterval(
+      () => setPatter((p) => (p + 1) % SHUFFLE_LINES.length),
+      900
+    );
+    return () => window.clearInterval(id);
+  }, [shattered]);
 
   useEffect(() => {
     try {
@@ -179,7 +191,7 @@ export default function IntroPick() {
           </motion.div>
         ) : !shattered ? (
           <p className="font-display text-[11px] uppercase tracking-[0.5em] text-[var(--color-muted)]">
-            dealing in<span className="loading-dots" />
+            {SHUFFLE_LINES[patter]}
           </p>
         ) : null}
       </div>

@@ -15,6 +15,8 @@ export type Dealer = {
   focus: string[];
   /** Personal GitHub profile. */
   github: string;
+  /** #82 "The Tell" — a quirk/habit, revealed on hover like reading a player. */
+  tell: string;
 };
 
 /**
@@ -34,6 +36,7 @@ export const DEALERS: Dealer[] = [
     bio: "Kailosh builds the hard parts. A zero-config Rust mesh that finds peers in five seconds, a metro-scale surveillance pipeline, a one-command recon suite — he lives where systems, computer vision and security meet, and ships all the way down to native TUI, Android and iOS.",
     focus: ["Systems", "Computer Vision", "Security", "Distributed", "Mobile AI"],
     github: "https://github.com/Sk1zmo",
+    tell: "Will rewrite the whole thing from scratch at 3am rather than ship a line he can't explain.",
   },
   {
     id: "keni",
@@ -46,6 +49,7 @@ export const DEALERS: Dealer[] = [
     bio: "Keni works at the frontier of trust. Post-quantum key exchange for VPNs, quantum-resistant multi-chain middleware, zero-knowledge recommendations, an AI cofounder and a statistical-arbitrage engine — cryptography and AI turned into products people can actually use.",
     focus: ["Post-Quantum Crypto", "Zero-Knowledge", "Web3", "AI Products", "Quant"],
     github: "https://github.com/KenidoesCode",
+    tell: "Won't trust a system he hasn't already tried to break — assumes the attacker is smarter.",
   },
 ];
 

@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Pebble-in-a-pond reveal. When the block scrolls into view its content emerges
- * through an expanding circular "water surface" (clip-path) while concentric
- * ripple rings radiate outward — like a pebble dropped at the top of the
- * section, the rings traversing the layers of the pond. One-shot; disabled
- * under reduced-motion (content just shows).
+ * Clean scroll-in reveal. (Formerly the "pebble-in-a-pond" ripple — the
+ * concentric rings + circular clip-path were removed; content now just fades
+ * and lifts into place.) One-shot; disabled under reduced-motion.
+ *
+ * Kept the name/exports so existing call sites don't change.
  */
 export default function RippleReveal({
   children,
@@ -40,13 +40,8 @@ export default function RippleReveal({
   }, []);
 
   return (
-    <div ref={ref} className={`ripple-reveal ${shown ? "is-in" : ""} ${className}`}>
-      <span className="ripple-rings" aria-hidden>
-        <i />
-        <i />
-        <i />
-      </span>
-      <div className="ripple-content">{children}</div>
+    <div ref={ref} className={`reveal-in ${shown ? "is-in" : ""} ${className}`}>
+      {children}
     </div>
   );
 }

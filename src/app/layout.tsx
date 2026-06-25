@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Zilla_Slab, Inter, Pinyon_Script } from "next/font/google";
+import { Zilla_Slab, Inter, Pinyon_Script, Gochi_Hand } from "next/font/google";
 import "./globals.css";
 import Cursor from "@/components/Cursor";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -7,6 +7,11 @@ import MuteToggle from "@/components/ui/MuteToggle";
 import Header from "@/components/ui/Header";
 import ScrollProgress from "@/components/ui/ScrollProgress";
 import Ambience from "@/components/Ambience";
+import TimeOfDay from "@/components/ui/TimeOfDay";
+import IdleTell from "@/components/ui/IdleTell";
+import ConsoleEgg from "@/components/ui/ConsoleEgg";
+import SvgFilters from "@/components/ui/SvgFilters";
+import { Analytics } from "@vercel/analytics/next";
 
 const display = Zilla_Slab({
   subsets: ["latin"],
@@ -28,10 +33,33 @@ const script = Pinyon_Script({
   display: "swap",
 });
 
+// #8 — the hand-drawn ink font for annotations / labels (structure-vs-spontaneity)
+const ink = Gochi_Hand({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-ink",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Techuila Guys — Pick your dealer",
+  metadataBase: new URL("https://techuila-guys.vercel.app"),
+  title: {
+    default: "Techuila Guys — Pick your dealer",
+    template: "%s",
+  },
   description:
     "A high-end poker lounge where every project is a card. Pick your dealer, read the hand, meet the cat. Built by Kailosh & Keni.",
+  openGraph: {
+    title: "Techuila Guys",
+    description:
+      "A high-end poker lounge where every project is a card. Built by Kailosh & Keni.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Techuila Guys",
+    description: "Cinematic, engineered software — told as a hand of poker.",
+  },
 };
 
 export const viewport: Viewport = {
@@ -48,15 +76,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${script.variable}`}
+      className={`${display.variable} ${body.variable} ${script.variable} ${ink.variable}`}
     >
       <body className="film-grain vignette grade">
+        <SvgFilters />
+        <TimeOfDay />
         <Ambience />
         <Cursor />
+        <IdleTell />
+        <ConsoleEgg />
         <ScrollProgress />
         <Header />
         <MuteToggle />
         <SmoothScroll>{children}</SmoothScroll>
+        <Analytics />
       </body>
     </html>
   );

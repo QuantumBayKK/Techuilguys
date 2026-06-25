@@ -217,6 +217,7 @@ export default function PixelCat() {
   const nextBlink = useRef(1800);
   const earTwitchUntil = useRef(0);
   const nextTwitch = useRef(3000);
+  const nextLook = useRef(2000);
   const moodRef = useRef<"idle" | "happy" | "sleep">("idle");
   const hearts = useRef<{ x: number; y: number; life: number; c: string }[]>([]);
 
@@ -301,6 +302,13 @@ export default function PixelCat() {
         nextTwitch.current = t + 3000 + Math.random() * 4000;
       }
 
+      // idle look-around — when the pointer is still, Ace glances about
+      if (!sleeping && !petting && now - lastActivity.current > 1600 && t > nextLook.current) {
+        gaze.current.x = (Math.random() * 2 - 1) * 0.8;
+        gaze.current.y = Math.random() * 0.5;
+        nextLook.current = t + 1100 + Math.random() * 2200;
+      }
+
       const eye: St["eye"] = meowing
         ? "wide"
         : blinking
@@ -378,6 +386,18 @@ export default function PixelCat() {
     audio.play("select");
   };
 
+  // react to outside events (e.g. Ace answering in the chat)
+  useEffect(() => {
+    const onReact = (e: Event) => {
+      const kind = (e as CustomEvent).detail;
+      if (kind === "meow") meow();
+      else pet();
+    };
+    window.addEventListener("ace:react", onReact as EventListener);
+    return () => window.removeEventListener("ace:react", onReact as EventListener);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div ref={viewRef} className="flex flex-col items-center">
       <div
@@ -432,11 +452,10 @@ export default function PixelCat() {
 
       <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.3em] text-[var(--color-muted)]">
         {mood === "happy"
-          ? "purrrr~ ·"
+          ? "purrrr~"
           : mood === "sleep"
-          ? "shhh, napping ·"
-          : "pet the cat · click for a meow ·"}{" "}
-        say hello below
+          ? "shhh, napping"
+          : "pet the cat · click for a meow"}
       </p>
     </div>
   );

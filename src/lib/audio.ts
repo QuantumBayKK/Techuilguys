@@ -19,7 +19,8 @@ type CueId =
   | "flip"
   | "hover"
   | "select"
-  | "chip";
+  | "chip"
+  | "win";
 
 class AudioManager {
   private ctx: AudioContext | null = null;
@@ -65,6 +66,18 @@ class AudioManager {
   toggleMute() {
     this.setMuted(!this.muted);
     return this.muted;
+  }
+
+  /** #D — light haptic tap on phones, mirrored to a cue. Respects mute. */
+  haptic(pattern: number | number[]) {
+    if (this.muted) return;
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try {
+        navigator.vibrate(pattern);
+      } catch {
+        /* unsupported */
+      }
+    }
   }
 
   /** Quiet ambient room-tone bed + the jazz trio, started after table reveal. */
@@ -259,6 +272,9 @@ class AudioManager {
       src.stop(t + dur);
     };
 
+    // #D — slight per-trigger pitch variation so foley never sounds identical.
+    const p = opts.rate ?? 0.94 + Math.random() * 0.12;
+
     switch (id) {
       case "spin":
         tone("sawtooth", 220, 1400, 1.1, 0.12);
@@ -267,29 +283,52 @@ class AudioManager {
         tone("triangle", 90 * (opts.rate ?? 1), 70, 0.5, 0.08);
         break;
       case "chip":
-        tone("triangle", 520, 360, 0.18, 0.06);
+        tone("triangle", 520 * p, 360 * p, 0.18, 0.06);
         break;
       case "clack":
-        noise(0.09, 0.5, 1200, 5000);
-        tone("square", 180, 80, 0.08, 0.08);
+        noise(0.09, 0.5, 1200 * p, 5000);
+        tone("square", 180 * p, 80, 0.08, 0.08);
         break;
       case "thud":
         tone("sine", 120, 50, 0.3, 0.22);
         noise(0.12, 0.15, 200, 1200);
         break;
       case "deal":
-        noise(0.16, 0.4, 2200, 9000);
+        noise(0.16, 0.4, 2200 * p, 9000);
         break;
       case "flip":
-        noise(0.08, 0.45, 2600, 11000);
-        tone("square", 900, 400, 0.06, 0.05);
+        noise(0.08, 0.45, 2600 * p, 11000);
+        tone("square", 900 * p, 400, 0.06, 0.05);
+        this.haptic(8);
         break;
       case "hover":
-        tone("sine", 1300, 1700, 0.05, 0.025);
+        tone("sine", 1300 * p, 1700 * p, 0.05, 0.025);
         break;
       case "select":
-        tone("triangle", 440, 880, 0.22, 0.1);
+        tone("triangle", 440 * p, 880 * p, 0.22, 0.1);
+        this.haptic(12);
         break;
+      case "win": {
+        // #D — win sting: a quick chip-cascade + rising arpeggio
+        const steps = [523.25, 659.25, 783.99, 1046.5]; // C E G C
+        steps.forEach((f, i) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = "triangle";
+          const st = t + i * 0.07;
+          o.frequency.setValueAtTime(f, st);
+          g.gain.setValueAtTime(0.0001, st);
+          g.gain.exponentialRampToValueAtTime(0.12, st + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, st + 0.35);
+          o.connect(g);
+          g.connect(out);
+          o.start(st);
+          o.stop(st + 0.4);
+        });
+        for (let i = 0; i < 7; i++) noise(0.05, 0.18, 2600 + i * 200, 9000);
+        this.haptic([10, 30, 10, 30, 20]);
+        break;
+      }
     }
   }
 }

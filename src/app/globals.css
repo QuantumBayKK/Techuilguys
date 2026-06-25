@@ -424,6 +424,70 @@ html.lenis body {
   100% { transform: translate3d(var(--drift, 14px), -102vh, 0) scale(1); opacity: 0; }
 }
 
+/* weird background — eyes blink, log caret blinks */
+.weird-eye::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--color-noir);
+  transform-origin: center;
+  animation: eyeblink 6.5s ease-in-out infinite;
+}
+.weird-eye:nth-child(2)::after { animation-delay: 2.2s; }
+.weird-eye:nth-child(3)::after { animation-delay: 4.1s; }
+.weird-eye:nth-child(4)::after { animation-delay: 1.3s; }
+.weird-eye:nth-child(5)::after { animation-delay: 3.6s; }
+@keyframes eyeblink {
+  0%, 92%, 100% { transform: scaleY(0); }
+  95% { transform: scaleY(1.1); }
+}
+.weird-caret { animation: weirdcaret 1s steps(2, end) infinite; }
+@keyframes weirdcaret { 50% { opacity: 0; } }
+
+/* idle sway for the falling cards — gentle drift on top of the scroll fall */
+.card-sway {
+  animation-name: cardsway-idle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes cardsway-idle {
+  from { transform: translateX(-6px) rotate(-2deg); }
+  to { transform: translateX(6px) rotate(2deg); }
+}
+
+/* lounge stage lights — two slow conic spotlight cones over the room */
+.lounge-spot {
+  position: absolute;
+  top: -8%;
+  width: 30em;
+  height: 90%;
+  border-radius: 0 0 50% 50%;
+  transform-origin: 50% 0;
+  filter: blur(18px) opacity(0.45);
+  background-image: conic-gradient(
+    from 0deg at 50% -5%,
+    transparent 45%,
+    rgba(255, 200, 130, 0.16) 49%,
+    rgba(255, 200, 130, 0.28) 50%,
+    rgba(255, 200, 130, 0.16) 51%,
+    transparent 55%
+  );
+}
+.lounge-spot--l {
+  left: 8%;
+  animation: loungesweep 19s ease-in-out infinite;
+}
+.lounge-spot--r {
+  right: 8%;
+  animation: loungesweep 24s ease-in-out infinite reverse;
+}
+@keyframes loungesweep {
+  0%, 100% { transform: rotateZ(8deg) scale(1); filter: blur(18px) opacity(0.4); }
+  50% { transform: rotateZ(-8deg) scale(1.12); filter: blur(16px) opacity(0.55); }
+}
+
 /* slow breathing glow for the "available" status dot */
 .status-pulse { animation: statuspulse 2.6s ease-in-out infinite; }
 @keyframes statuspulse {
@@ -437,60 +501,18 @@ html.lenis body {
   will-change: transform;
 }
 
-/* pebble-in-pond section reveal */
-.ripple-reveal {
+/* clean scroll-in reveal (replaced the pebble-in-pond ripple) */
+.reveal-in {
   position: relative;
-}
-.ripple-content {
   opacity: 0;
-  transform: translateY(16px) scale(0.985);
-  clip-path: circle(0% at 50% 30%);
+  transform: translateY(22px);
   transition:
     opacity 0.9s ease,
-    transform 1s cubic-bezier(0.22, 1, 0.36, 1),
-    clip-path 1.15s cubic-bezier(0.22, 1, 0.36, 1);
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.ripple-reveal.is-in .ripple-content {
+.reveal-in.is-in {
   opacity: 1;
   transform: none;
-  clip-path: circle(150% at 50% 30%);
-}
-.ripple-rings {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  overflow: visible;
-}
-.ripple-rings i {
-  position: absolute;
-  top: 30%;
-  left: 50%;
-  width: 44px;
-  height: 44px;
-  margin: -22px 0 0 -22px;
-  border: 1px solid var(--color-line-warm);
-  border-radius: 50%;
-  opacity: 0;
-}
-.ripple-reveal.is-in .ripple-rings i {
-  animation: pondring 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-.ripple-reveal.is-in .ripple-rings i:nth-child(2) {
-  animation-delay: 0.16s;
-}
-.ripple-reveal.is-in .ripple-rings i:nth-child(3) {
-  animation-delay: 0.32s;
-}
-@keyframes pondring {
-  0% {
-    transform: scale(0.25);
-    opacity: 0.55;
-  }
-  100% {
-    transform: scale(16);
-    opacity: 0;
-  }
 }
 
 /* loader "dealing in…" dots */
@@ -546,18 +568,20 @@ html.lenis body {
   .status-pulse,
   .chip-turn,
   .snd-wave,
+  .lounge-spot,
+  .card-sway,
+  .weird-eye::after,
+  .weird-caret,
   .demo--live * {
     animation: none !important;
   }
   .ember { display: none !important; }
   .card-rotor { transform: none !important; }
-  .ripple-content {
+  .reveal-in {
     opacity: 1 !important;
     transform: none !important;
-    clip-path: none !important;
     transition: none !important;
   }
-  .ripple-rings { display: none !important; }
   /* show demos in their resolved state when motion is reduced */
   .demo--live .mesh-link,
   .demo--live .term-line,
@@ -580,4 +604,185 @@ html.lenis body {
   }
   .demo--live .risk-fill { width: 72% !important; }
   .demo--live .voice-bar { transform: scaleY(0.6) !important; }
+}
+
+/* ============================================================
+   IMPERFECTION + TIME-OF-DAY LAYER (ideas #3, #4, #49)
+   The "minute imperfections" that read as a human hand, plus a
+   lighting band that shifts with the visitor's local clock.
+   ============================================================ */
+
+/* #4 — living felt grain. A faint, slow-breathing noise over the table so the
+   green never looks like a flat fill. Sits under content, ignores pointer. */
+@keyframes feltBreathe {
+  0%, 100% { opacity: 0.05; transform: translate3d(0, 0, 0) scale(1); }
+  50%      { opacity: 0.08; transform: translate3d(-1%, 1%, 0) scale(1.03); }
+}
+.felt-grain::after {
+  content: "";
+  position: absolute;
+  inset: -4%;
+  z-index: 0;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  animation: feltBreathe 7s ease-in-out infinite;
+}
+
+/* #3 — worn card edges. A gentle displacement so card corners look thumbed,
+   not laser-cut. Apply `.worn-edge` to a card's outer element. */
+.worn-edge {
+  filter: url(#worn-edge-filter);
+}
+
+/* #49 — time-of-day table lighting. A `data-timeband` attribute on <html>
+   (set by TimeOfDay) tints the room: bright felt by day, smoky + low-lit late.
+   Variables let any component opt in via var(--room-*). */
+:root {
+  --room-warmth: 0;          /* extra amber wash 0..1 */
+  --room-dim: 0;             /* darkening 0..1 */
+  --room-tint: transparent;  /* overlay tint */
+}
+html[data-timeband="morning"]   { --room-warmth: 0.12; --room-dim: 0.0;  --room-tint: rgba(255, 214, 144, 0.05); }
+html[data-timeband="afternoon"] { --room-warmth: 0.0;  --room-dim: 0.0;  --room-tint: transparent; }
+html[data-timeband="evening"]   { --room-warmth: 0.18; --room-dim: 0.06; --room-tint: rgba(255, 157, 47, 0.06); }
+html[data-timeband="lateNight"] { --room-warmth: 0.10; --room-dim: 0.16; --room-tint: rgba(20, 16, 40, 0.18); }
+
+.room-light {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--room-tint);
+  box-shadow: inset 0 0 40vmax rgba(0, 0, 0, var(--room-dim));
+  transition: background 1.2s ease, box-shadow 1.2s ease;
+}
+
+/* #78/#40 — the idle whisper that surfaces near the cursor after a still beat. */
+.idle-whisper {
+  position: fixed;
+  z-index: 90;
+  pointer-events: none;
+  font-family: var(--font-script), cursive;
+  font-size: 1.05rem;
+  color: var(--color-brass-bright);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.idle-whisper[data-show="true"] {
+  opacity: 0.92;
+  transform: translateY(0);
+}
+
+@keyframes greetFade {
+  to { opacity: 1; }
+}
+
+/* #8 — hand-drawn ink annotations (founder labels, marginalia). */
+.font-ink {
+  font-family: var(--font-ink), "Comic Sans MS", cursive;
+  letter-spacing: 0.01em;
+}
+
+/* #6 — off-register print. A 1px cyan/magenta misregistration like cheap card
+   stock. Apply `.misprint` to a heading. */
+.misprint {
+  text-shadow:
+    -1px 0 0 rgba(55, 230, 207, 0.5),
+    1px 0 0 rgba(255, 60, 130, 0.45);
+}
+
+/* #9 — ink bleed on hover. Handwritten links thicken like a felt-tip pressed
+   too long. */
+.ink-link {
+  font-family: var(--font-ink), cursive;
+  position: relative;
+  transition: text-shadow 0.18s ease, letter-spacing 0.18s ease, color 0.18s ease;
+}
+.ink-link:hover {
+  letter-spacing: 0.012em;
+  text-shadow:
+    0 0 0.6px currentColor,
+    0 0 1.4px currentColor,
+    0.4px 0.3px 0 currentColor;
+}
+
+/* #5 — a permanently dog-eared corner (folded down, casts a shadow). */
+.dog-ear::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  z-index: 25;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 20px 20px 0;
+  border-color: transparent var(--color-chip-cream) transparent transparent;
+  filter: drop-shadow(-3px 3px 3px rgba(0, 0, 0, 0.65));
+  opacity: 0.42;
+}
+
+/* #7 — a coffee-ring stain that dried on the table and never moved. */
+.coffee-ring {
+  position: fixed;
+  width: 132px;
+  height: 124px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.5;
+  transform: rotate(-12deg);
+  mix-blend-mode: multiply;
+  background:
+    radial-gradient(closest-side, transparent 58%, rgba(120, 72, 30, 0.1) 61%,
+      rgba(120, 72, 30, 0.2) 70%, rgba(120, 72, 30, 0.06) 76%, transparent 80%);
+}
+
+/* #10 — uneven chip stack lean (per-stack, via inline --lean). */
+.chip-stack { transform: rotate(var(--lean, 0deg)); transform-origin: bottom center; }
+
+/* #E — on /reborn, the cursor ring becomes a slowly-spinning poker chip
+   (dashed edge + inner ring). Scoped to .reborn-route so `/` is untouched. */
+.reborn-route .cursor-ring {
+  border-style: dashed;
+  border-width: 2px;
+  border-color: var(--color-brass);
+  box-shadow: inset 0 0 0 2px rgba(233, 225, 207, 0.25);
+  animation: chip-turn 6s linear infinite;
+}
+.reborn-route .cursor-ring--label {
+  animation-play-state: paused;
+}
+
+/* #59 — neon sign flicker. Irregular, like a tube that can't quite hold. */
+.neon-sign {
+  text-shadow:
+    0 0 4px #ffb86b, 0 0 11px #ff9d2f, 0 0 22px #ff7a00, 0 0 38px #ff5e00;
+  animation: neonflicker 4.6s infinite;
+}
+.neon-dim {
+  animation: neondim 2.3s infinite;
+}
+@keyframes neonflicker {
+  0%, 19%, 21%, 23%, 80%, 83%, 100% { opacity: 1; }
+  20%, 22% { opacity: 0.45; }
+  81% { opacity: 0.7; }
+  82% { opacity: 0.3; }
+}
+@keyframes neondim {
+  0%, 100% { opacity: 0.85; text-shadow: 0 0 3px #ff9d2f, 0 0 8px #ff7a00; }
+  43% { opacity: 0.2; }
+  45% { opacity: 0.9; }
+  47% { opacity: 0.35; }
+  60% { opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .felt-grain::after,
+  .neon-sign,
+  .neon-dim { animation: none; }
 }
