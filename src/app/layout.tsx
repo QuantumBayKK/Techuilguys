@@ -3,8 +3,7 @@ import { Zilla_Slab, Inter, Pinyon_Script, Gochi_Hand } from "next/font/google";
 import "./globals.css";
 import Cursor from "@/components/Cursor";
 import SmoothScroll from "@/components/SmoothScroll";
-import MuteToggle from "@/components/ui/MuteToggle";
-import Header from "@/components/ui/Header";
+import TopNav from "@/components/ui/TopNav";
 import ScrollProgress from "@/components/ui/ScrollProgress";
 import Ambience from "@/components/Ambience";
 import TimeOfDay from "@/components/ui/TimeOfDay";
@@ -58,7 +57,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Techuila Guys",
-    description: "Cinematic, engineered software — told as a hand of poker.",
+    description: "We design & build SaaS products that ship — web, apps, AI, automation & payments.",
   },
 };
 
@@ -86,8 +85,7 @@ export default function RootLayout({
         <IdleTell />
         <ConsoleEgg />
         <ScrollProgress />
-        <Header />
-        <MuteToggle />
+        <TopNav />
         <SmoothScroll>{children}</SmoothScroll>
         <Analytics />
       </body>

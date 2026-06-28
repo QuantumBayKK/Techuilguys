@@ -10,7 +10,6 @@ import {
 import type { Project } from "@/data/projects";
 import { PROJECTS } from "@/data/projects";
 import { dealerById } from "@/data/dealers";
-import ProjectMedia from "@/components/cards/ProjectMedia";
 import { inspect } from "@/lib/inspect";
 import { audio } from "@/lib/audio";
 
@@ -71,9 +70,9 @@ export default function WorksIndex() {
                   animate={{ opacity: 1, scale: 1, rotate: -2 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-                  className="w-[360px] -translate-x-1/2 -translate-y-1/2"
+                  className="w-[380px] -translate-x-1/2 -translate-y-1/2"
                 >
-                  <ProjectMedia project={active} live />
+                  <Preview project={active} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -81,6 +80,38 @@ export default function WorksIndex() {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Floating hover preview — the real website frontend + the 2-line brief. */
+function Preview({ project }: { project: Project }) {
+  const [ok, setOk] = useState(false);
+  return (
+    <div>
+      <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl border border-[var(--color-line-warm)] bg-gradient-to-br from-[var(--color-felt-deep)] via-[#0a0907] to-black shadow-[var(--shadow-table)]">
+        {project.image && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={project.image}
+            alt={project.imageAlt ?? project.title}
+            onLoad={() => setOk(true)}
+            onError={() => setOk(false)}
+            className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500 ${
+              ok ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        )}
+        {!ok && (
+          <span className="font-display absolute inset-0 grid place-items-center text-2xl font-bold uppercase tracking-tight text-[var(--color-brass)]/50">
+            {project.title}
+          </span>
+        )}
+        <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--color-noir)]/70 to-transparent" />
+      </div>
+      <p className="mt-2 line-clamp-2 text-xs leading-snug text-[var(--color-muted)]">
+        {project.blurb}
+      </p>
+    </div>
   );
 }
 
@@ -99,7 +130,7 @@ function WorkRow({
   return (
     <motion.button
       type="button"
-      data-cursor="Inspect"
+      data-cursor={project.live ? "Visit site ↗" : "Inspect"}
       onMouseEnter={() => {
         onEnter();
         audio.play("hover");
@@ -107,7 +138,8 @@ function WorkRow({
       onMouseLeave={onLeave}
       onClick={() => {
         audio.play("flip");
-        inspect.open(project);
+        if (project.live) window.open(project.live, "_blank", "noopener");
+        else inspect.open(project);
       }}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}

@@ -20,10 +20,6 @@ import RebornIntro from "@/components/reborn/RebornIntro";
 import ChapterRail from "@/components/reborn/ChapterRail";
 import Marquee from "@/components/ui/Marquee";
 import InspectCard from "@/components/cards/InspectCard";
-import SvgFilters from "@/components/ui/SvgFilters";
-import TimeOfDay from "@/components/ui/TimeOfDay";
-import IdleTell from "@/components/ui/IdleTell";
-import ConsoleEgg from "@/components/ui/ConsoleEgg";
 import RebornCursorSkin from "@/components/reborn/RebornCursorSkin";
 import SuitShortcuts from "@/components/reborn/SuitShortcuts";
 import RackTop from "@/components/reborn/RackTop";
@@ -52,12 +48,7 @@ export default function RebornPage() {
       <CursorGlow />
       <FallingCards />
 
-      {/* the human-hand layer: worn-edge filter, time-of-day light, idle tell,
-          a coffee-ring that dried on the felt, console egg */}
-      <SvgFilters />
-      <TimeOfDay />
-      <IdleTell />
-      <ConsoleEgg />
+      {/* the human-hand layer: a coffee-ring that dried on the felt, chip cursor */}
       <RebornCursorSkin />
       <span className="coffee-ring" style={{ left: "8vw", bottom: "18vh" }} aria-hidden />
 
@@ -74,7 +65,7 @@ export default function RebornPage() {
       <VelocitySkew>
         <WorksIndex />
       </VelocitySkew>
-      <Marquee text="Systems · Security · Post-Quantum · Zero-Knowledge · Vision · AI" />
+      <Marquee text="Web & App Dev · Product Design · AI Systems · Automation · Payments · Cybersecurity · Blockchain · Internal Tools" />
       <DragHand />
       <Dealers />
       <TheTell />

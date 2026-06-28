@@ -37,7 +37,7 @@ export default function ConsoleEgg() {
       "%cWe build cinematic, engineered software. Want a hand like this on your project?",
       amber
     );
-    console.log("%c→ info.quantumbay@gmail.com  ·  type techuila.allIn()", muted);
+    console.log("%c→ techuilaguys@gmail.com  ·  book: cal.com/pranauvshrinaath", muted);
 
     (window as unknown as { techuila?: Record<string, () => string> }).techuila = {
       allIn: () => {

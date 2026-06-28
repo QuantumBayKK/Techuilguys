@@ -47,7 +47,7 @@ function TellCard({ dealer, index }: { dealer: Dealer; index: number }) {
       onPointerEnter={() => audio.play("flip")}
     >
       <div
-        className="relative aspect-[16/9] w-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]"
+        className="relative aspect-[4/3] w-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] sm:aspect-[16/9]"
       >
         {/* face-down: card back */}
         <div

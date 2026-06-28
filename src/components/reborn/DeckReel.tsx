@@ -15,7 +15,6 @@ import {
 import type { Project } from "@/data/projects";
 import { PROJECTS } from "@/data/projects";
 import { dealerById } from "@/data/dealers";
-import ProjectDemo from "@/components/demos/ProjectDemo";
 import { inspect } from "@/lib/inspect";
 import { audio } from "@/lib/audio";
 import { handJitter } from "@/lib/seededNoise";
@@ -28,15 +27,8 @@ import { handJitter } from "@/lib/seededNoise";
  * Phones / reduced-motion get a native swipe strip.
  */
 
-/** One story beat per project, in deck order — the throughline. */
-const STORY = [
-  { chapter: "Connect", beat: "It starts with a connection — two machines, no server, five seconds flat." },
-  { chapter: "See", beat: "Once linked, you teach it to see — one face, tracked across a city of cameras." },
-  { chapter: "Remember", beat: "What you see, you remember — every journey reconstructed and queryable." },
-  { chapter: "Secure", beat: "But trust has to outlive the quantum era — so you harden the handshake." },
-  { chapter: "Prove", beat: "Then prove you're right — without ever revealing the data behind it." },
-  { chapter: "Build", beat: "And when the parts cohere, they stop being projects. They become a company." },
-];
+/** The rail beat per card = the project's 2-line brief (what we built). */
+const STORY = PROJECTS.map((p) => ({ chapter: p.title, beat: p.blurb }));
 
 export default function DeckReel() {
   const [pinned, setPinned] = useState(false);
@@ -299,7 +291,7 @@ function ReelCard({
     >
       <motion.button
         type="button"
-        data-cursor="Inspect"
+        data-cursor={project.live ? "Visit site ↗" : "Inspect"}
         onPointerMove={onMove}
         onPointerEnter={() => {
           setHover(true);
@@ -308,7 +300,8 @@ function ReelCard({
         onPointerLeave={onLeave}
         onClick={() => {
           audio.play("flip");
-          inspect.open(project);
+          if (project.live) window.open(project.live, "_blank", "noopener");
+          else inspect.open(project);
         }}
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -333,10 +326,8 @@ function ReelCard({
           {suit}
         </span>
 
-        <div className="absolute inset-0 opacity-70 transition-opacity duration-500 group-hover:opacity-100">
-          <ProjectDemo kind={project.demo} live />
-        </div>
-
+        {/* the real website frontend (live screenshot); gradient + title show
+            until it loads or if there's no live URL yet */}
         {project.image && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -346,7 +337,7 @@ function ReelCard({
             decoding="async"
             onLoad={() => setImgOk(true)}
             onError={() => setImgOk(false)}
-            className={`absolute inset-0 h-full w-full object-cover transition-[transform,opacity] duration-700 group-hover:scale-[1.05] ${
+            className={`absolute inset-0 h-full w-full object-cover object-top transition-[transform,opacity] duration-700 group-hover:scale-[1.04] ${
               imgOk ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -391,11 +382,10 @@ function ReelCard({
         <Tick className="bottom-2 left-2 -rotate-90" />
         <Tick className="bottom-2 right-2 rotate-180" />
 
-        {/* chapter tag — weaves the story onto the card itself */}
         <span className="font-mono absolute left-4 top-3 z-10 flex items-center gap-2 text-xs text-[var(--color-brass)]/80">
           {String(index + 1).padStart(2, "0")}
           <span className="font-display tracking-[0.25em] text-[var(--color-neon-amber)]/90">
-            · {story.chapter.toUpperCase()}
+            · {project.role.split(" · ")[0]}
           </span>
         </span>
         <span className="font-display absolute right-4 top-3 z-10 text-xl text-[var(--color-brass)]">
@@ -423,7 +413,7 @@ function ReelCard({
               {project.role}
             </p>
             <span className="font-display text-[10px] uppercase tracking-[0.25em] text-[var(--color-neon-amber)] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              Inspect ⤢
+              {project.live ? "Visit ↗" : "Inspect ⤢"}
             </span>
           </div>
         </div>

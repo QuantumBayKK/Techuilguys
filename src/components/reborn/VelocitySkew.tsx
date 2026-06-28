@@ -13,6 +13,8 @@ export default function VelocitySkew({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // skip on touch/mobile — it reads as jank, not polish, on a phone
+    if (window.matchMedia("(pointer: coarse)").matches) return;
     const el = ref.current;
     if (!el) return;
 

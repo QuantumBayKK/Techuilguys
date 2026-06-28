@@ -52,7 +52,7 @@ export default function LoungeAct() {
           className="mt-16 !flex w-full max-w-lg flex-col items-center gap-6 !rounded-3xl !p-8"
         >
           <motion.a
-            href="mailto:info.quantumbay@gmail.com"
+            href="mailto:techuilaguys@gmail.com"
             data-cursor="Email"
             data-magnetic
             initial={{ opacity: 0, y: 16 }}
@@ -60,7 +60,7 @@ export default function LoungeAct() {
             viewport={{ once: true }}
             className="font-display rounded-full border border-[var(--color-line-warm)] px-8 py-4 text-lg uppercase tracking-[0.2em] transition-colors hover:bg-[var(--color-neon-amber)]/10"
           >
-            info.quantumbay@gmail.com
+            techuilaguys@gmail.com
           </motion.a>
           <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] uppercase tracking-[0.3em] text-[var(--color-muted)]">
             <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] px-3 py-1 text-[var(--color-neon-amber)]">

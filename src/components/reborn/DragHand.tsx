@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useAnimationControls,
@@ -25,6 +25,16 @@ const HAND = [
 
 export default function DragHand() {
   const [spread, setSpread] = useState(false);
+  // touch devices can't hover and shouldn't have cards stealing the scroll
+  const [interactive, setInteractive] = useState(true);
+
+  useEffect(() => {
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    if (coarse) {
+      setInteractive(false);
+      setSpread(true); // show a fanned hand at rest instead of a flat stack
+    }
+  }, []);
 
   return (
     <section className="relative overflow-hidden py-[12vh]">
@@ -33,13 +43,13 @@ export default function DragHand() {
           (interlude)
         </p>
         <h2 className="font-ink mt-2 text-[clamp(1.6rem,5vw,3.2rem)] leading-tight text-[var(--color-brass-bright)]">
-          here — feel the cards. drag one. flick it away.
+          {interactive ? "here — feel the cards. drag one. flick it away." : "the hand we play."}
         </h2>
 
         <div
-          className="relative mx-auto mt-12 flex h-[280px] w-full max-w-md items-center justify-center"
-          onPointerEnter={() => setSpread(true)}
-          onPointerLeave={() => setSpread(false)}
+          className="relative mx-auto mt-12 flex h-[260px] w-full max-w-md items-center justify-center sm:h-[280px]"
+          onPointerEnter={() => interactive && setSpread(true)}
+          onPointerLeave={() => interactive && setSpread(false)}
           style={{ perspective: 1200 }}
         >
           {HAND.map((c, i) => (
@@ -49,12 +59,15 @@ export default function DragHand() {
               index={i}
               count={HAND.length}
               spread={spread}
+              interactive={interactive}
             />
           ))}
         </div>
-        <p className="mt-6 text-[11px] uppercase tracking-[0.3em] text-[var(--color-faint)]">
-          drag to fan · flick to throw · they come back
-        </p>
+        {interactive && (
+          <p className="mt-6 text-[11px] uppercase tracking-[0.3em] text-[var(--color-faint)]">
+            drag to fan · flick to throw · they come back
+          </p>
+        )}
       </div>
     </section>
   );
@@ -65,11 +78,13 @@ function FanCard({
   index,
   count,
   spread,
+  interactive,
 }: {
   card: { rank: string; suit: string };
   index: number;
   count: number;
   spread: boolean;
+  interactive: boolean;
 }) {
   const controls = useAnimationControls();
   const tilt = useMotionValue(0);
@@ -133,18 +148,20 @@ function FanCard({
 
   return (
     <motion.div
-      drag
+      drag={interactive}
       dragMomentum={false}
-      onDragStart={onDragStart}
-      onDrag={onDrag}
-      onDragEnd={onDragEnd}
-      data-cursor="Grab"
+      onDragStart={interactive ? onDragStart : undefined}
+      onDrag={interactive ? onDrag : undefined}
+      onDragEnd={interactive ? onDragEnd : undefined}
+      data-cursor={interactive ? "Grab" : undefined}
       initial={{ x: baseX, y: baseY, rotate: baseRot }}
       animate={dragging.current ? undefined : { x: baseX, y: baseY, rotate: baseRot }}
       transition={{ type: "spring", stiffness: 160, damping: 18 }}
-      whileTap={{ scale: 1.08, zIndex: 30 }}
+      whileTap={interactive ? { scale: 1.08, zIndex: 30 } : undefined}
       style={{ rotate: tilt, zIndex: 10 + index }}
-      className="worn-edge absolute h-[200px] w-[145px] cursor-grab touch-none select-none overflow-hidden rounded-xl border border-[var(--color-line-warm)] bg-gradient-to-br from-[#1b140d] via-[#120d08] to-[#0a0705] shadow-[0_24px_50px_-18px_rgba(0,0,0,0.9)] active:cursor-grabbing"
+      className={`worn-edge absolute h-[180px] w-[128px] select-none overflow-hidden rounded-xl border border-[var(--color-line-warm)] bg-gradient-to-br from-[#1b140d] via-[#120d08] to-[#0a0705] shadow-[0_24px_50px_-18px_rgba(0,0,0,0.9)] sm:h-[200px] sm:w-[145px] ${
+        interactive ? "cursor-grab touch-none active:cursor-grabbing" : "pointer-events-none"
+      }`}
     >
       <span className="pointer-events-none absolute inset-2 rounded-lg border border-[var(--color-brass)]/25" />
       <span

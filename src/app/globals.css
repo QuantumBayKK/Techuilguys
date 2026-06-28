@@ -781,8 +781,29 @@ html[data-timeband="lateNight"] { --room-warmth: 0.10; --room-dim: 0.16; --room-
   60% { opacity: 0.85; }
 }
 
+/* HIRE US button — a fluid sheen sweeps across it forever. */
+.hire-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.55) 48%,
+    transparent 66%
+  );
+  background-size: 250% 100%;
+  animation: hireshine 3.4s ease-in-out infinite;
+}
+@keyframes hireshine {
+  0% { background-position: 180% 0; }
+  55%, 100% { background-position: -80% 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .felt-grain::after,
   .neon-sign,
-  .neon-dim { animation: none; }
+  .neon-dim,
+  .hire-btn::after { animation: none; }
 }

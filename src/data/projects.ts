@@ -2,7 +2,7 @@ import type { DealerId } from "./dealers";
 
 export type Suit = "spades" | "hearts" | "clubs" | "diamonds";
 
-/** Which embedded animated demo plays inside the card showcase. */
+/** Which embedded animated demo plays inside the card showcase (legacy fallback). */
 export type DemoKind =
   | "mesh"
   | "vision"
@@ -24,159 +24,129 @@ export type Project = {
   demo: DemoKind;
   title: string; // front of card
   subtitle: string; // front of card, under the title
-  blurb: string; // what it does (the one-liner)
+  blurb: string; // the clear 2-line brief of what we built
   role: string;
   outcomes: string;
-  skills: { group: string; items: string[] }[]; // tech stack chips
-  /** Public source repository, if any. Renders a "Code ↗" action. */
+  skills: { group: string; items: string[] }[]; // what we used to build it
+  /** Public source repository, if any. */
   repo?: string;
-  /** Live/deployed preview URL, if any. Renders a "Live ↗" action. */
+  /** Live/deployed site. Clicking the card opens this; drives the hover preview. */
   live?: string;
-  /**
-   * Optional AI-generated hero art (or real screenshot) for the deck.
-   * Generate in Gemini, drop the file into `public/projects/`, then set the
-   * path here (e.g. `/projects/bifrost.webp`). When present it replaces the
-   * live SVG demo in the showcase; when absent the demo plays as a fallback.
-   * See `public/projects/README.md` for the exact filenames + Gemini prompts.
-   */
+  /** Hero art. Auto-falls back to a live screenshot of `live` when present. */
   image?: string;
-  /** Alt text / caption used when `image` is set. */
   imageAlt?: string;
 };
 
+/** A live screenshot of a site — the deck shows the real frontend on hover. */
+export const siteShot = (url?: string) =>
+  url
+    ? `https://image.thum.io/get/width/1280/crop/1600/noanimate/viewportwidth/1366/${url}`
+    : undefined;
+
 /**
- * The real hands. Kailosh (♠) = systems / CV / security / distributed / mobile-AI.
- * Keni (♣, GitHub @KenidoesCode) = post-quantum crypto / web3 / ZK / AI / quant.
+ * The work — SaaS products we designed and shipped for clients. This is a
+ * client-facing portfolio, not a CV: it leads with what we built and the speed
+ * we built it, not the deep-tech under the hood.
+ *
+ * NOTE: `live` URLs + briefs for the non-WisdomJR entries are placeholders —
+ * fill them with the real values and the hover screenshots auto-generate.
  */
 export const PROJECTS: Project[] = [
-  // ---- Kailosh's hand (Spades) ----
   {
-    id: "k1",
+    id: "wisdomjr",
     dealer: "kailosh",
     rank: "A",
     suit: "spades",
-    demo: "mesh",
-    image: "/projects/bifrost.png",
-    imageAlt: "Bifrost — zero-config LAN mesh discovery",
-    title: "Bifrost",
-    subtitle: "Zero-Config LAN Mesh",
+    demo: "founder",
+    title: "WisdomJR",
+    subtitle: "EdTech platform · built in 28 days",
     blurb:
-      "Two machines on the same Wi-Fi find each other in ~5 seconds and share messages, files and voice — no servers, no setup, no internet.",
-    role: "Systems · P2P · Cross-platform",
-    outcomes: "One Rust core → TUI · Android · iOS, four concurrent services",
+      "We built an entire EdTech platform for kids aged 8–14 — lessons, parent dashboards and payments — from scratch in 28 days.",
+    role: "Web App · Product Design · Full-stack",
+    outcomes: "Idea → live product in 28 days",
     skills: [
-      { group: "Core", items: ["Rust", "Tokio"] },
-      { group: "Networking", items: ["UDP", "TCP", "Wire protocol", "Zero-config discovery"] },
-      { group: "Clients", items: ["ratatui", "Flutter", "SwiftUI"] },
+      { group: "Build", items: ["Web App Dev", "Full-stack", "Product Design"] },
+      { group: "Growth", items: ["Paywall & Payments", "Dashboards"] },
     ],
-    repo: "https://github.com/Sk1zmo/Bifrost",
+    live: "", // TODO: real URL → enables the live hover screenshot
   },
   {
-    id: "k2",
-    dealer: "kailosh",
+    id: "founderos",
+    dealer: "keni",
     rank: "K",
-    suit: "spades",
-    demo: "vision",
-    image: "/projects/atlas.png",
-    imageAlt: "ATLAS — tactical surveillance suite tracking a face across cameras",
-    title: "ATLAS",
-    subtitle: "Tactical Surveillance Suite",
-    blurb:
-      "Find one face across a city of cameras — detected on stride frames, tracked through the gaps, confirmed against hours of footage.",
-    role: "Computer Vision · Full-stack",
-    outcomes: "Metro-scale CCTV · live + offline pipelines · Windows build",
-    skills: [
-      { group: "Vision", items: ["YOLOv8", "OpenCV", "Face embeddings", "IoU tracking"] },
-      { group: "Backend", items: ["Python", "FastAPI", "SQLite", "MJPEG"] },
-      { group: "Ship", items: ["PyInstaller"] },
-    ],
-    repo: "https://github.com/Sk1zmo/ATLAS",
-  },
-  {
-    id: "k4",
-    dealer: "kailosh",
-    rank: "J",
-    suit: "spades",
-    demo: "geo",
-    image: "/projects/anemoi.png",
-    imageAlt: "Anemoi — geospatial memory system reconstructing a journey",
-    title: "Anemoi",
-    subtitle: "Geospatial Memory System",
-    blurb:
-      "Every journey captured, reconstructed and remembered — then queried by meaning and by graph across everywhere you've been.",
-    role: "Distributed · Geospatial",
-    outcomes: "Event-driven monorepo · capture → reconstruct → vector + graph",
-    skills: [
-      { group: "Backend", items: ["TypeScript", "Fastify", "Apache Kafka"] },
-      { group: "Data", items: ["PostGIS", "pgvector", "Graph queries"] },
-      { group: "App", items: ["Expo", "React Native", "Docker Compose"] },
-    ],
-    repo: "https://github.com/Sk1zmo/Anemoi",
-  },
-
-  // ---- Keni's hand (Clubs) ----
-  {
-    id: "n1",
-    dealer: "keni",
-    rank: "A",
-    suit: "clubs",
-    demo: "handshake",
-    image: "/projects/ipsec-pqc.png",
-    imageAlt: "ipsec-pqc-ikev2 — post-quantum key exchange handshake",
-    title: "ipsec-pqc-ikev2",
-    subtitle: "Post-Quantum VPN Key Exchange",
-    blurb:
-      "Post-quantum key establishment for IPsec VPNs using ML-KEM (Kyber) — tunnels hardened against harvest-now-decrypt-later attacks.",
-    role: "Security Research · Cryptography",
-    outcomes: "ML-KEM inside the IKEv2 handshake · strongSwan integration",
-    skills: [
-      { group: "Crypto", items: ["ML-KEM", "Kyber", "Post-quantum"] },
-      { group: "Systems", items: ["C", "IPsec", "IKEv2", "strongSwan"] },
-    ],
-    repo: "https://github.com/KenidoesCode/ipsec-pqc-ikev2",
-  },
-  {
-    id: "n3",
-    dealer: "keni",
-    rank: "Q",
-    suit: "clubs",
-    demo: "zk",
-    image: "/projects/zk-airec.png",
-    imageAlt: "zk-airec — zero-knowledge proven recommendations",
-    title: "zk-airec",
-    subtitle: "Zero-Knowledge Recommendations",
-    blurb:
-      "Personalized recommendations that prove they're correct without ever exposing your data — via zero-knowledge proofs.",
-    role: "Applied Cryptography · ML",
-    outcomes: "ZK-proven results · privacy-preserving by construction",
-    skills: [
-      { group: "Crypto", items: ["Zero-knowledge proofs", "Applied cryptography"] },
-      { group: "ML", items: ["Recommender systems", "Privacy-preserving ML"] },
-      { group: "Core", items: ["JavaScript"] },
-    ],
-    repo: "https://github.com/KenidoesCode/zk-airec",
-  },
-  {
-    id: "n4",
-    dealer: "keni",
-    rank: "J",
     suit: "clubs",
     demo: "founder",
-    image: "/projects/founderos.png",
-    imageAlt: "founderos — an AI cofounder spanning idea, strategy and execution",
-    title: "founderos",
-    subtitle: "AI Cofounder",
+    title: "FounderOS",
+    subtitle: "AI cofounder for builders",
     blurb:
-      "Your AI cofounder — a startup engine and founder-intelligence system spanning idea, strategy and execution.",
+      "An AI cofounder that turns a rough idea into a plan and ships the busywork — strategy, ops and momentum in one place. (brief: confirm)",
     role: "AI Product · Full-stack",
-    outcomes: "Flagship studio product · most product-shaped of the deck",
+    outcomes: "AI-native SaaS, end to end",
     skills: [
-      { group: "Product", items: ["TypeScript", "Full-stack", "Systems thinking"] },
-      { group: "AI", items: ["LLM apps", "Founder intelligence"] },
+      { group: "Build", items: ["AI Systems", "Automation", "Full-stack"] },
+      { group: "Ops", items: ["Internal Tools", "API Integrations"] },
     ],
-    repo: "https://github.com/KenidoesCode/founderos",
+    live: "", // TODO
   },
-];
+  {
+    id: "smartguta",
+    dealer: "kailosh",
+    rank: "Q",
+    suit: "hearts",
+    demo: "vision",
+    title: "SmartGuta",
+    subtitle: "SaaS product · design + build",
+    blurb:
+      "A SaaS product we designed and built end-to-end. (brief: tell us the one-liner — what it does, who it's for, how fast we shipped it.)",
+    role: "Web/App · Product Design",
+    outcomes: "Designed + shipped end-to-end",
+    skills: [
+      { group: "Build", items: ["Web & App Dev", "Product Design"] },
+      { group: "Glue", items: ["API Integrations", "Automation"] },
+    ],
+    live: "", // TODO
+  },
+  {
+    id: "quantumbay",
+    dealer: "keni",
+    rank: "J",
+    suit: "diamonds",
+    demo: "mesh",
+    title: "QuantumBay",
+    subtitle: "Our studio platform",
+    blurb:
+      "Our own studio platform — the home base for everything Techuila ships. (brief: confirm the one-liner.)",
+    role: "Full-stack · Design · Internal Tools",
+    outcomes: "Our own product, dogfooded",
+    skills: [
+      { group: "Build", items: ["Full-stack", "Product Design", "Internal Tools"] },
+      { group: "Trust", items: ["Cybersecurity"] },
+    ],
+    live: "", // TODO
+  },
+  {
+    id: "freelanceros",
+    dealer: "kailosh",
+    rank: "10",
+    suit: "spades",
+    demo: "geo",
+    title: "FreelancerOS",
+    subtitle: "An OS for freelancers",
+    blurb:
+      "An operating system for freelancers — clients, contracts, invoicing and pipeline in one calm dashboard. (brief: confirm.)",
+    role: "Web App · Product Design",
+    outcomes: "Clients → invoices in one place",
+    skills: [
+      { group: "Build", items: ["Web App Dev", "Dashboards"] },
+      { group: "Money", items: ["Paywall & Payments", "Automation"] },
+    ],
+    live: "", // TODO
+  },
+].map((p) => ({
+  ...(p as Project),
+  image: siteShot((p as Project).live),
+  imageAlt: `${p.title} — ${p.subtitle}`,
+}));
 
 export const handFor = (dealer: DealerId) =>
   PROJECTS.filter((p) => p.dealer === dealer);

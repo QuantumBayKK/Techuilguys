@@ -54,7 +54,7 @@ export default function ContactLounge() {
         <DealerGreeting className="font-ink mt-2 block text-xl text-[var(--color-brass-bright)]/85" />
 
         <motion.a
-          href="mailto:info.quantumbay@gmail.com"
+          href="mailto:techuilaguys@gmail.com"
           data-cursor="Email"
           data-magnetic
           onMouseEnter={() =>
@@ -85,8 +85,8 @@ export default function ContactLounge() {
             <span className="status-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-neon-amber)]" />
             Available 2026
           </span>
-          <a href="mailto:info.quantumbay@gmail.com" className="hover:text-[var(--color-neon-amber)]">
-            info.quantumbay@gmail.com
+          <a href="mailto:techuilaguys@gmail.com" className="hover:text-[var(--color-neon-amber)]">
+            techuilaguys@gmail.com
           </a>
           <a
             href="https://github.com/QuantumBayKK"
@@ -98,6 +98,24 @@ export default function ContactLounge() {
             GitHub ↗
           </a>
         </motion.div>
+
+        {/* the one button that matters */}
+        <motion.a
+          href="https://cal.com/pranauvshrinaath"
+          target="_blank"
+          rel="noreferrer"
+          data-cursor="Let's go"
+          data-magnetic
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
+          className="hire-btn mx-auto mt-14 inline-flex items-center gap-3 overflow-hidden rounded-full border-2 border-[var(--color-neon-amber)] bg-[var(--color-neon-amber)] px-8 py-5 text-lg font-bold uppercase tracking-[0.18em] text-[var(--color-noir)] shadow-[0_18px_50px_-12px_rgba(255,157,47,0.7)] sm:px-12 sm:py-6 sm:text-2xl"
+        >
+          <span className="relative z-10">Book a call with us</span>
+          <span className="relative z-10">↗</span>
+        </motion.a>
 
         <div className="mt-16 flex flex-col items-center">
           <PixelCat />

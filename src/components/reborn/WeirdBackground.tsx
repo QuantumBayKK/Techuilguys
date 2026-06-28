@@ -45,7 +45,9 @@ export default function WeirdBackground() {
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    // desktop, fine-pointer only — the eyes track a cursor and it's heavy on phones
+    if (reduced || coarse) return;
     setEnabled(true);
   }, []);
 

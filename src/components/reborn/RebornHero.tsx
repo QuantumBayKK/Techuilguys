@@ -71,16 +71,16 @@ export default function RebornHero() {
         className="px-6 sm:px-10"
       >
         <Headline text={LINE_ONE} delay={INTRO + 0.1} />
-        <div className="flex items-end gap-[3vw]">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:gap-[3vw]">
           <Headline text={LINE_TWO} delay={INTRO + 0.25} />
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: INTRO + 0.7, duration: 1 }}
-            className="mb-[1.6vw] max-w-sm text-sm leading-relaxed text-[var(--color-muted)] sm:text-base"
+            className="max-w-sm text-sm leading-relaxed text-[var(--color-muted)] sm:mb-[1.6vw] sm:text-base"
           >
-            Two builders, one table. We ship the cinematic and the
-            load-bearing — systems, security, post-quantum crypto, vision & AI.
+            We design and build SaaS products that ship — websites, apps, AI
+            features, automations and payments. Idea to live, in weeks.
           </motion.p>
         </div>
       </motion.div>

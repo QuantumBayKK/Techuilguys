@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Techuila Guys — cinematic, engineered software";
+export const alt = "Techuila Guys — we design & build SaaS products that ship";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -66,7 +66,7 @@ export default function OpengraphImage() {
             color: "#9a8f7d",
           }}
         >
-          Two builders, one table. Systems · Security · Crypto · Vision · AI.
+          We design & build SaaS — web, apps, AI, automation & payments.
         </div>
 
         {/* a dealt hand — a royal flush in spades */}

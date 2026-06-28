@@ -17,7 +17,7 @@ export default function RebornAudio() {
       if (done) return;
       done = true;
       audio.unlock();
-      audio.startBed();
+      // no persistent bed (the mute button was removed) — just short SFX cues
       experience.set({ started: true });
       remove();
     };
