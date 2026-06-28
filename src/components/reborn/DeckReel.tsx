@@ -412,7 +412,7 @@ function ReelCard({
             <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
               {project.role}
             </p>
-            <span className="font-display text-[10px] uppercase tracking-[0.25em] text-[var(--color-neon-amber)] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <span className="font-display text-[10px] uppercase tracking-[0.25em] text-[var(--color-neon-amber)] opacity-100 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100">
               {project.live ? "Visit ↗" : "Inspect ⤢"}
             </span>
           </div>

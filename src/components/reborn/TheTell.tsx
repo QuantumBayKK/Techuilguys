@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { DEALERS, type Dealer } from "@/data/dealers";
 import { handJitter } from "@/lib/seededNoise";
@@ -36,6 +37,18 @@ export default function TheTell() {
 
 function TellCard({ dealer, index }: { dealer: Dealer; index: number }) {
   const jitter = handJitter(`tell-${dealer.id}`, 0.6);
+  const [flipped, setFlipped] = useState(false);
+  const [touch, setTouch] = useState(false);
+
+  useEffect(() => {
+    setTouch(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
+
+  const flip = (v: boolean) => {
+    setFlipped(v);
+    audio.play("flip");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -44,10 +57,14 @@ function TellCard({ dealer, index }: { dealer: Dealer; index: number }) {
       transition={{ duration: 0.7, delay: index * 0.1 }}
       style={{ rotate: jitter.rotate }}
       className="group [perspective:1600px]"
-      onPointerEnter={() => audio.play("flip")}
+      data-cursor={touch ? undefined : "Read"}
+      onMouseEnter={touch ? undefined : () => flip(true)}
+      onMouseLeave={touch ? undefined : () => flip(false)}
+      onClick={touch ? () => flip(!flipped) : undefined}
     >
       <div
-        className="relative aspect-[4/3] w-full transition-transform duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] sm:aspect-[16/9]"
+        className="relative aspect-[4/3] w-full transition-transform duration-700 [transform-style:preserve-3d] sm:aspect-[16/9]"
+        style={{ transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
       >
         {/* face-down: card back */}
         <div
@@ -60,7 +77,7 @@ function TellCard({ dealer, index }: { dealer: Dealer; index: number }) {
           <span className="pointer-events-none absolute inset-2.5 rounded-xl border border-[var(--color-brass)]/30" />
           <span className="font-display text-6xl text-[var(--color-brass)]/50">{dealer.suit}</span>
           <span className="font-ink absolute bottom-4 text-lg text-[var(--color-muted)]">
-            hover to read the tell
+            {touch ? "tap to read the tell" : "hover to read the tell"}
           </span>
         </div>
 

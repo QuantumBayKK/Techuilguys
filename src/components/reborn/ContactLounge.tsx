@@ -79,21 +79,29 @@ export default function ContactLounge() {
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-10 flex flex-wrap items-center justify-center gap-6 text-[11px] uppercase tracking-[0.3em] text-[var(--color-muted)]"
+          className="mx-auto mt-10 flex w-full max-w-md flex-col items-center gap-4"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] px-3 py-1 text-[var(--color-neon-amber)]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-line)] px-3 py-1 text-[11px] uppercase tracking-[0.3em] text-[var(--color-neon-amber)]">
             <span className="status-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-neon-amber)]" />
             Available 2026
           </span>
-          <a href="mailto:techuilaguys@gmail.com" className="hover:text-[var(--color-neon-amber)]">
+
+          {/* highlighted email */}
+          <a
+            href="mailto:techuilaguys@gmail.com"
+            data-cursor="Email"
+            className="block w-full break-all rounded-full border-2 border-[var(--color-neon-amber)] bg-[var(--color-neon-amber)]/10 px-5 py-3 text-center text-sm font-semibold tracking-tight text-[var(--color-ink)] transition-colors hover:bg-[var(--color-neon-amber)]/20 sm:text-base"
+          >
             techuilaguys@gmail.com
           </a>
+
+          {/* github, bottom-right */}
           <a
             href="https://github.com/QuantumBayKK"
             target="_blank"
             rel="noreferrer"
             data-cursor="GitHub"
-            className="hover:text-[var(--color-neon-amber)]"
+            className="self-end text-[11px] uppercase tracking-[0.3em] text-[var(--color-muted)] transition-colors hover:text-[var(--color-neon-amber)]"
           >
             GitHub ↗
           </a>
@@ -111,7 +119,7 @@ export default function ContactLounge() {
           viewport={{ once: true }}
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.97 }}
-          className="hire-btn mx-auto mt-14 inline-flex items-center gap-3 overflow-hidden rounded-full border-2 border-[var(--color-neon-amber)] bg-[var(--color-neon-amber)] px-8 py-5 text-lg font-bold uppercase tracking-[0.18em] text-[var(--color-noir)] shadow-[0_18px_50px_-12px_rgba(255,157,47,0.7)] sm:px-12 sm:py-6 sm:text-2xl"
+          className="hire-btn mx-auto mt-14 inline-flex max-w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full border-2 border-[var(--color-neon-amber)] bg-[var(--color-neon-amber)] px-5 py-4 text-sm font-bold uppercase tracking-[0.1em] text-[var(--color-noir)] shadow-[0_18px_50px_-12px_rgba(255,157,47,0.7)] sm:gap-3 sm:px-12 sm:py-6 sm:text-2xl sm:tracking-[0.18em]"
         >
           <span className="relative z-10">Book a call with us</span>
           <span className="relative z-10">↗</span>
