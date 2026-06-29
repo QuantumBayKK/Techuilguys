@@ -301,8 +301,9 @@ function ReelCard({
         {/* the slow magic reveal of the REAL live site */}
         <CardPreview project={project} focused={focused} allowEmbed={allowEmbed} dim={dim} />
 
-        {/* readability scrim + inner frame, above the preview */}
-        <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--color-noir)] via-[var(--color-noir)]/30 to-transparent" />
+        {/* readability scrim — kept only at the very bottom so the live site
+            stays bright and visible; just enough to seat the title */}
+        <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,var(--color-noir)_0%,rgba(0,0,0,0.55)_18%,rgba(0,0,0,0)_42%)]" />
         <span className="pointer-events-none absolute inset-2.5 rounded-xl border border-[var(--color-brass)]/25" />
 
         <Tick className="left-2 top-2" />
@@ -325,7 +326,7 @@ function ReelCard({
           <h3 className="font-display text-3xl font-bold uppercase leading-none tracking-tight transition-colors duration-300 group-hover:text-[var(--color-neon-amber)] sm:text-4xl">
             {project.title}
           </h3>
-          <p className="font-script mt-1 text-lg text-[var(--color-brass-bright)]">
+          <p className="font-body mt-1.5 text-sm font-medium tracking-wide text-[var(--color-brass-bright)] sm:text-base">
             {project.subtitle}
           </p>
           {showBeat && (
@@ -364,6 +365,7 @@ function CardPreview({
 }) {
   const [live, setLive] = useState(false); // lazy-mount the iframe once focused
   const [frameOk, setFrameOk] = useState(false);
+  const [imgOk, setImgOk] = useState(false);
 
   useEffect(() => {
     if (focused) setLive(true);
@@ -392,8 +394,18 @@ function CardPreview({
           alt={project.imageAlt ?? project.title}
           loading="lazy"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-top"
+          onLoad={() => setImgOk(true)}
+          onError={() => setImgOk(false)}
+          className={`absolute inset-0 h-full w-full object-cover object-top brightness-110 contrast-[1.04] saturate-[1.05] transition-opacity duration-500 ${
+            imgOk ? "opacity-100" : "opacity-0"
+          }`}
         />
+      )}
+      {/* graceful fallback if the screenshot can't load (rate-limit, etc.) */}
+      {!imgOk && !canEmbed && (
+        <span className="font-display absolute inset-0 grid place-items-center text-2xl font-bold uppercase tracking-tight text-[var(--color-brass)]/50">
+          {project.title}
+        </span>
       )}
 
       {/* the REAL running site, scaled to fit the card; pointer-events off so the
@@ -415,6 +427,7 @@ function CardPreview({
               transformOrigin: "top left",
               border: 0,
               pointerEvents: "none",
+              filter: "brightness(1.06) contrast(1.03)",
               opacity: frameOk ? 1 : 0,
               transition: "opacity 600ms ease",
             }}

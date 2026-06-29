@@ -43,10 +43,16 @@ export type Project = {
   imageAlt?: string;
 };
 
-/** A live screenshot of a site — the deck shows the real frontend on hover. */
+/**
+ * A live screenshot of a site — the deck shows the real frontend. Uses
+ * Microlink with `waitUntil=networkidle2` so single-page apps finish booting
+ * before the shot (thum.io fired too early and caught WisdomJR's splash loader).
+ */
 export const siteShot = (url?: string) =>
   url
-    ? `https://image.thum.io/get/width/1280/crop/1600/noanimate/viewportwidth/1366/${url}`
+    ? `https://api.microlink.io/?url=${encodeURIComponent(
+        url
+      )}&screenshot=true&embed=screenshot.url&meta=false&waitUntil=networkidle2`
     : undefined;
 
 /**
