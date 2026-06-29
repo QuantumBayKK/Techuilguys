@@ -9,25 +9,28 @@ import {
   useScroll,
   useSpring,
   useTransform,
-  useVelocity,
   type MotionValue,
 } from "framer-motion";
 import type { Project } from "@/data/projects";
 import { PROJECTS } from "@/data/projects";
 import { dealerById } from "@/data/dealers";
-import { inspect } from "@/lib/inspect";
 import { audio } from "@/lib/audio";
 import { handJitter } from "@/lib/seededNoise";
 
 /**
- * Reborn — the riffle, told as a hand being played. The deck sweeps sideways as
- * you scroll (pinned on desktop), and a single story is woven through the six
- * cards: connect → see → remember → secure → prove → build. The centred card
- * focuses (scales up, brightens) and the story rail below tracks the beat.
- * Phones / reduced-motion get a native swipe strip.
+ * Reborn — "Riffle the deck", told as a hand being played one card at a time.
+ * The deck is pinned; as you scroll, each card slides to centre stage and its
+ * REAL live site magic-reveals — a slow curtain-rise (clip + un-blur) with a
+ * light sweeping down it. Embeddable sites render as a live <iframe>; the two
+ * that forbid framing fall back to a live screenshot. The story rail under the
+ * deck narrates the beat for whichever card is centred.
+ * Phones / reduced-motion get a native swipe strip (screenshots only).
  */
 
-/** The rail beat per card = the project's 2-line brief (what we built). */
+const N = PROJECTS.length;
+const IFRAME_W = 1280; // reference desktop width the live site renders at
+
+/** The rail beat per card = the project's brief (what we built, told as story). */
 const STORY = PROJECTS.map((p) => ({ chapter: p.title, beat: p.blurb }));
 
 export default function DeckReel() {
@@ -49,13 +52,13 @@ export default function DeckReel() {
 function Heading({ active }: { active: number }) {
   const s = STORY[active] ?? STORY[0];
   return (
-    <div className="mx-auto flex w-full max-w-6xl items-end justify-between px-6 pt-[7vh] sm:px-10">
+    <div className="mx-auto flex w-full max-w-6xl items-end justify-between px-6 pt-[6vh] sm:px-10">
       <h2 className="misprint font-display text-[clamp(1.8rem,5.5vw,4.5rem)] font-bold uppercase leading-none tracking-tight">
         Riffle&nbsp;the&nbsp;deck
       </h2>
       <div className="hidden text-right sm:block">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-faint)]">
-          Chapter {String(active + 1).padStart(2, "0")} / {String(STORY.length).padStart(2, "0")}
+          Card {String(active + 1).padStart(2, "0")} / {String(N).padStart(2, "0")}
         </p>
         <AnimatePresence mode="wait">
           <motion.p
@@ -74,83 +77,68 @@ function Heading({ active }: { active: number }) {
   );
 }
 
-/** Desktop: pinned, scroll-scrubbed horizontal sweep (measured in px). */
+type Dim = { vw: number; cardW: number; cardH: number; gap: number; slot: number; offset: number };
+
+/** Desktop: pinned; scroll centres each card and reveals its live site. */
 function Pinned() {
   const ref = useRef<HTMLDivElement>(null);
-  const railRef = useRef<HTMLDivElement>(null);
-  const [maxX, setMaxX] = useState(0);
   const [active, setActive] = useState(0);
+  const [dim, setDim] = useState<Dim>({ vw: 0, cardW: 0, cardH: 0, gap: 0, slot: 0, offset: 0 });
 
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end end"],
   });
-  const x = useTransform(scrollYProgress, [0, 1], [0, -maxX]);
-  // sweep velocity → warp the rail and split each card's channels
-  const velocity = useVelocity(scrollYProgress);
-  const skewX = useSpring(useTransform(velocity, [-1.5, 0, 1.5], [6, 0, -6], { clamp: true }), {
-    stiffness: 250,
-    damping: 30,
-  });
 
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const idx = Math.min(STORY.length - 1, Math.max(0, Math.round(v * (STORY.length - 1))));
+  // continuous card position 0..N-1; the centred card is round(activeFloat)
+  const activeFloat = useTransform(scrollYProgress, [0, 1], [0, N - 1]);
+  // translate the rail so the active card sits dead centre
+  const x = useTransform(activeFloat, (a) => dim.offset - a * dim.slot);
+  const xs = useSpring(x, { stiffness: 90, damping: 22, mass: 0.6 });
+
+  useMotionValueEvent(activeFloat, "change", (v) => {
+    const idx = Math.max(0, Math.min(N - 1, Math.round(v)));
     setActive((cur) => {
       if (cur === idx) return cur;
-      audio.play("deal"); // soft card-slide as the next card lands
+      audio.play("deal"); // soft card-slide as the next card takes the table
       return idx;
     });
   });
 
   useEffect(() => {
     const measure = () => {
-      const rail = railRef.current;
-      if (!rail) return;
-      setMaxX(Math.max(0, rail.scrollWidth - window.innerWidth));
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const cardH = Math.min(vh * 0.66, 640);
+      const cardW = Math.round(cardH * 0.72); // ~3/4 portrait
+      const gap = Math.max(28, Math.round(vw * 0.045));
+      setDim({ vw, cardW, cardH, gap, slot: cardW + gap, offset: (vw - cardW) / 2 });
     };
     measure();
-    const ro = new ResizeObserver(measure);
-    if (railRef.current) ro.observe(railRef.current);
     window.addEventListener("resize", measure);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", measure);
-    };
+    return () => window.removeEventListener("resize", measure);
   }, []);
 
   return (
-    <section id="rb-riffle" ref={ref} className="relative h-[380vh]">
+    <section id="rb-riffle" ref={ref} className="relative" style={{ height: `${N * 95 + 30}vh` }}>
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
         {/* #4 — living felt grain breathing under the table */}
         <div className="felt-grain pointer-events-none absolute inset-0 -z-10" aria-hidden />
         <Heading active={active} />
 
         <div className="flex flex-1 items-center overflow-hidden">
-          <motion.div
-            ref={railRef}
-            style={{ x, skewX }}
-            className="relative flex w-max items-center gap-[1.6vw] px-[3vw]"
-          >
-            {/* the woven thread running through every card */}
-            <span
-              aria-hidden
-              className="pointer-events-none absolute left-[3vw] right-[3vw] top-1/2 h-px -translate-y-1/2"
-              style={{
-                background:
-                  "repeating-linear-gradient(90deg, var(--color-line-warm) 0 14px, transparent 14px 26px)",
-              }}
-            />
+          <motion.div style={{ x: xs, gap: dim.gap }} className="relative flex w-max items-center">
             {PROJECTS.map((p, i) => (
               <ReelCard
                 key={p.id}
                 project={p}
                 index={i}
+                activeFloat={activeFloat}
                 focused={i === active}
-                vel={velocity}
-                className="h-[clamp(330px,54vh,620px)] aspect-[3/4]"
+                dim={dim}
+                allowEmbed
               />
             ))}
-            <TrailingPanel className="h-[clamp(330px,54vh,620px)] aspect-[3/4]" />
           </motion.div>
         </div>
 
@@ -160,23 +148,22 @@ function Pinned() {
   );
 }
 
-/** The story rail: nodes that light up + the active beat. */
+/** The story rail: nodes that light up + the active beat (the storytelling). */
 function StoryRail({ active }: { active: number }) {
   const s = STORY[active] ?? STORY[0];
   return (
     <div className="mx-auto w-full max-w-3xl px-6 pb-[5vh]">
       <div className="mb-3 flex items-center justify-center gap-2">
         {STORY.map((_, i) => (
-          <span key={i} className="flex items-center gap-2">
-            <motion.span
-              animate={{
-                width: i === active ? 26 : 8,
-                backgroundColor:
-                  i <= active ? "var(--color-neon-amber)" : "var(--color-line-warm)",
-              }}
-              className="block h-1 rounded-full"
-            />
-          </span>
+          <motion.span
+            key={i}
+            animate={{
+              width: i === active ? 26 : 8,
+              backgroundColor:
+                i <= active ? "var(--color-neon-amber)" : "var(--color-line-warm)",
+            }}
+            className="block h-1 rounded-full"
+          />
         ))}
       </div>
       <div className="h-10">
@@ -197,7 +184,7 @@ function StoryRail({ active }: { active: number }) {
   );
 }
 
-/** Mobile / reduced-motion: native swipe strip with the beat on each card. */
+/** Mobile / reduced-motion: native swipe strip, live screenshots, beat per card. */
 function Strip() {
   return (
     <section id="rb-riffle" className="relative py-20">
@@ -210,66 +197,50 @@ function Strip() {
             index={i}
             focused
             showBeat
-            className="aspect-[3/4] w-[74vw] sm:w-[44vw]"
+            className="aspect-[3/4] w-[74vw] shrink-0 sm:w-[44vw]"
           />
         ))}
-        <TrailingPanel className="aspect-[3/4] w-[74vw] sm:w-[44vw]" />
       </div>
     </section>
-  );
-}
-
-function TrailingPanel({ className = "" }: { className?: string }) {
-  return (
-    <div className={`grid shrink-0 place-items-center ${className}`}>
-      <p className="font-display max-w-xs text-center text-2xl uppercase leading-tight tracking-tight text-[var(--color-muted)]">
-        Six works.
-        <br />
-        <span className="text-[var(--color-neon-amber)]">One hand.</span>
-        <br />
-        Now you&apos;ve seen it played.
-      </p>
-    </div>
   );
 }
 
 function ReelCard({
   project,
   index,
+  activeFloat,
   focused = true,
   showBeat = false,
-  vel,
+  dim,
+  allowEmbed = false,
   className = "",
 }: {
   project: Project;
   index: number;
+  activeFloat?: MotionValue<number>;
   focused?: boolean;
   showBeat?: boolean;
-  vel?: MotionValue<number>;
+  dim?: Dim;
+  allowEmbed?: boolean;
   className?: string;
 }) {
   const suit = dealerById(project.dealer).suit;
   const story = STORY[index] ?? STORY[0];
-  const [imgOk, setImgOk] = useState(false);
-  const [hover, setHover] = useState(false);
-  // #1/#2 — hand-dealt jitter: a stable, tiny off-square + humanized deal delay
+  // #1/#2 — hand-dealt jitter: a stable, tiny off-square
   const jitter = handJitter(`reel-${project.id}`);
 
-  // velocity-driven chromatic aberration (RGB split) on the card edges
-  const fallbackVel = useMotionValue(0);
-  const v = vel ?? fallbackVel;
-  const aberration = useTransform(v, (val) => {
-    const a = Math.min(12, Math.abs(val) * 9);
-    return a < 0.5
-      ? "none"
-      : `drop-shadow(${a}px 0 0 rgba(255,40,95,0.55)) drop-shadow(${-a}px 0 0 rgba(50,255,215,0.5))`;
-  });
+  // distance from centre → scale + dim of neighbouring cards (pinned only)
+  const fallback = useMotionValue(0);
+  const af = activeFloat ?? fallback;
+  const scale = useTransform(af, (a) => 1 - Math.min(Math.abs(a - index), 1.3) * 0.16);
+  const dim2 = useTransform(af, (a) => 1 - Math.min(Math.abs(a - index), 1) * 0.5);
 
+  // cursor tilt on hover
+  const [hover, setHover] = useState(false);
   const mx = useMotionValue(0.5);
   const my = useMotionValue(0.5);
-  const rx = useSpring(useTransform(my, [0, 1], [9, -9]), { stiffness: 140, damping: 16 });
-  const ry = useSpring(useTransform(mx, [0, 1], [-11, 11]), { stiffness: 140, damping: 16 });
-  const sheenX = useTransform(mx, [0, 1], ["0%", "100%"]);
+  const rx = useSpring(useTransform(my, [0, 1], [8, -8]), { stiffness: 140, damping: 16 });
+  const ry = useSpring(useTransform(mx, [0, 1], [-10, 10]), { stiffness: 140, damping: 16 });
 
   const onMove = (e: React.PointerEvent) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -282,11 +253,16 @@ function ReelCard({
     setHover(false);
   };
 
+  const sizeStyle = dim ? { width: dim.cardW, height: dim.cardH } : undefined;
+
   return (
     <motion.div
-      style={{ filter: aberration, rotate: jitter.rotate, x: jitter.x, y: jitter.y }}
-      animate={{ scale: focused ? 1 : 0.9, opacity: focused ? 1 : 0.62 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        rotate: jitter.rotate,
+        scale: activeFloat ? scale : undefined,
+        opacity: activeFloat ? dim2 : undefined,
+        ...sizeStyle,
+      }}
       className={`shrink-0 [perspective:1400px] ${className}`}
     >
       <motion.button
@@ -301,81 +277,33 @@ function ReelCard({
         onClick={() => {
           audio.play("flip");
           if (project.live) window.open(project.live, "_blank", "noopener");
-          else inspect.open(project);
         }}
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-8%" }}
-        transition={{ duration: 0.6, delay: index * 0.06 + jitter.delay }}
         style={{
           rotateX: hover ? rx : 0,
           rotateY: hover ? ry : 0,
           transformStyle: "preserve-3d",
           boxShadow:
             hover || focused
-              ? "0 40px 90px -30px rgba(255,157,47,0.5), inset 0 0 0 1px rgba(255,157,47,0.4)"
+              ? "0 50px 110px -34px rgba(255,157,47,0.55), inset 0 0 0 1px rgba(255,157,47,0.4)"
               : "var(--shadow-table)",
         }}
         className="worn-edge group relative block h-full w-full overflow-hidden rounded-2xl border border-[var(--color-line-warm)] text-left transition-[border-color] duration-300"
       >
+        {/* base: the card's identity (felt + suit), shown before the reveal */}
         <span className="absolute inset-0 bg-gradient-to-br from-[var(--color-felt-deep)] via-[#0a0907] to-black" />
         <span
-          className="font-display pointer-events-none absolute -right-4 -top-8 select-none leading-none text-[var(--color-brass)]/[0.06] transition-transform duration-500 group-hover:scale-110"
+          className="font-display pointer-events-none absolute -right-4 -top-8 select-none leading-none text-[var(--color-brass)]/[0.07] transition-transform duration-500 group-hover:scale-110"
           style={{ fontSize: "16rem", transform: "translateZ(0)" }}
         >
           {suit}
         </span>
 
-        {/* the real website frontend (live screenshot); gradient + title show
-            until it loads or if there's no live URL yet */}
-        {project.image && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={project.image}
-            alt={project.imageAlt ?? project.title}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setImgOk(true)}
-            onError={() => setImgOk(false)}
-            className={`absolute inset-0 h-full w-full object-cover object-top transition-[transform,opacity] duration-700 group-hover:scale-[1.04] ${
-              imgOk ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        )}
+        {/* the slow magic reveal of the REAL live site */}
+        <CardPreview project={project} focused={focused} allowEmbed={allowEmbed} dim={dim} />
 
-        <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--color-noir)] via-[var(--color-noir)]/35 to-transparent" />
+        {/* readability scrim + inner frame, above the preview */}
+        <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[var(--color-noir)] via-[var(--color-noir)]/30 to-transparent" />
         <span className="pointer-events-none absolute inset-2.5 rounded-xl border border-[var(--color-brass)]/25" />
-
-        <motion.span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 mix-blend-overlay"
-          style={{
-            opacity: hover ? 0.6 : 0,
-            background: useTransform(
-              sheenX,
-              (v) => `radial-gradient(40% 60% at ${v} 12%, rgba(255,230,180,0.55), transparent 70%)`
-            ),
-          }}
-        />
-
-        {/* #B — holographic foil that tilts with the cursor */}
-        <motion.span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 mix-blend-color-dodge"
-          style={{
-            opacity: hover ? 0.3 : 0,
-            backgroundSize: "220% 220%",
-            backgroundImage: useTransform(
-              [mx, my] as [typeof mx, typeof my],
-              ([x, y]: number[]) =>
-                `linear-gradient(${Math.round(x * 140 + y * 40)}deg, transparent 18%, rgba(255,40,150,0.5), rgba(40,220,255,0.5), rgba(150,90,255,0.5), transparent 82%)`
-            ),
-            backgroundPosition: useTransform(
-              [mx, my] as [typeof mx, typeof my],
-              ([x, y]: number[]) => `${Math.round(x * 100)}% ${Math.round(y * 100)}%`
-            ),
-          }}
-        />
 
         <Tick className="left-2 top-2" />
         <Tick className="right-2 top-2 rotate-90" />
@@ -393,10 +321,7 @@ function ReelCard({
           {suit}
         </span>
 
-        <div
-          className="absolute inset-x-0 bottom-0 z-10 p-5"
-          style={{ transform: "translateZ(40px)" }}
-        >
+        <div className="absolute inset-x-0 bottom-0 z-10 p-5" style={{ transform: "translateZ(40px)" }}>
           <h3 className="font-display text-3xl font-bold uppercase leading-none tracking-tight transition-colors duration-300 group-hover:text-[var(--color-neon-amber)] sm:text-4xl">
             {project.title}
           </h3>
@@ -404,9 +329,7 @@ function ReelCard({
             {project.subtitle}
           </p>
           {showBeat && (
-            <p className="mt-2 text-[11px] leading-snug text-[var(--color-muted)]">
-              {story.beat}
-            </p>
+            <p className="mt-2 text-[11px] leading-snug text-[var(--color-muted)]">{story.beat}</p>
           )}
           <div className="mt-2 flex items-center justify-between">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
@@ -418,6 +341,107 @@ function ReelCard({
           </div>
         </div>
       </motion.button>
+    </motion.div>
+  );
+}
+
+/**
+ * The live preview + magic reveal. Curtain-rises (clip-path) and un-blurs when
+ * the card is centred; a light bar sweeps down it. Embeddable sites mount a
+ * real <iframe> (lazily, only once focused) over a screenshot poster; the two
+ * that block framing show the live screenshot alone.
+ */
+function CardPreview({
+  project,
+  focused,
+  allowEmbed,
+  dim,
+}: {
+  project: Project;
+  focused: boolean;
+  allowEmbed: boolean;
+  dim?: Dim;
+}) {
+  const [live, setLive] = useState(false); // lazy-mount the iframe once focused
+  const [frameOk, setFrameOk] = useState(false);
+
+  useEffect(() => {
+    if (focused) setLive(true);
+  }, [focused]);
+
+  const canEmbed = allowEmbed && project.embed && !!project.live && !!dim;
+  const fScale = dim && dim.cardW ? dim.cardW / IFRAME_W : 0.3;
+  const iframeH = dim ? Math.ceil(dim.cardH / fScale) : Math.ceil(IFRAME_W * 1.4);
+
+  return (
+    <motion.div
+      initial={false}
+      animate={focused ? "on" : "off"}
+      variants={{
+        off: { clipPath: "inset(0% 0% 100% 0%)", filter: "blur(16px)", scale: 1.04 },
+        on: { clipPath: "inset(0% 0% 0% 0%)", filter: "blur(0px)", scale: 1 },
+      }}
+      transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+      className="absolute inset-0 overflow-hidden"
+    >
+      {/* live screenshot — instant poster + the fallback for framing-blocked sites */}
+      {project.image && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={project.image}
+          alt={project.imageAlt ?? project.title}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover object-top"
+        />
+      )}
+
+      {/* the REAL running site, scaled to fit the card; pointer-events off so the
+          pinned scroll keeps working — clicking the card opens the live site */}
+      {canEmbed && live && (
+        <div className="absolute inset-0 overflow-hidden" aria-hidden>
+          <iframe
+            src={project.live}
+            title={`${project.title} — live`}
+            loading="lazy"
+            tabIndex={-1}
+            scrolling="no"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+            onLoad={() => setFrameOk(true)}
+            style={{
+              width: IFRAME_W,
+              height: iframeH,
+              transform: `scale(${fScale})`,
+              transformOrigin: "top left",
+              border: 0,
+              pointerEvents: "none",
+              opacity: frameOk ? 1 : 0,
+              transition: "opacity 600ms ease",
+            }}
+          />
+          {/* tiny "live" tell so it reads as the running site, not an image */}
+          <span className="absolute right-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-neon-amber)] backdrop-blur">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-neon-amber)]" />
+            live
+          </span>
+        </div>
+      )}
+
+      {/* the sweep of light that rides the curtain up */}
+      {focused && (
+        <motion.span
+          key={project.id}
+          aria-hidden
+          initial={{ y: "-110%" }}
+          animate={{ y: "120%" }}
+          transition={{ duration: 1.1, ease: "easeInOut" }}
+          className="pointer-events-none absolute inset-x-0 top-0 h-1/3"
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent, rgba(255,224,170,0.35), transparent)",
+          }}
+        />
+      )}
     </motion.div>
   );
 }

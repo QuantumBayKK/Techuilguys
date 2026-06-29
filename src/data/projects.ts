@@ -32,6 +32,12 @@ export type Project = {
   repo?: string;
   /** Live/deployed site. Clicking the card opens this; drives the hover preview. */
   live?: string;
+  /**
+   * Whether `live` allows being embedded in an <iframe> (no X-Frame-Options /
+   * frame-ancestors block). When true the deck shows the REAL running site;
+   * when false it falls back to a live screenshot. Verified per-site.
+   */
+  embed?: boolean;
   /** Hero art. Auto-falls back to a live screenshot of `live` when present. */
   image?: string;
   imageAlt?: string;
@@ -44,12 +50,13 @@ export const siteShot = (url?: string) =>
     : undefined;
 
 /**
- * The work — SaaS products we designed and shipped for clients. This is a
- * client-facing portfolio, not a CV: it leads with what we built and the speed
- * we built it, not the deep-tech under the hood.
+ * The work — four SaaS products we designed and shipped, dealt as a four-card
+ * hand. This is a client-facing portfolio, not a CV: it leads with what we
+ * built and how fast, and the deck shows the REAL live site for each one.
  *
- * NOTE: `live` URLs + briefs for the non-WisdomJR entries are placeholders —
- * fill them with the real values and the hover screenshots auto-generate.
+ * `embed` = the site allows <iframe> embedding (verified via response headers);
+ * those cards reveal the running site live. The two that send
+ * X-Frame-Options: DENY (smartguta, wisdomjr) fall back to a live screenshot.
  */
 export const PROJECTS: Project[] = [
   {
@@ -61,86 +68,72 @@ export const PROJECTS: Project[] = [
     title: "WisdomJR",
     subtitle: "EdTech platform · built in 28 days",
     blurb:
-      "We built an entire EdTech platform for kids aged 8–14 — lessons, parent dashboards and payments — from scratch in 28 days.",
+      "An entire EdTech platform for kids aged 8–14 — lessons, parent dashboards and payments — built from scratch in 28 days.",
     role: "Web App · Product Design · Full-stack",
     outcomes: "Idea → live product in 28 days",
     skills: [
       { group: "Build", items: ["Web App Dev", "Full-stack", "Product Design"] },
       { group: "Growth", items: ["Paywall & Payments", "Dashboards"] },
     ],
-    live: "", // TODO: real URL → enables the live hover screenshot
-  },
-  {
-    id: "founderos",
-    dealer: "keni",
-    rank: "K",
-    suit: "clubs",
-    demo: "founder",
-    title: "FounderOS",
-    subtitle: "AI cofounder for builders",
-    blurb:
-      "An AI cofounder that turns a rough idea into a plan and ships the busywork — strategy, ops and momentum in one place. (brief: confirm)",
-    role: "AI Product · Full-stack",
-    outcomes: "AI-native SaaS, end to end",
-    skills: [
-      { group: "Build", items: ["AI Systems", "Automation", "Full-stack"] },
-      { group: "Ops", items: ["Internal Tools", "API Integrations"] },
-    ],
-    live: "", // TODO
+    live: "https://wisdomjr-web.vercel.app/",
+    embed: false, // X-Frame-Options: DENY → live screenshot
   },
   {
     id: "smartguta",
     dealer: "kailosh",
-    rank: "Q",
+    rank: "K",
     suit: "hearts",
     demo: "vision",
     title: "SmartGuta",
     subtitle: "SaaS product · design + build",
     blurb:
-      "A SaaS product we designed and built end-to-end. (brief: tell us the one-liner — what it does, who it's for, how fast we shipped it.)",
+      "A focused SaaS product we designed and built end-to-end — clean UX, real workflows, shipped fast.",
     role: "Web/App · Product Design",
     outcomes: "Designed + shipped end-to-end",
     skills: [
       { group: "Build", items: ["Web & App Dev", "Product Design"] },
       { group: "Glue", items: ["API Integrations", "Automation"] },
     ],
-    live: "", // TODO
+    live: "https://smartguta.vercel.app/",
+    embed: false, // X-Frame-Options: DENY → live screenshot
   },
   {
     id: "quantumbay",
     dealer: "keni",
-    rank: "J",
+    rank: "Q",
     suit: "diamonds",
     demo: "mesh",
     title: "QuantumBay",
     subtitle: "Our studio platform",
     blurb:
-      "Our own studio platform — the home base for everything Techuila ships. (brief: confirm the one-liner.)",
+      "Our own studio platform — the home base for everything Techuila designs and ships.",
     role: "Full-stack · Design · Internal Tools",
     outcomes: "Our own product, dogfooded",
     skills: [
       { group: "Build", items: ["Full-stack", "Product Design", "Internal Tools"] },
       { group: "Trust", items: ["Cybersecurity"] },
     ],
-    live: "", // TODO
+    live: "https://quantumbay.vercel.app/",
+    embed: true, // embeddable → real live iframe
   },
   {
     id: "freelanceros",
     dealer: "kailosh",
-    rank: "10",
+    rank: "J",
     suit: "spades",
     demo: "geo",
     title: "FreelancerOS",
     subtitle: "An OS for freelancers",
     blurb:
-      "An operating system for freelancers — clients, contracts, invoicing and pipeline in one calm dashboard. (brief: confirm.)",
+      "An operating system for freelancers — clients, contracts, invoicing and pipeline in one calm dashboard.",
     role: "Web App · Product Design",
     outcomes: "Clients → invoices in one place",
     skills: [
       { group: "Build", items: ["Web App Dev", "Dashboards"] },
       { group: "Money", items: ["Paywall & Payments", "Automation"] },
     ],
-    live: "", // TODO
+    live: "https://freelanceros-z7hp.vercel.app/",
+    embed: true, // embeddable → real live iframe
   },
 ].map((p) => ({
   ...(p as Project),
