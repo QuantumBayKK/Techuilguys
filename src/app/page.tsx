@@ -1,30 +1,74 @@
 "use client";
 
-import IntroPick from "@/components/IntroPick";
-import HandAct from "@/components/sections/HandAct";
-import DeckGallery from "@/components/sections/DeckGallery";
-import LoungeAct from "@/components/sections/LoungeAct";
+import RebornHero from "@/components/reborn/RebornHero";
+import Manifesto from "@/components/reborn/Manifesto";
+import DeckReel from "@/components/reborn/DeckReel";
+import WorksIndex from "@/components/reborn/WorksIndex";
+import Dealers from "@/components/reborn/Dealers";
+import TheTell from "@/components/reborn/TheTell";
+import DragHand from "@/components/reborn/DragHand";
+import ContactLounge from "@/components/reborn/ContactLounge";
+import AmbientBackdrop from "@/components/reborn/AmbientBackdrop";
+import CursorGlow from "@/components/reborn/CursorGlow";
+import FallingCards from "@/components/reborn/FallingCards";
+import RebornAudio from "@/components/reborn/RebornAudio";
+import SuitTrail from "@/components/reborn/SuitTrail";
+import KonamiJackpot from "@/components/reborn/KonamiJackpot";
+import WeirdBackground from "@/components/reborn/WeirdBackground";
+import VelocitySkew from "@/components/reborn/VelocitySkew";
+import RebornIntro from "@/components/reborn/RebornIntro";
+import ChapterRail from "@/components/reborn/ChapterRail";
+import Marquee from "@/components/ui/Marquee";
 import InspectCard from "@/components/cards/InspectCard";
-import { useExperience } from "@/lib/experience";
+import RebornCursorSkin from "@/components/reborn/RebornCursorSkin";
+import SuitShortcuts from "@/components/reborn/SuitShortcuts";
+import RackTop from "@/components/reborn/RackTop";
+import ChipScrollProgress from "@/components/reborn/ChipScrollProgress";
 
 /**
- * One scroll story. The full-screen loader (chip → shatter → two dealer cards)
- * IS the pick; choosing a dealer mounts the hand + the lounge underneath and
- * dismisses the loader to reveal them.
+ * The site. A single cinematic-editorial scroll (Luke Baffait inspo, heavy
+ * 21st.dev): shader hero → kinetic manifesto → the deck as a hover-preview
+ * index → the two dealers → the lounge close. The poker concept is kept to a
+ * whisper (suits, ranks, "the deck"); no card-pick gimmick.
  */
 export default function Home() {
-  const { dealer } = useExperience();
-
   return (
     <main className="relative z-10">
-      <IntroPick />
-      {dealer && (
-        <>
-          <HandAct dealer={dealer} />
-          <DeckGallery />
-          <LoungeAct />
-        </>
-      )}
+      {/* curtain on entry, chapter index + chip progress + keyboard nav */}
+      <RebornIntro />
+      <ChapterRail />
+      <ChipScrollProgress />
+      <SuitShortcuts />
+      <RackTop />
+
+      {/* scroll-reactive room: shifting light + cursor pool + falling cards */}
+      <AmbientBackdrop />
+      <WeirdBackground />
+      <CursorGlow />
+      <FallingCards />
+
+      {/* the human-hand layer: a coffee-ring that dried on the felt, chip cursor */}
+      <RebornCursorSkin />
+      <span className="coffee-ring" style={{ left: "8vw", bottom: "18vh" }} aria-hidden />
+
+      {/* sound, cursor trail, and the easter egg */}
+      <RebornAudio />
+      <SuitTrail />
+      <KonamiJackpot />
+
+      <RebornHero />
+      <VelocitySkew>
+        <Manifesto />
+      </VelocitySkew>
+      <DeckReel />
+      <VelocitySkew>
+        <WorksIndex />
+      </VelocitySkew>
+      <Marquee text="Web & App Dev · Product Design · AI Systems · Automation · Payments · Cybersecurity · Blockchain · Internal Tools" />
+      <DragHand />
+      <Dealers />
+      <TheTell />
+      <ContactLounge />
       <InspectCard />
     </main>
   );

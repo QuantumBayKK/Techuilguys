@@ -31,13 +31,6 @@ export default function NotFound() {
         >
           ← Back to the table
         </Link>
-        <Link
-          href="/reborn"
-          data-cursor="Reborn"
-          className="font-display text-[11px] uppercase tracking-[0.3em] text-[var(--color-muted)] transition-colors hover:text-[var(--color-neon-amber)]"
-        >
-          The reborn cut ↗
-        </Link>
       </div>
     </main>
   );
