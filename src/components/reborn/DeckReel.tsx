@@ -12,31 +12,33 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import type { Project } from "@/data/projects";
+import type { Project, Suit } from "@/data/projects";
 import { PROJECTS } from "@/data/projects";
-import { dealerById } from "@/data/dealers";
 import { audio } from "@/lib/audio";
 import { handJitter } from "@/lib/seededNoise";
 
 /**
- * Reborn — "Riffle the deck", told as a hand played one card at a time.
+ * Reborn — "Riffle the deck": the work, dealt as a hand of designed playing
+ * cards. Each card is a self-contained, hand-finished card face (rank pips,
+ * suit watermark, the brief, the stack we used) — no iframes, no screenshots,
+ * no live-preview flash. Clicking any card opens its live site in a new tab.
  *
- * The deck is pinned; scrolling riffles a 3D coverflow — the centred card sits
- * dead-on while its neighbours fan back in depth (rotateY + translateZ). Each
- * card is a little browser window (traffic lights + live address bar) that
- * magic-reveals the REAL site: embeddable ones mount a live <iframe> you can
- * actually click into ("Interact"); the two that forbid framing show a live
- * screenshot. You can riffle with the on-screen arrows or by clicking the story
- * dots, and every card opens its live site in a new tab.
- *
- * Phones / reduced-motion get a native swipe strip (screenshots only).
+ * Desktop pins the section and riffles a 3D coverflow as you scroll; phones and
+ * reduced-motion get a clean horizontal swipe strip. Both are tap-first.
  */
 
 const N = PROJECTS.length;
-const IFRAME_W = 1280; // reference desktop width the live site renders at
 
 /** The rail beat per card = the project's brief (what we built, told as story). */
 const STORY = PROJECTS.map((p) => ({ chapter: p.title, beat: p.blurb }));
+
+/** Suit glyph + whether it reads "red" on a real card (for the corner pips). */
+const SUIT: Record<Suit, { glyph: string; red: boolean }> = {
+  spades: { glyph: "♠", red: false },
+  clubs: { glyph: "♣", red: false },
+  hearts: { glyph: "♥", red: true },
+  diamonds: { glyph: "♦", red: true },
+};
 
 const domainOf = (url?: string) => {
   if (!url) return "";
@@ -93,11 +95,10 @@ function Heading({ active }: { active: number }) {
 
 type Dim = { vw: number; cardW: number; cardH: number; gap: number; slot: number; offset: number };
 
-/** Desktop: pinned; scroll riffles a coverflow and reveals the centred site. */
+/** Desktop: pinned; scrolling riffles a 3D coverflow of the designed cards. */
 function Pinned() {
   const ref = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-  const [interacting, setInteracting] = useState(false);
   const [dim, setDim] = useState<Dim>({ vw: 0, cardW: 0, cardH: 0, gap: 0, slot: 0, offset: 0 });
 
   const { scrollYProgress } = useScroll({
@@ -120,17 +121,12 @@ function Pinned() {
     });
   });
 
-  // leaving a card always drops you out of inline-interact mode
-  useEffect(() => {
-    setInteracting(false);
-  }, [active]);
-
   useEffect(() => {
     const measure = () => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const cardH = Math.min(vh * 0.66, 640);
-      const cardW = Math.round(cardH * 0.72); // ~3/4 portrait
+      const cardH = Math.min(vh * 0.72, 660);
+      const cardW = Math.round(cardH * 0.7);
       const gap = Math.max(28, Math.round(vw * 0.045));
       setDim({ vw, cardW, cardH, gap, slot: cardW + gap, offset: (vw - cardW) / 2 });
     };
@@ -152,9 +148,9 @@ function Pinned() {
   }, []);
 
   return (
-    <section id="rb-riffle" ref={ref} className="relative" style={{ height: `${N * 95 + 30}vh` }}>
+    <section id="rb-riffle" ref={ref} className="relative" style={{ height: `${N * 90 + 30}vh` }}>
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
-        {/* #4 — living felt grain breathing under the table */}
+        {/* living felt grain breathing under the table */}
         <div className="felt-grain pointer-events-none absolute inset-0 -z-10" aria-hidden />
         <Heading active={active} />
 
@@ -170,28 +166,14 @@ function Pinned() {
                 index={i}
                 activeFloat={activeFloat}
                 focused={i === active}
-                interacting={interacting && i === active}
-                onInteract={() => setInteracting(true)}
-                onExit={() => setInteracting(false)}
+                onSelect={() => (i === active ? null : goTo(i))}
                 dim={dim}
-                allowEmbed
               />
             ))}
           </motion.div>
 
-          {/* riffle arrows — fade out while you're inside a live site */}
-          <DeckArrow
-            dir="prev"
-            disabled={active === 0}
-            hidden={interacting}
-            onClick={() => goTo(active - 1)}
-          />
-          <DeckArrow
-            dir="next"
-            disabled={active === N - 1}
-            hidden={interacting}
-            onClick={() => goTo(active + 1)}
-          />
+          <DeckArrow dir="prev" disabled={active === 0} onClick={() => goTo(active - 1)} />
+          <DeckArrow dir="next" disabled={active === N - 1} onClick={() => goTo(active + 1)} />
         </div>
 
         <StoryRail active={active} onJump={goTo} />
@@ -203,12 +185,10 @@ function Pinned() {
 function DeckArrow({
   dir,
   disabled,
-  hidden,
   onClick,
 }: {
   dir: "prev" | "next";
   disabled?: boolean;
-  hidden?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -220,7 +200,7 @@ function DeckArrow({
       data-magnetic
       className={`group absolute top-1/2 z-30 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full border border-[var(--color-brass)]/30 bg-black/45 text-[var(--color-brass-bright)] backdrop-blur transition-all duration-300 hover:border-[var(--color-neon-amber)] hover:text-[var(--color-neon-amber)] disabled:pointer-events-none disabled:opacity-0 ${
         dir === "prev" ? "left-4 sm:left-8" : "right-4 sm:right-8"
-      } ${hidden ? "pointer-events-none opacity-0" : "opacity-100"}`}
+      }`}
     >
       <span className="text-xl leading-none transition-transform duration-300 group-hover:scale-125">
         {dir === "prev" ? "‹" : "›"}
@@ -272,10 +252,10 @@ function StoryRail({ active, onJump }: { active: number; onJump: (k: number) => 
   );
 }
 
-/** Mobile / reduced-motion: native swipe strip, live screenshots, beat per card. */
+/** Mobile / reduced-motion: native swipe strip of the same designed cards. */
 function Strip() {
   return (
-    <section id="rb-riffle" className="relative py-20">
+    <section id="rb-riffle" className="relative py-16 sm:py-20">
       <Heading active={0} />
       <div className="mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] sm:gap-6 sm:px-10">
         {PROJECTS.map((p, i) => (
@@ -285,10 +265,13 @@ function Strip() {
             index={i}
             focused
             showBeat
-            className="aspect-[3/4] w-[78vw] shrink-0 sm:w-[46vw]"
+            className="aspect-[3/4.35] w-[80vw] max-w-[340px] shrink-0 snap-center sm:w-[46vw]"
           />
         ))}
       </div>
+      <p className="mt-4 px-6 text-center font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-faint)] sm:px-10">
+        swipe · tap a card to open it live
+      </p>
     </section>
   );
 }
@@ -298,32 +281,24 @@ function ReelCard({
   index,
   activeFloat,
   focused = true,
-  interacting = false,
-  onInteract,
-  onExit,
   showBeat = false,
+  onSelect,
   dim,
-  allowEmbed = false,
   className = "",
 }: {
   project: Project;
   index: number;
   activeFloat?: MotionValue<number>;
   focused?: boolean;
-  interacting?: boolean;
-  onInteract?: () => void;
-  onExit?: () => void;
   showBeat?: boolean;
+  onSelect?: () => void;
   dim?: Dim;
-  allowEmbed?: boolean;
   className?: string;
 }) {
-  const suit = dealerById(project.dealer).suit;
+  const suit = SUIT[project.suit] ?? SUIT.spades;
   const story = STORY[index] ?? STORY[0];
-  // #1/#2 — hand-dealt jitter: a stable, tiny off-square
+  // hand-dealt jitter: a stable, tiny off-square
   const jitter = handJitter(`reel-${project.id}`);
-
-  const canEmbed = allowEmbed && !!project.embed && !!project.live && !!dim;
 
   // ── coverflow: signed distance from centre drives 3D fan + depth + light ──
   const fallback = useMotionValue(0);
@@ -340,19 +315,19 @@ function ReelCard({
     { stiffness: 120, damping: 20 }
   );
   const scale = useTransform(rel, (r) => 1 - Math.min(Math.abs(r), 2) * 0.13);
-  const opacity = useTransform(rel, (r) => 1 - Math.min(Math.abs(r), 2.4) * 0.4);
-  const brightness = useTransform(rel, (r) => 1 - Math.min(Math.abs(r), 2) * 0.34);
+  const opacity = useTransform(rel, (r) => 1 - Math.min(Math.abs(r), 2.4) * 0.32);
+  const brightness = useTransform(rel, (r) => 1 - Math.min(Math.abs(r), 2) * 0.24);
   const filter = useMotionTemplate`brightness(${brightness})`;
 
-  // cursor tilt on hover (suspended while you're interacting with the live site)
+  // cursor tilt on hover (desktop only — pointer-fine)
   const [hover, setHover] = useState(false);
   const mx = useMotionValue(0.5);
   const my = useMotionValue(0.5);
-  const rx = useSpring(useTransform(my, [0, 1], [7, -7]), { stiffness: 140, damping: 16 });
-  const ryHover = useSpring(useTransform(mx, [0, 1], [-9, 9]), { stiffness: 140, damping: 16 });
+  const rx = useSpring(useTransform(my, [0, 1], [6, -6]), { stiffness: 140, damping: 16 });
+  const ryHover = useSpring(useTransform(mx, [0, 1], [-8, 8]), { stiffness: 140, damping: 16 });
 
   const onMove = (e: React.PointerEvent) => {
-    if (interacting) return;
+    if (e.pointerType !== "mouse") return;
     const r = e.currentTarget.getBoundingClientRect();
     mx.set((e.clientX - r.left) / r.width);
     my.set((e.clientY - r.top) / r.height);
@@ -363,14 +338,31 @@ function ReelCard({
     setHover(false);
   };
 
-  const openLive = () => {
-    if (!project.live) return;
-    audio.play("flip");
-    window.open(project.live, "_blank", "noopener");
+  // off-centre cards riffle to centre instead of navigating; the centre card
+  // (and every strip card) opens its live site in a new tab.
+  const isLink = focused && !!project.live;
+  const handleClick = (e: React.MouseEvent) => {
+    if (!focused && onSelect) {
+      e.preventDefault();
+      onSelect();
+      return;
+    }
+    if (project.live) audio.play("flip");
   };
 
   const sizeStyle = dim ? { width: dim.cardW, height: dim.cardH } : undefined;
-  const lifted = hover || interacting;
+
+  const Pip = ({ corner }: { corner: "tl" | "br" }) => (
+    <span
+      className={`pointer-events-none absolute z-20 flex flex-col items-center leading-none ${
+        corner === "tl" ? "left-3.5 top-3" : "bottom-3 right-3.5 rotate-180"
+      } ${suit.red ? "text-[#e7728a]" : "text-[var(--color-brass-bright)]"}`}
+      style={{ transform: corner === "br" ? "rotate(180deg)" : undefined }}
+    >
+      <span className="font-display text-[1.4rem] font-bold">{project.rank}</span>
+      <span className="text-[1.05rem]">{suit.glyph}</span>
+    </span>
+  );
 
   return (
     <motion.div
@@ -386,279 +378,135 @@ function ReelCard({
       }}
       className={`shrink-0 [perspective:1400px] ${className}`}
     >
-      <motion.div
+      <motion.a
+        href={isLink ? project.live : undefined}
+        target={isLink ? "_blank" : undefined}
+        rel={isLink ? "noopener noreferrer" : undefined}
+        aria-label={
+          isLink ? `Open ${project.title} live site` : `Bring ${project.title} to the front`
+        }
+        data-cursor={isLink ? "Open ↗" : undefined}
+        data-magnetic={isLink ? true : undefined}
+        onClick={handleClick}
         onPointerMove={onMove}
-        onPointerEnter={() => {
-          if (interacting) return;
+        onPointerEnter={(e) => {
+          if (e.pointerType !== "mouse") return;
           setHover(true);
           audio.play("hover");
         }}
         onPointerLeave={onLeave}
         style={{
-          rotateX: hover && !interacting ? rx : 0,
-          rotateY: hover && !interacting ? ryHover : 0,
+          rotateX: hover ? rx : 0,
+          rotateY: hover ? ryHover : 0,
           transformStyle: "preserve-3d",
-          boxShadow: lifted || focused
-            ? "0 50px 110px -34px rgba(255,157,47,0.55), inset 0 0 0 1px rgba(255,157,47,0.4)"
-            : "var(--shadow-table)",
+          boxShadow:
+            hover || focused
+              ? "0 50px 110px -34px rgba(255,157,47,0.55), inset 0 0 0 1px rgba(255,157,47,0.38)"
+              : "var(--shadow-table)",
         }}
-        className="worn-edge group relative block h-full w-full overflow-hidden rounded-2xl border border-[var(--color-line-warm)] text-left transition-[border-color] duration-300"
+        className="worn-edge group relative flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-[var(--color-line-warm)] text-left transition-[border-color] duration-300 hover:border-[var(--color-neon-amber)]/60"
       >
-        {/* base: the card's identity (felt + suit), shown before the reveal */}
-        <span className="absolute inset-0 bg-gradient-to-br from-[var(--color-felt-deep)] via-[#0a0907] to-black" />
+        {/* felt face + warm vignette */}
+        <span className="absolute inset-0 bg-gradient-to-br from-[var(--color-felt-deep)] via-[#0c0a07] to-black" />
         <span
-          className="font-display pointer-events-none absolute -right-4 -top-8 select-none leading-none text-[var(--color-brass)]/[0.07] transition-transform duration-500 group-hover:scale-110"
-          style={{ fontSize: "16rem", transform: "translateZ(0)" }}
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            background:
+              "radial-gradient(120% 90% at 50% 0%, rgba(255,180,90,0.10), transparent 55%)",
+          }}
+        />
+
+        {/* giant suit watermark */}
+        <span
+          className={`font-display pointer-events-none absolute -right-6 top-1/2 -translate-y-1/2 select-none leading-none transition-transform duration-500 group-hover:scale-110 ${
+            suit.red ? "text-[#e7728a]/[0.06]" : "text-[var(--color-brass)]/[0.07]"
+          }`}
+          style={{ fontSize: "17rem", transform: "translateZ(0)" }}
         >
-          {suit}
+          {suit.glyph}
         </span>
 
-        {/* a little browser window around the live preview */}
-        <BrowserPreview
-          project={project}
-          focused={focused}
-          interacting={interacting}
-          canEmbed={canEmbed}
-          dim={dim}
-        />
+        {/* corner rank pips — real playing-card framing */}
+        <Pip corner="tl" />
+        <Pip corner="br" />
 
-        {/* readability scrim — only at the very bottom so the live site stays
-            bright; lifts away while you're interacting with the real site */}
-        <span
-          className={`pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,var(--color-noir)_0%,rgba(0,0,0,0.55)_18%,rgba(0,0,0,0)_42%)] transition-opacity duration-300 ${
-            interacting ? "opacity-0" : "opacity-100"
-          }`}
-        />
+        {/* inner brass frame + corner ticks */}
         <span className="pointer-events-none absolute inset-2.5 z-10 rounded-xl border border-[var(--color-brass)]/25" />
-
         <Tick className="left-2 top-2" />
         <Tick className="right-2 top-2 rotate-90" />
         <Tick className="bottom-2 left-2 -rotate-90" />
         <Tick className="bottom-2 right-2 rotate-180" />
 
-        {/* card rank corner (over the chrome, top-right) */}
-        <span className="font-display absolute right-3 top-2.5 z-20 text-xl text-[var(--color-brass)] mix-blend-screen">
-          {project.rank}
-          {suit}
-        </span>
-
-        {/* ── bottom plate: title + the actions (hidden while interacting) ── */}
+        {/* ── content ── */}
         <div
-          className={`absolute inset-x-0 bottom-0 z-20 p-5 transition-opacity duration-300 ${
-            interacting ? "pointer-events-none opacity-0" : "opacity-100"
-          }`}
+          className="relative z-20 flex h-full flex-col px-6 pb-6 pt-14 sm:px-7"
           style={{ transform: "translateZ(40px)" }}
         >
-          <span className="font-mono mb-1 flex items-center gap-2 text-xs text-[var(--color-brass)]/80">
+          <span className="font-mono mb-2 flex items-center gap-2 text-[11px] tracking-wide text-[var(--color-brass)]/80">
             {String(index + 1).padStart(2, "0")}
-            <span className="font-display tracking-[0.25em] text-[var(--color-neon-amber)]/90">
+            <span className="font-display tracking-[0.22em] text-[var(--color-neon-amber)]/90">
               · {project.role.split(" · ")[0]}
             </span>
           </span>
-          <h3 className="font-display text-3xl font-bold uppercase leading-none tracking-tight transition-colors duration-300 group-hover:text-[var(--color-neon-amber)] sm:text-4xl">
+
+          <h3 className="font-display text-[clamp(1.7rem,4.5vw,2.6rem)] font-bold uppercase leading-[0.92] tracking-tight transition-colors duration-300 group-hover:text-[var(--color-neon-amber)]">
             {project.title}
           </h3>
-          <p className="font-body mt-1.5 text-sm font-medium tracking-wide text-[var(--color-brass-bright)] sm:text-base">
+          <p className="font-body mt-1.5 text-sm font-medium tracking-wide text-[var(--color-brass-bright)]">
             {project.subtitle}
           </p>
-          {showBeat && (
-            <p className="mt-2 text-[11px] leading-snug text-[var(--color-muted)]">{story.beat}</p>
-          )}
 
-          {/* actions: Interact (embeddable, live cards only) + Open live */}
-          {focused && project.live ? (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              {canEmbed && onInteract && (
-                <button
-                  type="button"
-                  data-magnetic
-                  onClick={onInteract}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-neon-amber)]/60 bg-[var(--color-neon-amber)]/10 px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-neon-amber)] transition-colors hover:bg-[var(--color-neon-amber)]/20"
+          <p className="mt-4 text-[13px] leading-relaxed text-[var(--color-ink)]/80">
+            {showBeat ? story.beat : project.blurb}
+          </p>
+
+          {/* the stack we used */}
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {project.skills
+              .flatMap((g) => g.items)
+              .slice(0, 4)
+              .map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full border border-[var(--color-line-warm)] bg-[var(--color-neon-amber)]/[0.04] px-2.5 py-0.5 text-[10px] tracking-wide text-[var(--color-ink)]/75"
                 >
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-neon-amber)]" />
-                  Try it live
-                </button>
-              )}
-              <button
-                type="button"
-                data-magnetic
-                onClick={openLive}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-brass)]/40 px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.18em] text-[var(--color-brass-bright)] transition-colors hover:border-[var(--color-neon-amber)] hover:text-[var(--color-neon-amber)]"
-              >
-                Open site ↗
-              </button>
-            </div>
-          ) : (
-            <div className="mt-2 flex items-center justify-between">
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                {project.role}
-              </p>
-              {project.live && (
-                <span className="font-display text-[10px] uppercase tracking-[0.25em] text-[var(--color-neon-amber)] opacity-100 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100">
-                  Open ↗
+                  {s}
                 </span>
-              )}
+              ))}
+          </div>
+
+          {/* footer plate — outcome + the open-live call */}
+          <div className="mt-auto flex items-end justify-between gap-3 pt-5">
+            <div className="min-w-0">
+              <p className="font-display text-[9px] uppercase tracking-[0.3em] text-[var(--color-brass)]/70">
+                Outcome
+              </p>
+              <p className="mt-0.5 truncate text-[12px] text-[var(--color-muted)]">
+                {project.outcomes}
+              </p>
             </div>
+            {project.live && (
+              <span className="shrink-0 font-mono text-[10px] text-[var(--color-brass-bright)]/70">
+                {domainOf(project.live)}
+              </span>
+            )}
+          </div>
+
+          {project.live && (
+            <span
+              className={`mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border px-4 py-2 font-display text-[11px] uppercase tracking-[0.18em] transition-all duration-300 ${
+                focused
+                  ? "border-[var(--color-neon-amber)]/60 bg-[var(--color-neon-amber)]/10 text-[var(--color-neon-amber)] group-hover:bg-[var(--color-neon-amber)]/20"
+                  : "border-[var(--color-brass)]/40 text-[var(--color-brass-bright)]"
+              }`}
+            >
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-neon-amber)]" />
+              {focused ? "Open the live site ↗" : "Bring to front"}
+            </span>
           )}
         </div>
-
-        {/* ── interacting: exit chrome over the live, now-clickable site ── */}
-        {interacting && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute right-3 top-10 z-30 flex items-center gap-2"
-          >
-            <span className="rounded-full bg-black/60 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--color-neon-amber)] backdrop-blur">
-              scroll · click inside
-            </span>
-            <button
-              type="button"
-              onClick={onExit}
-              aria-label="Stop interacting"
-              className="grid h-7 w-7 place-items-center rounded-full border border-[var(--color-brass)]/40 bg-black/60 text-sm text-[var(--color-brass-bright)] backdrop-blur transition-colors hover:border-[var(--color-neon-amber)] hover:text-[var(--color-neon-amber)]"
-            >
-              ✕
-            </button>
-          </motion.div>
-        )}
-      </motion.div>
+      </motion.a>
     </motion.div>
-  );
-}
-
-/**
- * A mini browser window: traffic-light dots + a live address bar, then the
- * magic-reveal of the REAL site. Embeddable sites mount a live <iframe> over a
- * screenshot poster — pointer-events stay OFF (so the pinned scroll keeps
- * working) until you hit "Try it live", which flips them on so you can actually
- * use the running product. Framing-blocked sites show the live screenshot.
- */
-function BrowserPreview({
-  project,
-  focused,
-  interacting,
-  canEmbed,
-  dim,
-}: {
-  project: Project;
-  focused: boolean;
-  interacting: boolean;
-  canEmbed: boolean;
-  dim?: Dim;
-}) {
-  const [live, setLive] = useState(false); // lazy-mount the iframe once focused
-  const [frameOk, setFrameOk] = useState(false);
-  const [imgOk, setImgOk] = useState(false);
-
-  useEffect(() => {
-    if (focused) setLive(true);
-  }, [focused]);
-
-  const fScale = dim && dim.cardW ? dim.cardW / IFRAME_W : 0.3;
-  // chrome bar eats the top ~34px; the viewport fills the rest
-  const chromeH = 34;
-  const viewportH = dim ? dim.cardH - chromeH : 0;
-  const iframeH = dim ? Math.ceil(viewportH / fScale) : Math.ceil(IFRAME_W * 1.4);
-
-  return (
-    <div className="absolute inset-0 z-[1] flex flex-col">
-      {/* browser chrome */}
-      <div className="relative z-10 flex h-[34px] shrink-0 items-center gap-2 border-b border-[var(--color-brass)]/15 bg-black/55 px-3 backdrop-blur-sm">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]/80" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]/80" />
-        </span>
-        <span className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md border border-white/5 bg-black/40 px-2 py-1">
-          <span className="text-[9px] text-[var(--color-neon-amber)]">●</span>
-          <span className="truncate font-mono text-[10px] text-[var(--color-brass-bright)]/85">
-            {domainOf(project.live)}
-          </span>
-        </span>
-        <span className="hidden items-center gap-1 font-mono text-[8px] uppercase tracking-[0.2em] text-[var(--color-neon-amber)] sm:flex">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-neon-amber)]" />
-          live
-        </span>
-      </div>
-
-      {/* viewport with the magic reveal */}
-      <motion.div
-        initial={false}
-        animate={focused ? "on" : "off"}
-        variants={{
-          off: { clipPath: "inset(0% 0% 100% 0%)", filter: "blur(16px)", scale: 1.04 },
-          on: { clipPath: "inset(0% 0% 0% 0%)", filter: "blur(0px)", scale: 1 },
-        }}
-        transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-        className="relative flex-1 overflow-hidden"
-      >
-        {/* live screenshot — instant poster + the fallback for framing-blocked sites */}
-        {project.image && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={project.image}
-            alt={project.imageAlt ?? project.title}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setImgOk(true)}
-            onError={() => setImgOk(false)}
-            className={`absolute inset-0 h-full w-full object-cover object-top brightness-110 contrast-[1.04] saturate-[1.05] transition-opacity duration-500 ${
-              imgOk ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        )}
-        {/* graceful fallback if the screenshot can't load (rate-limit, etc.) */}
-        {!imgOk && !canEmbed && (
-          <span className="font-display absolute inset-0 grid place-items-center text-2xl font-bold uppercase tracking-tight text-[var(--color-brass)]/50">
-            {project.title}
-          </span>
-        )}
-
-        {/* the REAL running site, scaled to fit; pointer-events flip ON only in
-            interact mode so the pinned scroll keeps working otherwise */}
-        {canEmbed && live && (
-          <div className="absolute inset-0 overflow-hidden">
-            <iframe
-              src={project.live}
-              title={`${project.title} — live`}
-              loading="lazy"
-              tabIndex={interacting ? 0 : -1}
-              scrolling={interacting ? "yes" : "no"}
-              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-              onLoad={() => setFrameOk(true)}
-              style={{
-                width: IFRAME_W,
-                height: iframeH,
-                transform: `scale(${fScale})`,
-                transformOrigin: "top left",
-                border: 0,
-                pointerEvents: interacting ? "auto" : "none",
-                filter: "brightness(1.06) contrast(1.03)",
-                opacity: frameOk ? 1 : 0,
-                transition: "opacity 600ms ease",
-              }}
-            />
-          </div>
-        )}
-
-        {/* the sweep of light that rides the curtain up */}
-        {focused && (
-          <motion.span
-            key={project.id}
-            aria-hidden
-            initial={{ y: "-110%" }}
-            animate={{ y: "120%" }}
-            transition={{ duration: 1.1, ease: "easeInOut" }}
-            className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-1/3"
-            style={{
-              background:
-                "linear-gradient(to bottom, transparent, rgba(255,224,170,0.35), transparent)",
-            }}
-          />
-        )}
-      </motion.div>
-    </div>
   );
 }
 
