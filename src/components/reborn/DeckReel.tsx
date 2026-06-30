@@ -318,13 +318,27 @@ function ReelCard({
   const opacity = useTransform(rel, (r) => 1 - Math.min(Math.abs(r), 2.4) * 0.32);
   const brightness = useTransform(rel, (r) => 1 - Math.min(Math.abs(r), 2) * 0.24);
   const filter = useMotionTemplate`brightness(${brightness})`;
+  // keep the centred card on top so its click can never be eaten by a neighbour
+  const zIndex = useTransform(rel, (r) => Math.round(60 - Math.min(Math.abs(r), 6) * 8));
 
   // cursor tilt on hover (desktop only — pointer-fine)
   const [hover, setHover] = useState(false);
   const mx = useMotionValue(0.5);
   const my = useMotionValue(0.5);
-  const rx = useSpring(useTransform(my, [0, 1], [6, -6]), { stiffness: 140, damping: 16 });
-  const ryHover = useSpring(useTransform(mx, [0, 1], [-8, 8]), { stiffness: 140, damping: 16 });
+  const rx = useSpring(useTransform(my, [0, 1], [7, -7]), { stiffness: 140, damping: 16 });
+  const ryHover = useSpring(useTransform(mx, [0, 1], [-9, 9]), { stiffness: 140, damping: 16 });
+
+  // ── chromatic aberration: RGB split that tracks the cursor ──
+  const caX = useSpring(useTransform(mx, [0, 1], [-5, 5]), { stiffness: 200, damping: 22 });
+  const caY = useSpring(useTransform(my, [0, 1], [-5, 5]), { stiffness: 200, damping: 22 });
+  const caXn = useTransform(caX, (v) => -v);
+  const caYn = useTransform(caY, (v) => -v);
+  // a glare sheen that follows the pointer across the card
+  const gxPct = useTransform(mx, (v) => v * 100);
+  const gyPct = useTransform(my, (v) => v * 100);
+  const glare = useMotionTemplate`radial-gradient(440px 440px at ${gxPct}% ${gyPct}%, rgba(255,228,176,0.16), transparent 60%)`;
+  // chromatic edge — a red/cyan split riding the inner frame
+  const edge = useMotionTemplate`inset ${caX}px ${caY}px 0 rgba(255,42,110,0.40), inset ${caXn}px ${caYn}px 0 rgba(26,216,255,0.36)`;
 
   const onMove = (e: React.PointerEvent) => {
     if (e.pointerType !== "mouse") return;
@@ -338,16 +352,20 @@ function ReelCard({
     setHover(false);
   };
 
-  // off-centre cards riffle to centre instead of navigating; the centre card
-  // (and every strip card) opens its live site in a new tab.
+  // off-centre cards riffle to centre; the centre card (and every strip card)
+  // opens its live site in a new tab. window.open is explicit so the click is
+  // bulletproof regardless of stacking / gesture quirks.
   const isLink = focused && !!project.live;
   const handleClick = (e: React.MouseEvent) => {
-    if (!focused && onSelect) {
+    if (!focused) {
       e.preventDefault();
-      onSelect();
+      onSelect?.();
       return;
     }
-    if (project.live) audio.play("flip");
+    if (!project.live) return;
+    e.preventDefault();
+    audio.play("flip");
+    window.open(project.live, "_blank", "noopener,noreferrer");
   };
 
   const sizeStyle = dim ? { width: dim.cardW, height: dim.cardH } : undefined;
@@ -355,13 +373,43 @@ function ReelCard({
   const Pip = ({ corner }: { corner: "tl" | "br" }) => (
     <span
       className={`pointer-events-none absolute z-20 flex flex-col items-center leading-none ${
-        corner === "tl" ? "left-3.5 top-3" : "bottom-3 right-3.5 rotate-180"
+        corner === "tl" ? "left-3.5 top-3" : "bottom-3 right-3.5"
       } ${suit.red ? "text-[#e7728a]" : "text-[var(--color-brass-bright)]"}`}
       style={{ transform: corner === "br" ? "rotate(180deg)" : undefined }}
     >
       <span className="font-display text-[1.4rem] font-bold">{project.rank}</span>
       <span className="text-[1.05rem]">{suit.glyph}</span>
     </span>
+  );
+
+  // the title, drawn three times for a true RGB-split chromatic fringe
+  const Title = () => (
+    <h3 className="font-display relative text-[clamp(1.7rem,4.5vw,2.6rem)] font-bold uppercase leading-[0.92] tracking-tight">
+      <motion.span
+        aria-hidden
+        style={{ x: caX, y: caY }}
+        className={`absolute inset-0 select-none text-[#ff2d6e] mix-blend-screen transition-opacity duration-300 ${
+          hover ? "opacity-80" : "opacity-0"
+        }`}
+      >
+        {project.title}
+      </motion.span>
+      <motion.span
+        aria-hidden
+        style={{ x: caXn, y: caYn }}
+        className={`absolute inset-0 select-none text-[#1ad8ff] mix-blend-screen transition-opacity duration-300 ${
+          hover ? "opacity-80" : "opacity-0"
+        }`}
+      >
+        {project.title}
+      </motion.span>
+      <span
+        className="relative block transition-colors duration-300 group-hover:text-[var(--color-neon-amber)]"
+        style={{ textShadow: "0.6px 0 rgba(255,40,110,0.38), -0.6px 0 rgba(26,216,255,0.32)" }}
+      >
+        {project.title}
+      </span>
+    </h3>
   );
 
   return (
@@ -373,10 +421,11 @@ function ReelCard({
         scale: activeFloat ? scale : undefined,
         opacity: activeFloat ? opacity : undefined,
         filter: activeFloat ? filter : undefined,
+        zIndex: activeFloat ? zIndex : undefined,
         transformStyle: "preserve-3d",
         ...sizeStyle,
       }}
-      className={`shrink-0 [perspective:1400px] ${className}`}
+      className={`relative shrink-0 [perspective:1400px] ${className}`}
     >
       <motion.a
         href={isLink ? project.live : undefined}
@@ -395,6 +444,7 @@ function ReelCard({
           audio.play("hover");
         }}
         onPointerLeave={onLeave}
+        whileTap={{ scale: 0.985 }}
         style={{
           rotateX: hover ? rx : 0,
           rotateY: hover ? ryHover : 0,
@@ -416,6 +466,15 @@ function ReelCard({
           }}
         />
 
+        {/* glare sheen that tracks the cursor */}
+        <motion.span
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 z-[5] transition-opacity duration-300 ${
+            hover ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ background: glare }}
+        />
+
         {/* giant suit watermark */}
         <span
           className={`font-display pointer-events-none absolute -right-6 top-1/2 -translate-y-1/2 select-none leading-none transition-transform duration-500 group-hover:scale-110 ${
@@ -430,8 +489,15 @@ function ReelCard({
         <Pip corner="tl" />
         <Pip corner="br" />
 
-        {/* inner brass frame + corner ticks */}
+        {/* inner brass frame + chromatic edge split */}
         <span className="pointer-events-none absolute inset-2.5 z-10 rounded-xl border border-[var(--color-brass)]/25" />
+        <motion.span
+          aria-hidden
+          className={`pointer-events-none absolute inset-2.5 z-10 rounded-xl transition-opacity duration-300 ${
+            hover ? "opacity-100" : "opacity-0"
+          }`}
+          style={{ boxShadow: edge }}
+        />
         <Tick className="left-2 top-2" />
         <Tick className="right-2 top-2 rotate-90" />
         <Tick className="bottom-2 left-2 -rotate-90" />
@@ -449,9 +515,7 @@ function ReelCard({
             </span>
           </span>
 
-          <h3 className="font-display text-[clamp(1.7rem,4.5vw,2.6rem)] font-bold uppercase leading-[0.92] tracking-tight transition-colors duration-300 group-hover:text-[var(--color-neon-amber)]">
-            {project.title}
-          </h3>
+          <Title />
           <p className="font-body mt-1.5 text-sm font-medium tracking-wide text-[var(--color-brass-bright)]">
             {project.subtitle}
           </p>
