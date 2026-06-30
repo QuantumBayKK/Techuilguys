@@ -35,6 +35,7 @@ export default function WorksBrowser() {
   const [interacting, setInteracting] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [fine, setFine] = useState(true);
+  const [maximized, setMaximized] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 640px) and (pointer: fine)");
@@ -49,6 +50,35 @@ export default function WorksBrowser() {
     () => (activeId ? PROJECTS.find((p) => p.id === activeId) ?? null : null),
     [activeId]
   );
+
+  // maximize: lock page scroll + Esc steps back out (release scroll, then restore)
+  useEffect(() => {
+    if (!maximized) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [maximized]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (maximized) setMaximized(false);
+      else if (interacting) setInteracting(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [maximized, interacting]);
+
+  // a maximized embeddable site should be usable immediately (no click gate)
+  useEffect(() => {
+    if (!maximized) {
+      setInteracting(false);
+      return;
+    }
+    if (active?.embed && active.live && fine) setInteracting(true);
+  }, [maximized, active, fine]);
 
   const navigate = useCallback(
     (id: View) => {
@@ -91,25 +121,54 @@ export default function WorksBrowser() {
           Browse&nbsp;our&nbsp;works
         </h2>
         <p className="hidden max-w-xs text-right text-sm leading-snug text-[var(--color-muted)] sm:block">
-          Pick a tab. Step inside the real, running product.
+          Pick a tab, step inside the live product — hit&nbsp;⤢ to go fullscreen and actually use it.
         </p>
       </div>
 
-      {/* ── the browser window ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 28 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.25 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="mx-auto flex w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-[var(--color-brass)]/25 bg-gradient-to-b from-[#0c0b09] to-black shadow-[0_60px_140px_-50px_rgba(255,157,47,0.4)]"
-        style={{ height: "clamp(460px, 76vh, 800px)" }}
+      {/* ── the browser window (lifts into a fullscreen overlay when maximized) ── */}
+      <div
+        className={
+          maximized
+            ? "fixed inset-0 z-[120] flex items-center justify-center bg-black/85 p-3 backdrop-blur-sm sm:p-6"
+            : "relative"
+        }
       >
+        {maximized && (
+          <button
+            type="button"
+            aria-label="Close fullscreen"
+            onClick={() => setMaximized(false)}
+            className="absolute inset-0 -z-10 cursor-default"
+          />
+        )}
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className={`flex w-full flex-col overflow-hidden rounded-2xl border border-[var(--color-brass)]/25 bg-gradient-to-b from-[#0c0b09] to-black ${
+            maximized
+              ? "h-[94vh] max-w-[1600px] shadow-[0_50px_140px_-20px_rgba(0,0,0,0.85)]"
+              : "mx-auto max-w-6xl shadow-[0_60px_140px_-50px_rgba(255,157,47,0.4)]"
+          }`}
+          style={maximized ? undefined : { height: "clamp(460px, 76vh, 800px)" }}
+        >
         {/* tab strip */}
         <div className="flex items-center gap-1 border-b border-white/5 bg-black/55 px-2.5 pt-2">
           <span className="mr-1.5 flex shrink-0 items-center gap-1.5 px-1.5">
-            <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]/80" />
+            <button
+              type="button"
+              aria-label={maximized ? "Restore window" : "Close"}
+              onClick={() => setMaximized(false)}
+              className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]/80 transition-transform hover:scale-125"
+            />
             <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]/80" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]/80" />
+            <button
+              type="button"
+              aria-label={maximized ? "Restore window" : "Maximize window"}
+              onClick={() => setMaximized((m) => !m)}
+              className="h-2.5 w-2.5 rounded-full bg-[#28c840]/80 transition-transform hover:scale-125"
+            />
           </span>
           <div className="flex min-w-0 flex-1 items-end gap-1 overflow-x-auto [scrollbar-width:none]">
             <Tab
@@ -164,6 +223,15 @@ export default function WorksBrowser() {
               Open ↗
             </a>
           )}
+          <NavBtn
+            label={maximized ? "Restore (Esc)" : "Maximize"}
+            onClick={() => {
+              setMaximized((m) => !m);
+              audio.play("flip");
+            }}
+          >
+            {maximized ? "⤡" : "⤢"}
+          </NavBtn>
         </div>
 
         {/* viewport */}
@@ -177,6 +245,7 @@ export default function WorksBrowser() {
                 project={active}
                 fine={fine}
                 interacting={interacting}
+                maximized={maximized}
                 onInteract={() => {
                   setInteracting(true);
                   audio.play("select");
@@ -186,7 +255,8 @@ export default function WorksBrowser() {
             )}
           </AnimatePresence>
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </section>
   );
 }
@@ -317,12 +387,14 @@ function Viewport({
   project,
   fine,
   interacting,
+  maximized,
   onInteract,
   onRelease,
 }: {
   project: Project;
   fine: boolean;
   interacting: boolean;
+  maximized: boolean;
   onInteract: () => void;
   onRelease: () => void;
 }) {
@@ -433,8 +505,8 @@ function Viewport({
         </button>
       )}
 
-      {/* release-scroll chip while browsing inside */}
-      {canEmbed && interacting && (
+      {/* release-scroll chip while browsing inside (redundant in fullscreen) */}
+      {canEmbed && interacting && !maximized && (
         <button
           type="button"
           onClick={onRelease}
