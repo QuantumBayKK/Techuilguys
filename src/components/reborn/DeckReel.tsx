@@ -375,23 +375,25 @@ function ReelCard({
     setHover(false);
     setPushing(true);
     setBurst((b) => b + 1);
-    window.setTimeout(() => window.open(url, "_blank", "noopener,noreferrer"), 250);
-    window.setTimeout(() => setPushing(false), 720);
+    // open after the slam is visible (well within the 5s transient-activation
+    // window, so it is never popup-blocked)
+    window.setTimeout(() => window.open(url, "_blank", "noopener,noreferrer"), 620);
+    window.setTimeout(() => setPushing(false), 1150);
   };
 
-  // lifted-to-be-inspected when focused; slammed back down on click
+  // lifted-high-to-be-inspected when focused; slammed hard back down on click
   const liftAnim = pushing
-    ? { y: 40, scale: 0.9, rotateX: 9 }
+    ? { y: 78, scale: 0.78, rotateX: 18 }
     : inCoverflow && focused
-    ? { y: [-12, -19, -12] as number[], scale: 1.02, rotateX: 0 }
+    ? { y: [-28, -44, -28] as number[], scale: 1.08, rotateX: -6 }
     : { y: 0, scale: 1, rotateX: 0 };
   const liftTrans = pushing
-    ? { type: "spring" as const, stiffness: 700, damping: 22 }
+    ? { type: "spring" as const, stiffness: 420, damping: 16 }
     : inCoverflow && focused
     ? {
-        y: { duration: 4.6, repeat: Infinity, ease: "easeInOut" as const },
-        scale: { type: "spring" as const, stiffness: 170, damping: 18 },
-        rotateX: { duration: 0.4 },
+        y: { duration: 4.2, repeat: Infinity, ease: "easeInOut" as const },
+        scale: { type: "spring" as const, stiffness: 150, damping: 15 },
+        rotateX: { duration: 0.5 },
       }
     : { type: "spring" as const, stiffness: 180, damping: 18 };
 
@@ -463,12 +465,12 @@ function ReelCard({
         {inCoverflow && (
           <span
             aria-hidden
-            className={`pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] transition-opacity duration-500 ${
+            className={`pointer-events-none absolute -inset-12 -z-10 rounded-[3rem] transition-opacity duration-500 ${
               focused ? "opacity-100" : "opacity-0"
             }`}
             style={{
               background:
-                "radial-gradient(60% 55% at 50% 48%, rgba(255,157,47,0.16), transparent 70%)",
+                "radial-gradient(56% 50% at 50% 44%, rgba(255,176,72,0.40), rgba(255,140,40,0.14) 45%, transparent 72%)",
             }}
           />
         )}
@@ -624,55 +626,71 @@ function ReelCard({
   );
 }
 
-/** A quick puff of air + scribbly streaks gushing from the card's bottom edge. */
+/** A burst of air + scribbly streaks gushing from the card's bottom edge as it
+ *  slams down — the squeezed-out-air feel. Fires on each click via `burst`. */
 function AirGush({ burst }: { burst: number }) {
   if (!burst) return null;
-  const puffs = Array.from({ length: 9 });
-  const lines = [-0.5, -0.18, 0.18, 0.5];
+  const puffs = Array.from({ length: 18 });
+  const lines = [-0.62, -0.4, -0.16, 0.16, 0.4, 0.62];
   return (
     <div
       key={burst}
       aria-hidden
       className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center"
     >
+      {/* central dust poof on impact */}
+      <motion.span
+        initial={{ opacity: 0, scale: 0.3, y: 0 }}
+        animate={{ opacity: [0, 0.5, 0], scale: [0.3, 2.6, 3.2], y: [0, 14, 26] }}
+        transition={{ duration: 0.7, ease: "easeOut", delay: 0.08 }}
+        className="absolute bottom-0 h-14 w-40 rounded-full"
+        style={{
+          background: "radial-gradient(closest-side, rgba(255,224,176,0.45), transparent 75%)",
+          filter: "blur(5px)",
+        }}
+      />
+
       {puffs.map((_, i) => {
         const t = puffs.length === 1 ? 0 : i / (puffs.length - 1);
         const dir = t - 0.5; // -0.5 .. 0.5 across the bottom edge
+        const out = dir * 300; // how far it shoots sideways
         return (
           <motion.span
             key={i}
-            initial={{ opacity: 0, x: dir * 26, y: -2, scaleX: 0.6, scaleY: 0.6 }}
+            initial={{ opacity: 0, x: dir * 30, y: -4, scaleX: 0.5, scaleY: 0.5 }}
             animate={{
-              opacity: [0, 0.6, 0],
-              x: dir * 150,
-              y: 34 + Math.abs(dir) * 26,
-              scaleX: 2,
-              scaleY: 1.2,
+              opacity: [0, 0.7, 0],
+              x: out,
+              y: 30 + Math.abs(dir) * 78,
+              scaleX: 3.2,
+              scaleY: 1.4,
             }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: Math.abs(dir) * 0.05 }}
-            className="absolute bottom-1 h-2 w-6 rounded-full"
+            transition={{ duration: 0.72, ease: "easeOut", delay: 0.06 + Math.abs(dir) * 0.06 }}
+            className="absolute bottom-1 h-2.5 w-10 rounded-full"
             style={{
-              background: "radial-gradient(closest-side, rgba(255,226,182,0.55), transparent)",
-              filter: "blur(1.5px)",
+              background: "radial-gradient(closest-side, rgba(255,228,186,0.6), transparent)",
+              filter: "blur(2px)",
             }}
           />
         );
       })}
+
+      {/* scribbly hand-drawn streaks flicking out from under the card */}
       <svg
-        className="absolute bottom-0 h-16 w-[120%] overflow-visible"
-        viewBox="0 0 200 60"
+        className="absolute bottom-0 h-24 w-[160%] overflow-visible"
+        viewBox="0 0 200 80"
         fill="none"
       >
         {lines.map((d, i) => (
           <motion.path
             key={i}
-            d={`M100 4 q ${d * 26} 14 ${d * 80} 30 q ${d * -10} 8 ${d * 30} 22`}
-            stroke="rgba(255,214,150,0.6)"
-            strokeWidth="1.4"
+            d={`M100 2 q ${d * 38} 18 ${d * 120} 36 q ${d * -16} 10 ${d * 46} 30`}
+            stroke="rgba(255,210,142,0.7)"
+            strokeWidth="1.8"
             strokeLinecap="round"
             initial={{ pathLength: 0, opacity: 0, y: 0 }}
-            animate={{ pathLength: [0, 1, 1], opacity: [0, 0.7, 0], y: [0, 12, 24] }}
-            transition={{ duration: 0.55, ease: "easeOut", delay: i * 0.03 }}
+            animate={{ pathLength: [0, 1, 1], opacity: [0, 0.8, 0], y: [0, 16, 34] }}
+            transition={{ duration: 0.65, ease: "easeOut", delay: 0.06 + i * 0.035 }}
           />
         ))}
       </svg>
