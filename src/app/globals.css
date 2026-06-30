@@ -758,30 +758,23 @@ html[data-timeband="lateNight"] { --room-warmth: 0.10; --room-dim: 0.16; --room-
   animation-play-state: paused;
 }
 
-/* #59 — neon sign flicker. Irregular, like a tube that can't quite hold. */
+/* #59 — neon "Techuila" sign. Steady warm glow with only a gentle breathing
+   pulse (the old hard flicker read as a glitchy flash, so it's been calmed). */
 .neon-sign {
   text-shadow:
     0 0 4px #ffb86b, 0 0 11px #ff9d2f, 0 0 22px #ff7a00, 0 0 38px #ff5e00;
-  animation: neonflicker 4.6s infinite;
+  animation: neonglow 5.5s ease-in-out infinite;
 }
 .neon-dim {
-  animation: neondim 2.3s infinite;
+  animation: neonglow 4s ease-in-out infinite;
+  opacity: 0.85;
 }
-@keyframes neonflicker {
-  0%, 19%, 21%, 23%, 80%, 83%, 100% { opacity: 1; }
-  20%, 22% { opacity: 0.45; }
-  81% { opacity: 0.7; }
-  82% { opacity: 0.3; }
-}
-@keyframes neondim {
-  0%, 100% { opacity: 0.85; text-shadow: 0 0 3px #ff9d2f, 0 0 8px #ff7a00; }
-  43% { opacity: 0.2; }
-  45% { opacity: 0.9; }
-  47% { opacity: 0.35; }
-  60% { opacity: 0.85; }
+@keyframes neonglow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
 }
 
-/* HIRE US button — a fluid sheen sweeps across it forever. */
+/* HIRE US button — a soft amber sheen drifts across it (no hard white flash). */
 .hire-btn::after {
   content: "";
   position: absolute;
@@ -789,12 +782,12 @@ html[data-timeband="lateNight"] { --room-warmth: 0.10; --room-dim: 0.16; --room-
   z-index: 5;
   background: linear-gradient(
     100deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.55) 48%,
-    transparent 66%
+    transparent 35%,
+    rgba(255, 224, 176, 0.18) 50%,
+    transparent 65%
   );
   background-size: 250% 100%;
-  animation: hireshine 3.4s ease-in-out infinite;
+  animation: hireshine 6s ease-in-out infinite;
 }
 @keyframes hireshine {
   0% { background-position: 180% 0; }

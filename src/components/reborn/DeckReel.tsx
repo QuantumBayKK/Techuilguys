@@ -352,9 +352,15 @@ function ReelCard({
     setHover(false);
   };
 
+  // push-to-open: clicking slams the card back down, air gushes out the
+  // bottom, then the live site opens in a new tab (within the click's
+  // transient activation so it's never popup-blocked).
+  const [pushing, setPushing] = useState(false);
+  const [burst, setBurst] = useState(0);
+  const inCoverflow = !!activeFloat;
+
   // off-centre cards riffle to centre; the centre card (and every strip card)
-  // opens its live site in a new tab. window.open is explicit so the click is
-  // bulletproof regardless of stacking / gesture quirks.
+  // opens its live site in a new tab.
   const isLink = focused && !!project.live;
   const handleClick = (e: React.MouseEvent) => {
     if (!focused) {
@@ -364,9 +370,30 @@ function ReelCard({
     }
     if (!project.live) return;
     e.preventDefault();
+    const url = project.live;
     audio.play("flip");
-    window.open(project.live, "_blank", "noopener,noreferrer");
+    setHover(false);
+    setPushing(true);
+    setBurst((b) => b + 1);
+    window.setTimeout(() => window.open(url, "_blank", "noopener,noreferrer"), 250);
+    window.setTimeout(() => setPushing(false), 720);
   };
+
+  // lifted-to-be-inspected when focused; slammed back down on click
+  const liftAnim = pushing
+    ? { y: 40, scale: 0.9, rotateX: 9 }
+    : inCoverflow && focused
+    ? { y: [-12, -19, -12] as number[], scale: 1.02, rotateX: 0 }
+    : { y: 0, scale: 1, rotateX: 0 };
+  const liftTrans = pushing
+    ? { type: "spring" as const, stiffness: 700, damping: 22 }
+    : inCoverflow && focused
+    ? {
+        y: { duration: 4.6, repeat: Infinity, ease: "easeInOut" as const },
+        scale: { type: "spring" as const, stiffness: 170, damping: 18 },
+        rotateX: { duration: 0.4 },
+      }
+    : { type: "spring" as const, stiffness: 180, damping: 18 };
 
   const sizeStyle = dim ? { width: dim.cardW, height: dim.cardH } : undefined;
 
@@ -427,6 +454,25 @@ function ReelCard({
       }}
       className={`relative shrink-0 [perspective:1400px] ${className}`}
     >
+      <motion.div
+        className="relative h-full w-full [transform-style:preserve-3d]"
+        animate={liftAnim}
+        transition={liftTrans}
+      >
+        {/* inspect spotlight — a warm pool the card floats in when centred */}
+        {inCoverflow && (
+          <span
+            aria-hidden
+            className={`pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] transition-opacity duration-500 ${
+              focused ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              background:
+                "radial-gradient(60% 55% at 50% 48%, rgba(255,157,47,0.16), transparent 70%)",
+            }}
+          />
+        )}
+
       <motion.a
         href={isLink ? project.live : undefined}
         target={isLink ? "_blank" : undefined}
@@ -570,7 +616,67 @@ function ReelCard({
           )}
         </div>
       </motion.a>
+
+        {/* air gushing out from under the card as it slams down */}
+        <AirGush burst={burst} />
+      </motion.div>
     </motion.div>
+  );
+}
+
+/** A quick puff of air + scribbly streaks gushing from the card's bottom edge. */
+function AirGush({ burst }: { burst: number }) {
+  if (!burst) return null;
+  const puffs = Array.from({ length: 9 });
+  const lines = [-0.5, -0.18, 0.18, 0.5];
+  return (
+    <div
+      key={burst}
+      aria-hidden
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center"
+    >
+      {puffs.map((_, i) => {
+        const t = puffs.length === 1 ? 0 : i / (puffs.length - 1);
+        const dir = t - 0.5; // -0.5 .. 0.5 across the bottom edge
+        return (
+          <motion.span
+            key={i}
+            initial={{ opacity: 0, x: dir * 26, y: -2, scaleX: 0.6, scaleY: 0.6 }}
+            animate={{
+              opacity: [0, 0.6, 0],
+              x: dir * 150,
+              y: 34 + Math.abs(dir) * 26,
+              scaleX: 2,
+              scaleY: 1.2,
+            }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: Math.abs(dir) * 0.05 }}
+            className="absolute bottom-1 h-2 w-6 rounded-full"
+            style={{
+              background: "radial-gradient(closest-side, rgba(255,226,182,0.55), transparent)",
+              filter: "blur(1.5px)",
+            }}
+          />
+        );
+      })}
+      <svg
+        className="absolute bottom-0 h-16 w-[120%] overflow-visible"
+        viewBox="0 0 200 60"
+        fill="none"
+      >
+        {lines.map((d, i) => (
+          <motion.path
+            key={i}
+            d={`M100 4 q ${d * 26} 14 ${d * 80} 30 q ${d * -10} 8 ${d * 30} 22`}
+            stroke="rgba(255,214,150,0.6)"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            initial={{ pathLength: 0, opacity: 0, y: 0 }}
+            animate={{ pathLength: [0, 1, 1], opacity: [0, 0.7, 0], y: [0, 12, 24] }}
+            transition={{ duration: 0.55, ease: "easeOut", delay: i * 0.03 }}
+          />
+        ))}
+      </svg>
+    </div>
   );
 }
 
