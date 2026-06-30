@@ -3,6 +3,7 @@
 import RebornHero from "@/components/reborn/RebornHero";
 import Manifesto from "@/components/reborn/Manifesto";
 import DeckReel from "@/components/reborn/DeckReel";
+import WorksBrowser from "@/components/reborn/WorksBrowser";
 import Dealers from "@/components/reborn/Dealers";
 import TheTell from "@/components/reborn/TheTell";
 import DragHand from "@/components/reborn/DragHand";
@@ -60,6 +61,7 @@ export default function Home() {
         <Manifesto />
       </VelocitySkew>
       <DeckReel />
+      <WorksBrowser />
       <Marquee text="Web & App Dev · Product Design · AI Systems · Automation · Payments · Cybersecurity · Blockchain · Internal Tools" />
       <DragHand />
       <Dealers />
