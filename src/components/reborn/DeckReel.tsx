@@ -373,24 +373,37 @@ function ReelCard({
       e.preventDefault();
       return;
     }
-    // Focused + live: DON'T preventDefault — let the native <a target="_blank">
-    // open the tab inside the real click gesture (most reliable, never
-    // popup-blocked or glitched by a setTimeout). Just play the push visual.
+    // Mobile / strip cards: let the native <a target="_blank"> open inside the
+    // gesture — touch browsers block a tab opened from a delayed timer.
+    if (!inCoverflow) {
+      audio.play("flip");
+      return;
+    }
+    // Desktop coverflow: the card lays flat down onto the felt, THEN the live
+    // site opens (~520ms later — inside the browser's transient-activation
+    // window, so the new tab is never popup-blocked).
+    e.preventDefault();
+    const url = project.live;
     audio.play("flip");
     setHover(false);
     setPushing(true);
     setBurst((b) => b + 1);
-    window.setTimeout(() => setPushing(false), 1150);
+    window.setTimeout(() => {
+      window.open(url, "_blank", "noopener,noreferrer");
+      setPushing(false);
+    }, 520);
   };
 
   // lifted-high-to-be-inspected when focused; slammed hard back down on click
   const liftAnim = pushing
-    ? { y: 78, scale: 0.78, rotateX: 18 }
+    ? // lay the card flat onto the felt — tips back from its bottom edge and
+      // settles down before the site opens
+      { y: 34, scale: 0.9, rotateX: 78, opacity: 0.9 }
     : inCoverflow && focused
-    ? { y: [-18, -23, -18] as number[], scale: 1.07, rotateX: -5 }
-    : { y: 0, scale: 1, rotateX: 0 };
+    ? { y: [-18, -23, -18] as number[], scale: 1.07, rotateX: -5, opacity: 1 }
+    : { y: 0, scale: 1, rotateX: 0, opacity: 1 };
   const liftTrans = pushing
-    ? { type: "spring" as const, stiffness: 420, damping: 16 }
+    ? { duration: 0.5, ease: [0.33, 1, 0.68, 1] as const }
     : inCoverflow && focused
     ? {
         // slow, small breathing bob so the lifted card is a steady tap target
@@ -478,6 +491,7 @@ function ReelCard({
 
       <motion.div
         className="relative h-full w-full [transform-style:preserve-3d]"
+        style={{ transformOrigin: "50% 88%" }}
         animate={liftAnim}
         transition={liftTrans}
       >
