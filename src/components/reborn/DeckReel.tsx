@@ -369,16 +369,17 @@ function ReelCard({
       onSelect?.();
       return;
     }
-    if (!project.live) return;
-    e.preventDefault();
-    const url = project.live;
+    if (!project.live) {
+      e.preventDefault();
+      return;
+    }
+    // Focused + live: DON'T preventDefault — let the native <a target="_blank">
+    // open the tab inside the real click gesture (most reliable, never
+    // popup-blocked or glitched by a setTimeout). Just play the push visual.
     audio.play("flip");
     setHover(false);
     setPushing(true);
     setBurst((b) => b + 1);
-    // open after the slam is visible (well within the 5s transient-activation
-    // window, so it is never popup-blocked)
-    window.setTimeout(() => window.open(url, "_blank", "noopener,noreferrer"), 620);
     window.setTimeout(() => setPushing(false), 1150);
   };
 
@@ -386,13 +387,14 @@ function ReelCard({
   const liftAnim = pushing
     ? { y: 78, scale: 0.78, rotateX: 18 }
     : inCoverflow && focused
-    ? { y: [-28, -44, -28] as number[], scale: 1.08, rotateX: -6 }
+    ? { y: [-18, -23, -18] as number[], scale: 1.07, rotateX: -5 }
     : { y: 0, scale: 1, rotateX: 0 };
   const liftTrans = pushing
     ? { type: "spring" as const, stiffness: 420, damping: 16 }
     : inCoverflow && focused
     ? {
-        y: { duration: 4.2, repeat: Infinity, ease: "easeInOut" as const },
+        // slow, small breathing bob so the lifted card is a steady tap target
+        y: { duration: 5.6, repeat: Infinity, ease: "easeInOut" as const },
         scale: { type: "spring" as const, stiffness: 150, damping: 15 },
         rotateX: { duration: 0.5 },
       }
@@ -457,25 +459,28 @@ function ReelCard({
       }}
       className={`relative shrink-0 [perspective:1400px] ${className}`}
     >
+      {/* inspect spotlight — a steady warm pool on the felt that the card
+          floats ABOVE. Kept OUTSIDE the bob wrapper so the light stays put on
+          the table instead of jittering up and down with the card. */}
+      {inCoverflow && (
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute left-1/2 top-[54%] -z-10 h-[128%] w-[150%] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-700 ${
+            focused ? "opacity-100" : "opacity-0"
+          }`}
+          style={{
+            background:
+              "radial-gradient(50% 44% at 50% 50%, rgba(255,182,82,0.30), rgba(255,146,44,0.09) 46%, transparent 70%)",
+            filter: "blur(10px)",
+          }}
+        />
+      )}
+
       <motion.div
         className="relative h-full w-full [transform-style:preserve-3d]"
         animate={liftAnim}
         transition={liftTrans}
       >
-        {/* inspect spotlight — a warm pool the card floats in when centred */}
-        {inCoverflow && (
-          <span
-            aria-hidden
-            className={`pointer-events-none absolute -inset-12 -z-10 rounded-[3rem] transition-opacity duration-500 ${
-              focused ? "opacity-100" : "opacity-0"
-            }`}
-            style={{
-              background:
-                "radial-gradient(56% 50% at 50% 44%, rgba(255,176,72,0.40), rgba(255,140,40,0.14) 45%, transparent 72%)",
-            }}
-          />
-        )}
-
       <motion.a
         href={isLink ? project.live : undefined}
         target={isLink ? "_blank" : undefined}
@@ -607,13 +612,17 @@ function ReelCard({
 
           {project.live && (
             <span
-              className={`mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full border px-4 py-2 font-display text-[11px] uppercase tracking-[0.18em] transition-all duration-300 ${
+              className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border-2 px-5 py-3.5 font-display text-[13px] font-bold uppercase tracking-[0.16em] transition-all duration-300 ${
                 focused
-                  ? "border-[var(--color-neon-amber)]/60 bg-[var(--color-neon-amber)]/10 text-[var(--color-neon-amber)] group-hover:bg-[var(--color-neon-amber)]/20"
+                  ? "border-[var(--color-neon-amber)] bg-[var(--color-neon-amber)] text-[var(--color-noir)] shadow-[0_14px_36px_-12px_rgba(255,157,47,0.7)] group-hover:brightness-105"
                   : "border-[var(--color-brass)]/40 text-[var(--color-brass-bright)]"
               }`}
             >
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-neon-amber)]" />
+              <span
+                className={`h-1.5 w-1.5 animate-pulse rounded-full ${
+                  focused ? "bg-[var(--color-noir)]" : "bg-[var(--color-neon-amber)]"
+                }`}
+              />
               {focused ? "Open the live site ↗" : "Bring to front"}
             </span>
           )}

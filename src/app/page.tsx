@@ -16,7 +16,6 @@ import WeirdBackground from "@/components/reborn/WeirdBackground";
 import VelocitySkew from "@/components/reborn/VelocitySkew";
 import RebornIntro from "@/components/reborn/RebornIntro";
 import Marquee from "@/components/ui/Marquee";
-import MuteToggle from "@/components/ui/MuteToggle";
 import RebornCursorSkin from "@/components/reborn/RebornCursorSkin";
 import SuitShortcuts from "@/components/reborn/SuitShortcuts";
 import RackTop from "@/components/reborn/RackTop";
@@ -45,9 +44,8 @@ export default function Home() {
       <RebornCursorSkin />
       <span className="coffee-ring" style={{ left: "8vw", bottom: "18vh" }} aria-hidden />
 
-      {/* sound (+ the chip mute toggle), cursor trail, and the easter egg */}
+      {/* sound (short SFX only, no toggle), cursor trail, and the easter egg */}
       <RebornAudio />
-      <MuteToggle />
       <SuitTrail />
       <KonamiJackpot />
 

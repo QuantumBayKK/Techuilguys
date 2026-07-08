@@ -81,7 +81,7 @@ export const PROJECTS: Project[] = [
       { group: "Build", items: ["Web App Dev", "Full-stack", "Product Design"] },
       { group: "Growth", items: ["Paywall & Payments", "Dashboards"] },
     ],
-    live: "https://wisdomjr-web.vercel.app/",
+    live: "https://wisdomjr-web-alpha.vercel.app/",
     embed: false, // X-Frame-Options: DENY → live screenshot
   },
   {
