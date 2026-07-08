@@ -12,7 +12,7 @@ const CHAPTERS = [
   { id: "rb-hero", n: "00", label: "Table" },
   { id: "rb-statement", n: "01", label: "Statement" },
   { id: "rb-riffle", n: "02", label: "Riffle" },
-  { id: "rb-deck", n: "03", label: "The Deck" },
+  { id: "rb-hand", n: "03", label: "The Hand" },
   { id: "rb-dealers", n: "04", label: "Dealers" },
   { id: "rb-lounge", n: "05", label: "Lounge" },
 ];

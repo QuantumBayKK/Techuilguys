@@ -3,6 +3,8 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ParticleField from "@/components/ui/particle-field";
+import MouseGlowText from "@/components/framer/MouseGlowText";
+import { NeuButton, OriginButton } from "@/components/framer/FramerButtons";
 import PixelCat from "@/components/pixel/PixelCat";
 import ChipStack from "@/components/reborn/ChipStack";
 import DealerGreeting from "@/components/ui/DealerGreeting";
@@ -53,19 +55,21 @@ export default function ContactLounge() {
         {/* #94/#100 — time + return-aware dealer greeting, handwritten */}
         <DealerGreeting className="font-ink mt-2 block text-xl text-[var(--color-brass-bright)]/85" />
 
+        {/* the big call — glow copies fan away from the cursor (MouseTextEffect port) */}
         <motion.a
           href="mailto:techuilaguys@gmail.com"
           data-cursor="Email"
-          data-magnetic
           onMouseEnter={() =>
             window.dispatchEvent(new CustomEvent("ace:react", { detail: "happy" }))
           }
           style={{ y }}
           className="misprint font-display mx-auto mt-6 block text-[clamp(2.6rem,13vw,11rem)] font-bold uppercase leading-[0.85] tracking-[-0.02em] text-[var(--color-ink)] transition-colors hover:text-[var(--color-neon-amber)]"
         >
-          Deal us
-          <br />
-          in<span className="text-[var(--color-neon-amber)]">.</span>
+          <MouseGlowText copies={10} spread={2.4} glow="rgba(255,157,47,0.28)">
+            Deal us
+            <br />
+            in<span className="text-[var(--color-neon-amber)]">.</span>
+          </MouseGlowText>
         </motion.a>
 
         {/* #10 — the pot: two uneven chip stacks on the felt */}
@@ -86,14 +90,14 @@ export default function ContactLounge() {
             Available 2026
           </span>
 
-          {/* highlighted email */}
-          <a
+          {/* highlighted email — neumorphic (Framer Neumorphism-Buttons port) */}
+          <NeuButton
             href="mailto:techuilaguys@gmail.com"
             data-cursor="Email"
-            className="block w-full break-all rounded-full border-2 border-[var(--color-neon-amber)] bg-[var(--color-neon-amber)]/10 px-5 py-3 text-center text-sm font-semibold tracking-tight text-[var(--color-ink)] transition-colors hover:bg-[var(--color-neon-amber)]/20 sm:text-base"
+            className="w-full break-all px-5 py-3.5 text-center text-sm font-semibold tracking-tight text-[var(--color-neon-amber)] sm:text-base"
           >
             techuilaguys@gmail.com
-          </a>
+          </NeuButton>
 
           {/* github, bottom-right */}
           <a
@@ -107,23 +111,31 @@ export default function ContactLounge() {
           </a>
         </motion.div>
 
-        {/* the one button that matters */}
-        <motion.a
-          href="https://cal.com/pranauvshrinaath"
-          target="_blank"
-          rel="noreferrer"
-          data-cursor="Let's go"
-          data-magnetic
+        {/* the one button that matters — a dark pool floods from the cursor's
+            entry point (Framer OriginButton port) and the type flips amber */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.97 }}
-          className="hire-btn mx-auto mt-14 inline-flex max-w-full items-center justify-center gap-2 overflow-hidden whitespace-nowrap rounded-full border-2 border-[var(--color-neon-amber)] bg-[var(--color-neon-amber)] px-5 py-4 text-sm font-bold uppercase tracking-[0.1em] text-[var(--color-noir)] shadow-[0_18px_50px_-12px_rgba(255,157,47,0.7)] sm:gap-3 sm:px-12 sm:py-6 sm:text-2xl sm:tracking-[0.18em]"
+          className="mt-14"
         >
-          <span className="relative z-10">Book a call with us</span>
-          <span className="relative z-10">↗</span>
-        </motion.a>
+          <OriginButton
+            href="https://cal.com/pranauvshrinaath"
+            target="_blank"
+            rel="noreferrer"
+            data-cursor="Let's go"
+            data-magnetic
+            circleClassName="bg-[var(--color-noir-2)]"
+            className="hire-btn mx-auto inline-flex max-w-full items-center justify-center gap-2 whitespace-nowrap rounded-full border-2 border-[var(--color-neon-amber)] bg-[var(--color-neon-amber)] px-5 py-4 text-sm font-bold uppercase tracking-[0.1em] text-[var(--color-noir)] shadow-[0_18px_50px_-12px_rgba(255,157,47,0.7)] sm:gap-3 sm:px-12 sm:py-6 sm:text-2xl sm:tracking-[0.18em]"
+          >
+            <span className="relative z-10 transition-colors duration-300 group-hover:text-[var(--color-neon-amber)]">
+              Book a call with us
+            </span>
+            <span className="relative z-10 transition-colors duration-300 group-hover:text-[var(--color-neon-amber)]">
+              ↗
+            </span>
+          </OriginButton>
+        </motion.div>
 
         <div className="mt-16 flex flex-col items-center">
           <PixelCat />

@@ -37,7 +37,7 @@ export default function DragHand() {
   }, []);
 
   return (
-    <section className="relative overflow-hidden py-[12vh]">
+    <section id="rb-hand" className="relative overflow-hidden py-[12vh]">
       <div className="mx-auto max-w-6xl px-6 text-center sm:px-10">
         <p className="font-display text-[11px] uppercase tracking-[0.4em] text-[var(--color-brass)]">
           (interlude)

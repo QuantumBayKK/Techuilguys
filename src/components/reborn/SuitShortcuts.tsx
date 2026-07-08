@@ -5,15 +5,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { audio } from "@/lib/audio";
 
 /**
- * #87 — suit shortcuts. Tap a key to jump tables: T(able), S(pades→deck),
- * H(earts→the tell), D(iamonds→dealers), C(lubs→lounge). Shows a one-time hint
+ * #87 — suit shortcuts. Tap a key to jump tables: T(able), S(pades→riffle),
+ * H(earts→the hand), D(iamonds→dealers), C(lubs→lounge). Shows a one-time hint
  * card the first few seconds, then gets out of the way.
  */
 const MAP: Record<string, string> = {
   t: "rb-hero",
   s: "rb-riffle",
-  w: "rb-deck",
-  h: "rb-tell",
+  h: "rb-hand",
   d: "rb-dealers",
   c: "rb-lounge",
 };

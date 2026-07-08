@@ -217,6 +217,7 @@ export default function PixelCat() {
   const nextBlink = useRef(1800);
   const earTwitchUntil = useRef(0);
   const nextTwitch = useRef(3000);
+  const lastPet = useRef(0);
   const nextLook = useRef(2000);
   const moodRef = useRef<"idle" | "happy" | "sleep">("idle");
   const hearts = useRef<{ x: number; y: number; life: number; c: string }[]>([]);
@@ -372,7 +373,10 @@ export default function PixelCat() {
     const now = performance.now();
     happyUntil.current = now + 1500;
     lastActivity.current = now;
-    if (now > meowUntil.current + 1200) {
+    // hearts + purr at most ~once a stroke, not on every pointermove event —
+    // the old per-event spawn read as glitchy while petting
+    if (now > meowUntil.current + 1200 && now - lastPet.current > 700) {
+      lastPet.current = now;
       spawnHearts(1);
       audio.play("hover");
     }

@@ -15,13 +15,11 @@ import KonamiJackpot from "@/components/reborn/KonamiJackpot";
 import WeirdBackground from "@/components/reborn/WeirdBackground";
 import VelocitySkew from "@/components/reborn/VelocitySkew";
 import RebornIntro from "@/components/reborn/RebornIntro";
-import ChapterRail from "@/components/reborn/ChapterRail";
 import Marquee from "@/components/ui/Marquee";
-import InspectCard from "@/components/cards/InspectCard";
+import MuteToggle from "@/components/ui/MuteToggle";
 import RebornCursorSkin from "@/components/reborn/RebornCursorSkin";
 import SuitShortcuts from "@/components/reborn/SuitShortcuts";
 import RackTop from "@/components/reborn/RackTop";
-import ChipScrollProgress from "@/components/reborn/ChipScrollProgress";
 
 /**
  * The site. A single cinematic-editorial scroll (Luke Baffait inspo, heavy
@@ -32,10 +30,8 @@ import ChipScrollProgress from "@/components/reborn/ChipScrollProgress";
 export default function Home() {
   return (
     <main className="relative z-10">
-      {/* curtain on entry, chapter index + chip progress + keyboard nav */}
+      {/* curtain on entry + keyboard nav */}
       <RebornIntro />
-      <ChapterRail />
-      <ChipScrollProgress />
       <SuitShortcuts />
       <RackTop />
 
@@ -49,8 +45,9 @@ export default function Home() {
       <RebornCursorSkin />
       <span className="coffee-ring" style={{ left: "8vw", bottom: "18vh" }} aria-hidden />
 
-      {/* sound, cursor trail, and the easter egg */}
+      {/* sound (+ the chip mute toggle), cursor trail, and the easter egg */}
       <RebornAudio />
+      <MuteToggle />
       <SuitTrail />
       <KonamiJackpot />
 
@@ -63,7 +60,6 @@ export default function Home() {
       <DragHand />
       <Dealers />
       <ContactLounge />
-      <InspectCard />
     </main>
   );
 }

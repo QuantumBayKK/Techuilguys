@@ -37,13 +37,19 @@ export default function Cursor() {
       ring.current?.classList.toggle("cursor-ring--active", !!el);
       ring.current?.classList.toggle("cursor-ring--label", !!text);
 
-      // magnetic pull toward element center
+      // magnetic pull toward element center — gentle and capped. The old
+      // 0.35 * full-distance pull threw the cursor across large targets
+      // (the lounge CTA above the cat) and read as a glitch; now the pull
+      // fades in near the center and never exceeds a few px.
       if (el?.hasAttribute("data-magnetic")) {
         const r = el.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        target.x += (cx - e.clientX) * 0.35;
-        target.y += (cy - e.clientY) * 0.35;
+        const dx = r.left + r.width / 2 - e.clientX;
+        const dy = r.top + r.height / 2 - e.clientY;
+        const dist = Math.hypot(dx, dy) || 1;
+        const MAX = 10; // px, hard cap on the nudge
+        const pull = Math.min(dist * 0.12, MAX) / dist;
+        target.x += dx * pull;
+        target.y += dy * pull;
       }
     };
 

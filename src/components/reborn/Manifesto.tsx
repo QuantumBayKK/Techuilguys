@@ -2,10 +2,13 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import TextRevealScroll from "@/components/framer/TextRevealScroll";
 
 /**
- * Reborn — the statement. Big editorial type that scrubs sideways as you pass,
- * the two accent lines drifting against each other (Baffait kinetic type).
+ * Reborn — the statement. The words light up one by one as you scroll through
+ * (Framer text-reveal-scroll port), with the two accent lines drifting against
+ * each other underneath (Baffait kinetic type). The hero's old "we design and
+ * build SaaS" line lives here now, revealed as the second beat.
  */
 export default function Manifesto() {
   const ref = useRef<HTMLDivElement>(null);
@@ -23,19 +26,32 @@ export default function Manifesto() {
       className="relative overflow-hidden border-y border-[var(--color-line)] py-[18vh]"
     >
       <div className="mx-auto max-w-6xl px-6 sm:px-10">
-        <motion.p
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-15%" }}
+        <TextRevealScroll
+          parts={[
+            {
+              text: "We don't pitch decks. We build the product — websites, apps, AI features, automations and payments that actually ship — and we make it feel",
+            },
+            {
+              text: "premium.",
+              className: "font-script text-[var(--color-brass-bright)]",
+            },
+          ]}
+          startOffset={0.85}
+          endOffset={0.35}
           className="font-display max-w-3xl text-[clamp(1.6rem,3.4vw,3rem)] font-medium leading-[1.15] tracking-tight text-[var(--color-ink)]"
-        >
-          We don&apos;t pitch decks. We build the product — websites, apps, AI
-          features, automations and payments that actually ship — and we make it
-          feel{" "}
-          <span className="font-script text-[var(--color-brass-bright)]">
-            premium.
-          </span>
-        </motion.p>
+        />
+
+        {/* the hero's old CTA line, re-seated here as the second beat */}
+        <TextRevealScroll
+          parts={[
+            {
+              text: "We design and build SaaS products that ship. Idea to live, in weeks.",
+            },
+          ]}
+          startOffset={0.8}
+          endOffset={0.3}
+          className="mt-8 max-w-xl text-base leading-relaxed text-[var(--color-muted)] sm:text-lg"
+        />
       </div>
 
       {/* the scrubbing accent band */}

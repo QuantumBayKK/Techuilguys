@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import {
   motion,
@@ -10,6 +9,8 @@ import {
   useTransform,
 } from "framer-motion";
 import { DEALERS, type Dealer } from "@/data/dealers";
+import FluidImage from "@/components/framer/FluidImage";
+import ScrambleText from "@/components/framer/ScrambleText";
 import { audio } from "@/lib/audio";
 import { handJitter } from "@/lib/seededNoise";
 
@@ -25,7 +26,7 @@ export default function Dealers() {
       <div className="mx-auto max-w-6xl px-6 sm:px-10">
         <div className="mb-14 flex items-end justify-between">
           <h2 className="misprint font-display text-[clamp(2rem,6vw,5rem)] font-bold uppercase leading-none tracking-tight">
-            The&nbsp;dealers
+            <ScrambleText text={"The dealers"} />
           </h2>
           <p className="font-display mb-2 text-[11px] uppercase tracking-[0.4em] text-[var(--color-brass)]">
             Two at the table
@@ -109,19 +110,20 @@ function DealerCard({ dealer, index }: { dealer: Dealer; index: number }) {
 
         <div className="relative flex h-full flex-col" style={{ transform: "translateZ(30px)" }}>
           <div className="flex items-start justify-between">
-            <div className="relative h-20 w-20 overflow-hidden rounded-full border border-[var(--color-line-warm)] sm:h-24 sm:w-24">
-              <Image
+            <div
+              className="relative h-20 w-20 overflow-hidden rounded-full border border-[var(--color-line-warm)] transition-all duration-700 sm:h-24 sm:w-24"
+              style={{
+                filter: hover
+                  ? "grayscale(0) contrast(1.05) saturate(1.1)"
+                  : "grayscale(0.95) contrast(1.15) brightness(0.85)",
+                transform: hover ? "scale(1.08)" : "scale(1)",
+              }}
+            >
+              {/* portrait ripples under the cursor (Framer FluidImage port) */}
+              <FluidImage
                 src={dealer.portrait}
                 alt={dealer.name}
-                fill
-                sizes="96px"
-                className="object-cover transition-all duration-700"
-                style={{
-                  filter: hover
-                    ? "grayscale(0) contrast(1.05) saturate(1.1)"
-                    : "grayscale(0.95) contrast(1.15) brightness(0.85)",
-                  transform: hover ? "scale(1.08)" : "scale(1)",
-                }}
+                className="h-full w-full"
               />
               {/* sweep ring on hover */}
               <span

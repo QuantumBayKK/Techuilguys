@@ -14,6 +14,7 @@ import {
 } from "framer-motion";
 import type { Project, Suit } from "@/data/projects";
 import { PROJECTS } from "@/data/projects";
+import ScrambleText from "@/components/framer/ScrambleText";
 import { audio } from "@/lib/audio";
 import { handJitter } from "@/lib/seededNoise";
 
@@ -70,7 +71,7 @@ function Heading({ active }: { active: number }) {
   return (
     <div className="mx-auto flex w-full max-w-6xl items-end justify-between px-6 pt-[6vh] sm:px-10">
       <h2 className="misprint font-display text-[clamp(1.8rem,5.5vw,4.5rem)] font-bold uppercase leading-none tracking-tight">
-        Riffle&nbsp;the&nbsp;deck
+        <ScrambleText text={"Riffle the deck"} />
       </h2>
       <div className="hidden text-right sm:block">
         <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-faint)]">

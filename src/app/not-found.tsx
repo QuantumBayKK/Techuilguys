@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Ambience from "@/components/Ambience";
 
 export const metadata = { title: "Dead hand — Techuila Guys" };
 
@@ -6,6 +7,8 @@ export const metadata = { title: "Dead hand — Techuila Guys" };
 export default function NotFound() {
   return (
     <main className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 text-center">
+      {/* the room backdrop lives here (the home page paints its own) */}
+      <Ambience />
       <span
         aria-hidden
         className="pointer-events-none absolute select-none text-[40vw] font-bold leading-none text-[var(--color-brass)]/[0.05]"
