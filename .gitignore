@@ -9,5 +9,10 @@ next-env.d.ts
 
 .vercel
 
+# secrets — .env.example is the tracked template, real keys never are
+.env
+.env.local
+.env*.local
+
 # local dev/test logs
 *.log

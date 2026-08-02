@@ -3,10 +3,13 @@ import Ambience from "@/components/Ambience";
 
 export const metadata = { title: "Dead hand — Techuila Guys" };
 
-/** Themed 404: you played a card that isn't in the deck. */
+/**
+ * Themed 404: you played a card that isn't in the deck. Root-level, so it paints
+ * its own grain/vignette rather than inheriting the `(site)` chrome.
+ */
 export default function NotFound() {
   return (
-    <main className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 text-center">
+    <main className="film-grain vignette relative z-10 flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 text-center">
       {/* the room backdrop lives here (the home page paints its own) */}
       <Ambience />
       <span

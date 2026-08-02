@@ -1,14 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Zilla_Slab, Inter, Pinyon_Script, Gochi_Hand } from "next/font/google";
+import { Zilla_Slab, Inter, Pinyon_Script, Gochi_Hand, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import Cursor from "@/components/Cursor";
-import SmoothScroll from "@/components/SmoothScroll";
-import TopNav from "@/components/ui/TopNav";
-import ScrollProgress from "@/components/ui/ScrollProgress";
-import TimeOfDay from "@/components/ui/TimeOfDay";
-import IdleTell from "@/components/ui/IdleTell";
-import ConsoleEgg from "@/components/ui/ConsoleEgg";
-import SvgFilters from "@/components/ui/SvgFilters";
 import { Analytics } from "@vercel/analytics/next";
 
 const display = Zilla_Slab({
@@ -39,6 +31,13 @@ const ink = Gochi_Hand({
   display: "swap",
 });
 
+// Workspace numerics: task ids, commit hashes, durations, byte counts.
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://techuila-guys.vercel.app"),
   title: {
@@ -66,26 +65,25 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: "#0a0907",
-  colorScheme: "dark",
 };
 
+/**
+ * Root layout is deliberately bare: fonts, tokens, analytics. The cinematic
+ * chrome (custom cursor, Lenis, grain, poker nav) belongs to the marketing site
+ * only and lives in `(site)/layout.tsx` — the workspace under `(workspace)`
+ * is a different product and must not inherit any of it.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      className={`${display.variable} ${body.variable} ${script.variable} ${ink.variable}`}
+      suppressHydrationWarning
+      className={`${display.variable} ${body.variable} ${script.variable} ${ink.variable} ${mono.variable}`}
     >
-      <body className="film-grain vignette grade">
-        <SvgFilters />
-        <TimeOfDay />
-        <Cursor />
-        <IdleTell />
-        <ConsoleEgg />
-        <ScrollProgress />
-        <TopNav />
-        <SmoothScroll>{children}</SmoothScroll>
+      <body>
+        {children}
         <Analytics />
       </body>
     </html>

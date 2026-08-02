@@ -897,3 +897,163 @@ html[data-timeband="lateNight"] { --room-warmth: 0.10; --room-dim: 0.16; --room-
   .glassy-btn__inner,
   .neu-btn { transition: none; }
 }
+
+/* ============================================================
+   WORKSPACE — /workspace/*
+   A different product from the marketing site: no grain, no custom
+   cursor, no Lenis. Dark-first with a real light mode. All tokens are
+   scoped under `.ws` so nothing here can bleed into the cinematic site.
+   ============================================================ */
+.ws {
+  --ws-bg: #0a0907;
+  --ws-surface: #100d0a;
+  --ws-raised: #17120e;
+  --ws-hover: #1e1813;
+  --ws-line: rgba(233, 225, 207, 0.1);
+  --ws-line-strong: rgba(233, 225, 207, 0.18);
+  --ws-text: #ece4d6;
+  --ws-muted: #9a8f7d;
+  --ws-faint: #6b6252;
+  --ws-accent: #ff9d2f;
+  --ws-accent-soft: rgba(255, 157, 47, 0.12);
+  --ws-accent-ink: #0a0907;
+  --ws-live: #37e6cf;
+  --ws-green: #3ecf8e;
+  --ws-amber: #f5b544;
+  --ws-red: #f2615c;
+  --ws-internal: rgba(245, 181, 68, 0.07);
+  --ws-internal-line: rgba(245, 181, 68, 0.28);
+  --ws-shadow: 0 18px 50px -22px rgba(0, 0, 0, 0.9);
+
+  background: var(--ws-bg);
+  color: var(--ws-text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  min-height: 100svh;
+  color-scheme: dark;
+}
+
+/* The pre-paint script stamps `data-ws-theme` on <html>, so light mode is
+   correct on first frame; `.ws[data-theme]` covers portaled surfaces. */
+.ws[data-theme="light"],
+html[data-ws-theme="light"] .ws {
+  --ws-bg: #f7f4ee;
+  --ws-surface: #ffffff;
+  --ws-raised: #ffffff;
+  --ws-hover: #f0ebe1;
+  --ws-line: rgba(26, 20, 16, 0.1);
+  --ws-line-strong: rgba(26, 20, 16, 0.2);
+  --ws-text: #1a1410;
+  --ws-muted: #6d6455;
+  --ws-faint: #99917f;
+  --ws-accent: #c46a00;
+  --ws-accent-soft: rgba(196, 106, 0, 0.1);
+  --ws-accent-ink: #ffffff;
+  --ws-live: #0d9488;
+  --ws-green: #16794f;
+  --ws-amber: #a06b06;
+  --ws-red: #c0322d;
+  --ws-internal: rgba(160, 107, 6, 0.07);
+  --ws-internal-line: rgba(160, 107, 6, 0.3);
+  --ws-shadow: 0 18px 40px -26px rgba(26, 20, 16, 0.4);
+  color-scheme: light;
+}
+
+/* Numerics — task refs, hashes, durations, byte counts. */
+.ws .mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.ws ::selection {
+  background: var(--ws-accent);
+  color: var(--ws-accent-ink);
+}
+
+.ws :focus-visible {
+  outline: 2px solid var(--ws-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Restrained motion: fade page transitions, spring only on drag. */
+@keyframes ws-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.ws-in { animation: ws-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* The progress ring draws once on mount, never again. */
+@keyframes ws-ring {
+  from { stroke-dashoffset: var(--ring-circumference); }
+  to { stroke-dashoffset: var(--ring-offset); }
+}
+.ws-ring-value {
+  animation: ws-ring 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Current milestone breathes so the eye lands on "what's next". */
+@keyframes ws-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--ws-accent-soft); }
+  50% { box-shadow: 0 0 0 8px transparent; }
+}
+.ws-pulse { animation: ws-pulse 2.4s ease-in-out infinite; }
+
+/* Live-realtime dot on the board header. */
+@keyframes ws-blip {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+.ws-blip { animation: ws-blip 1.8s ease-in-out infinite; }
+
+.ws-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.ws-scroll::-webkit-scrollbar-thumb {
+  background: var(--ws-line-strong);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+.ws-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* Markdown rendered from `body_md` (updates, comments, notes). */
+.ws-md { line-height: 1.68; font-size: 14px; }
+.ws-md > * + * { margin-top: 0.85em; }
+.ws-md h1, .ws-md h2, .ws-md h3 {
+  font-family: var(--font-display), serif;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.ws-md h1 { font-size: 1.4em; }
+.ws-md h2 { font-size: 1.2em; }
+.ws-md h3 { font-size: 1.05em; }
+.ws-md a { color: var(--ws-accent); text-decoration: underline; text-underline-offset: 2px; }
+.ws-md ul, .ws-md ol { padding-left: 1.3em; }
+.ws-md ul { list-style: disc; }
+.ws-md ol { list-style: decimal; }
+.ws-md li + li { margin-top: 0.3em; }
+.ws-md code {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.88em;
+  background: var(--ws-hover);
+  padding: 0.12em 0.4em;
+  border-radius: 5px;
+}
+.ws-md pre {
+  background: var(--ws-hover);
+  padding: 0.9em 1em;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+.ws-md pre code { background: none; padding: 0; }
+.ws-md blockquote {
+  border-left: 2px solid var(--ws-accent);
+  padding-left: 0.9em;
+  color: var(--ws-muted);
+}
+.ws-md table { width: 100%; border-collapse: collapse; font-size: 0.92em; }
+.ws-md th, .ws-md td { border: 1px solid var(--ws-line); padding: 0.4em 0.6em; text-align: left; }
+.ws-md hr { border: 0; border-top: 1px solid var(--ws-line); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-in, .ws-ring-value, .ws-pulse, .ws-blip { animation: none; }
+  .ws-ring-value { stroke-dashoffset: var(--ring-offset); }
+}
