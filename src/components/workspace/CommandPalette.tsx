@@ -3,7 +3,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import { FileText, FolderKanban, Megaphone, Paperclip, Search } from "lucide-react";
+import {
+  BookText,
+  FileText,
+  FolderKanban,
+  Megaphone,
+  MessageSquare,
+  Paperclip,
+  Search,
+  Video,
+} from "lucide-react";
 import { supabaseBrowser } from "@/lib/supabase/client";
 import type { SearchHit } from "@/lib/workspace/database.types";
 
@@ -19,6 +28,9 @@ const ICONS = {
   task: FileText,
   update: Megaphone,
   file: Paperclip,
+  document: BookText,
+  meeting: Video,
+  message: MessageSquare,
 } as const;
 
 /**
@@ -89,6 +101,9 @@ export default function CommandPalette({ isStaff }: { isStaff: boolean }) {
 
   const hrefFor = useCallback(
     (hit: SearchHit) => {
+      // Docs, meetings and chat have one route each regardless of role, so SQL
+      // already named it. The project-scoped kinds branch on who's asking.
+      if (hit.href) return hit.href;
       const base = isStaff
         ? `/workspace/projects/${hit.project_slug}`
         : `/workspace/portal/${hit.project_slug}`;
@@ -137,7 +152,7 @@ export default function CommandPalette({ isStaff }: { isStaff: boolean }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder="Search projects, tasks, updates, files…"
+            placeholder="Search projects, tasks, docs, meetings, chat…"
             className="w-full bg-transparent py-3.5 text-sm text-[var(--ws-text)] placeholder:text-[var(--ws-faint)] focus:outline-none"
           />
           <kbd className="mono shrink-0 rounded border border-[var(--ws-line)] px-1.5 py-0.5 text-[10px] text-[var(--ws-faint)]">

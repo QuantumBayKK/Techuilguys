@@ -17,19 +17,13 @@ export const dynamic = "force-dynamic";
  * Workspace root. Deliberately shares nothing with the marketing site's chrome:
  * no Lenis, no custom cursor, no film grain. All tokens live under `.ws`.
  *
- * The inline script runs before paint so light mode never flashes dark.
+ * The theme pre-paint script used to live here, but a <script> in a component
+ * is never executed on a client render and React warns about it — and it also
+ * missed anyone who reached the workspace by client-side navigation from the
+ * marketing nav. It is now a `beforeInteractive` script in the root layout.
  */
 export default function WorkspaceRootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `try{var t=localStorage.getItem("ws-theme");document.documentElement.dataset.wsTheme=t==="light"?"light":"dark"}catch(e){}`,
-        }}
-      />
-      <div className="ws ws-scroll">{children}</div>
-    </>
-  );
+  return <div className="ws ws-scroll">{children}</div>;
 }

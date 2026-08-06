@@ -4,13 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 import {
+  BookOpen,
   Building2,
+  CalendarDays,
   Clock,
+  FileText,
   FolderKanban,
   Inbox,
   LayoutDashboard,
+  MessageSquare,
+  PenTool,
+  Share2,
   ShieldCheck,
   Users,
+  Video,
 } from "lucide-react";
 import type { Profile, ProjectStatus } from "@/lib/workspace/database.types";
 import { Avatar } from "./ui/Primitives";
@@ -68,6 +75,63 @@ export default function Sidebar({
           </Item>
         </Group>
       ) : null}
+
+      {/* Everything below is scoped by RLS rather than by role: a client sees
+          the same links, and each page shows them only what was shared. */}
+      <Group label="Collaborate">
+        <Item
+          href="/workspace/calendar"
+          icon={CalendarDays}
+          active={pathname.startsWith("/workspace/calendar")}
+        >
+          Calendar
+        </Item>
+        <Item
+          href="/workspace/meetings"
+          icon={Video}
+          active={pathname.startsWith("/workspace/meetings")}
+        >
+          Meetings
+        </Item>
+        <Item
+          href="/workspace/chat"
+          icon={MessageSquare}
+          active={pathname.startsWith("/workspace/chat")}
+        >
+          Chat
+        </Item>
+        <Item
+          href="/workspace/whiteboard"
+          icon={PenTool}
+          active={pathname.startsWith("/workspace/whiteboard")}
+        >
+          Whiteboard
+        </Item>
+      </Group>
+
+      <Group label="Knowledge">
+        <Item
+          href="/workspace/docs"
+          icon={FileText}
+          active={pathname.startsWith("/workspace/docs")}
+        >
+          Documents
+        </Item>
+        <Item
+          href="/workspace/wiki"
+          icon={BookOpen}
+          active={pathname.startsWith("/workspace/wiki")}
+        >
+          Wiki
+        </Item>
+        <Item
+          href="/workspace/graph"
+          icon={Share2}
+          active={pathname.startsWith("/workspace/graph")}
+        >
+          Graph
+        </Item>
+      </Group>
 
       <div className="mt-5 min-h-0 flex-1">
         <p className="mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--ws-faint)]">

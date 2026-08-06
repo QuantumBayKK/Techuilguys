@@ -7,6 +7,7 @@ import type { Profile } from "@/lib/workspace/database.types";
 import Sidebar, { type NavProject } from "./Sidebar";
 import Topbar from "./Topbar";
 import CommandPalette from "./CommandPalette";
+import { PresenceHeartbeat } from "./Presence";
 
 export default function Shell({
   profile,
@@ -30,6 +31,7 @@ export default function Shell({
   return (
     <div className="min-h-[100svh] lg:grid lg:grid-cols-[236px_1fr]">
       <CommandPalette isStaff={profile.role !== "client"} />
+      <PresenceHeartbeat />
 
       {/* Desktop rail */}
       <div className="hidden border-r border-[var(--ws-line)] bg-[var(--ws-surface)] lg:block">

@@ -27,6 +27,7 @@ import { moveTask, syncGithubRefs } from "@/lib/workspace/actions/tasks";
 import type { Task, TaskStatus } from "@/lib/workspace/database.types";
 import { Avatar, Badge, Button } from "@/components/workspace/ui/Primitives";
 import { QuickForm } from "@/components/workspace/ui/Form";
+import Presence from "@/components/workspace/Presence";
 import TaskDialog from "./TaskDialog";
 
 const COLUMNS: [TaskStatus, string][] = [
@@ -45,12 +46,14 @@ export default function Board({
   initialTasks,
   milestones,
   staff,
+  me,
 }: {
   projectId: string;
   githubRepo: string | null;
   initialTasks: Task[];
   milestones: { id: string; title: string }[];
   staff: Person[];
+  me: Person;
 }) {
   const [tasks, setTasks] = useState(initialTasks);
   const [dragging, setDragging] = useState<Task | null>(null);
@@ -221,12 +224,15 @@ export default function Board({
           </QuickForm>
         ) : null}
 
-        <span className="ml-auto flex items-center gap-1.5 text-[11px] text-[var(--ws-muted)]">
-          <span
-            className={clsx("h-1.5 w-1.5 rounded-full", live && "ws-blip")}
-            style={{ background: live ? "var(--ws-live)" : "var(--ws-faint)" }}
-          />
-          {live ? "Live — changes sync instantly" : "Connecting…"}
+        <span className="ml-auto flex items-center gap-3">
+          <Presence room={`board:${projectId}`} me={me} label="on the board" />
+          <span className="flex items-center gap-1.5 text-[11px] text-[var(--ws-muted)]">
+            <span
+              className={clsx("h-1.5 w-1.5 rounded-full", live && "ws-blip")}
+              style={{ background: live ? "var(--ws-live)" : "var(--ws-faint)" }}
+            />
+            {live ? "Live — changes sync instantly" : "Connecting…"}
+          </span>
         </span>
       </div>
 

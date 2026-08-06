@@ -44,8 +44,25 @@ Client
              …/files                 deliverables + download-all zip
              …/requests              request box + your own status pipeline
 
+Collaboration (everyone — RLS decides what each person actually sees)
+/workspace/calendar                  month grid; events + meetings + milestone dates
+/workspace/meetings                  agenda → live notes → action items
+/workspace/meetings/[id]             RSVP, attendees, promote an item to a task
+/workspace/chat                      channels, realtime, @mentions, unread badges
+/workspace/chat/[id]                 a channel
+/workspace/whiteboard                shared boards
+/workspace/whiteboard/[id]           collaborative canvas with live cursors
+/workspace/docs                      project documents
+/workspace/docs/[slug]               editor, version history, share toggle
+/workspace/wiki                      the studio handbook
+/workspace/wiki/[slug]               same editor, [[linked]] pages
+/workspace/graph                     knowledge graph of everything above
+
 /api/cron/digest                     9am daily email digest (Vercel Cron)
 ```
+
+Deep detail — ER diagram, realtime topology, every policy and trigger — lives in
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
@@ -54,9 +71,18 @@ Client
 ### 2.1 Supabase
 
 1. Create a project at [supabase.com](https://supabase.com) (free tier).
-2. SQL Editor → paste **all** of `supabase/migrations/0001_workspace.sql` → Run.
-   That creates the schema, every RLS policy, the triggers, the RPCs, the
-   `project-files` storage bucket and its policies, and enables Realtime.
+2. SQL Editor → paste **all** of `supabase/migrations/0001_workspace.sql` → Run,
+   then do the same with `supabase/migrations/0002_collaboration.sql`. Order
+   matters; both are safe to re-run.
+
+   `0001` creates the core schema, every RLS policy, the triggers, the RPCs, the
+   `project-files` bucket and its policies, and enables Realtime.
+   `0002` adds calendar, documents + wiki, meetings, chat, whiteboard, the
+   knowledge graph and the `chat-attachments` bucket.
+
+   To check the SQL before it touches your database, `./supabase/tests/run.sh`
+   applies both to a throwaway Postgres in Docker and asserts the tenant
+   isolation rules. Nothing else to install.
 3. Authentication → Providers → **Google**: enable it, paste your Google OAuth
    client ID and secret.
 4. Authentication → URL Configuration → add redirect URLs:
@@ -115,12 +141,23 @@ cannot leak Client A's data to Client B, because the database returns zero rows.
 | `files` | own org **and** `client_visible` | all | all |
 | `time_logs` | **nothing** | own rows only | all |
 | `updates` / `milestones` | own org | all | all |
+| `documents` | own org **and** `client_visible` | all | all |
+| `document_versions` | only for documents they can read | all | all |
+| `events` / `meetings` / `boards` / `channels` | own org **and** `client_visible` | all | all |
+| `messages` | only in channels they can see | all | all |
+| `board_shapes` | read **and write** on shared boards | all | all |
+| `links` | own project only | all | all |
 | `audit_log` | nothing | nothing | read-only |
 
 Supporting mechanisms:
 
-- **`current_role_of()` / `current_org_of()` / `is_staff()`** are `SECURITY
-  DEFINER` so the policy on `profiles` can call them without recursing.
+- **`can_see(project_id, client_visible)`** is the single predicate behind every
+  table added in 0002. Staff see everything; a client needs the row to be both
+  explicitly shared *and* inside their own organization.
+- **`current_role_of()` / `current_org_of()` / `is_staff()` / `is_channel_member()`**
+  are `SECURITY DEFINER` so policies can call them without recursing into each
+  other — see [ARCHITECTURE.md §2](docs/ARCHITECTURE.md#2-security-model) for the
+  chat case, where the naive version deadlocks the whole table.
 - **`guard_profile_privileges`** trigger silently reverts any `role` or
   `organization_id` change made by a non-admin, so "edit your own profile"
   can't become privilege escalation.
@@ -142,11 +179,13 @@ open Org B's project slug directly. You should get a 404, not a redirect.
 
 | Limit | Ceiling | How this stays under |
 | --- | --- | --- |
-| Supabase Storage 1 GB | ~100 files | 10 MB per-file cap in the UI *and* on the bucket; code in GitHub, big assets linked to Drive |
-| Resend 100/day | ~25 accounts | Only approvals and new requests email immediately; everything else batches into the 9am digest |
-| Supabase Realtime 200 concurrent | not reachable | ~25 accounts, one socket per browser (singleton client) |
+| Supabase Storage 1 GB | ~100 files | 10 MB per-file cap in the UI *and* on both buckets; `storage-janitor` sweeps orphans weekly; code in GitHub, big assets linked to Drive |
+| Resend 100/day | ~25 accounts | Only approvals, new requests and meeting reminders email immediately; everything else batches into the 9am digest |
+| Supabase Realtime 200 concurrent | not reachable | ~25 accounts, one socket per browser (singleton client) — chat, presence and the whiteboard share it |
+| Realtime messages 2M/month | the whiteboard, if careless | Cursors go over **Broadcast**, never CDC. A dragged cursor is ~20 events/sec and would be a row each if it were a write |
 | GitHub API 60/hr unauthenticated | busy board | Repo fetches cached 5 minutes at the fetch layer |
-| Supabase DB 500 MB | years away | Prune `audit_log` if it ever matters |
+| Supabase DB 500 MB | years away | `document_versions` is the only table that grows per keystroke-session; prune it and `audit_log` if it ever matters |
+| Vercel Hobby cron 2/day | meeting reminders | Reminders run as a Supabase Edge Function on a 5-minute Postgres cron instead |
 
 ### Vercel Hobby
 
@@ -180,6 +219,21 @@ lives. Two ways out when you want to be strictly safe:
 - **Types are hand-maintained** in `lib/workspace/database.types.ts` rather than
   generated, so the repo has no Supabase CLI dependency. Change the migration
   and that file in the same commit.
+- **The chrome is monochrome.** `--ws-accent` is not a hue, it is the
+  highest-contrast ink — so a primary button is black-on-white or
+  white-on-black, and an active nav row is full-strength text on a raised plate.
+  Colour is reserved for meaning: green/amber/red for status, one amber wash for
+  "internal only". If something needs emphasis, it gets spacing, not a colour.
+- **Documents and the wiki are one table.** Same tree, editor, history and
+  `[[link]]` resolution; `kind` and whether `project_id` is set are the whole
+  difference. Two tables would have duplicated all of that to encode a boolean.
+- **The knowledge graph settles once, then freezes.** A permanently animating
+  graph is a toy — you cannot read a label that drifts, and the motion is not
+  information. Node kinds are distinguished by shape rather than colour, which
+  survives greyscale, colour-blindness and a projector.
+- **Cursors and typing indicators are Broadcast, never rows.** If losing it on
+  refresh would be a bug it goes through Postgres CDC; otherwise it must not be
+  a write. See [ARCHITECTURE.md §3](docs/ARCHITECTURE.md#3-realtime-architecture).
 - **Excluded per the PRD**: invoicing, contracts/e-sign, scheduling,
   WhatsApp/Slack, per-project granular permissions, multi-language,
   white-labeling for resale.
@@ -191,7 +245,22 @@ lives. Two ways out when you want to be strictly safe:
 - **ESLint doesn't run** in this repo — `next/typescript` via `FlatCompat`
   throws `Converting circular structure to JSON` on ESLint 9.39. This predates
   the workspace; `npm run build` typechecks cleanly regardless.
-- **No automated tests.** The RLS policies are the thing most worth testing;
-  the manual check in §3 is the current substitute.
 - **Approval emails are best-effort.** A Resend outage logs and moves on rather
   than rolling back the database write — the in-app notification still lands.
+- **Tests cover the database, not the browser.** `./supabase/tests/run.sh`
+  proves the schema applies, is idempotent, and holds the tenant boundary — 51
+  assertions. Realtime, presence and the storage policies still need two live
+  browsers and the manual check in §3.
+- **Documents are last-write-wins, not co-edited.** Presence shows who else has
+  the page open and warns you before you collide; it does not merge. Real
+  concurrent editing needs a CRDT, which is a dependency and a data model this
+  studio would have to maintain forever.
+- **Meeting notes are single-scribe** for the same reason — the presence marker
+  says who is typing, and everyone else stays out of the box.
+- **Whiteboard has no images, no undo, no zoom.** Sticky notes, shapes, arrows,
+  text and pen, on a fixed canvas. Delete works; Ctrl-Z does not.
+- **Chat has no file picker yet.** The `chat-attachments` bucket, its policies
+  and the `attachment_*` columns all exist and are enforced; the upload control
+  in the composer is the missing piece.
+- **`[[wiki links]]` resolve by title.** Rename a page and links to its old
+  title go dim until the referring page is saved again.

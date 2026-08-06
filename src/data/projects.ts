@@ -141,6 +141,26 @@ export const PROJECTS: Project[] = [
     live: "https://freelanceros-z7hp.vercel.app/",
     embed: true, // embeddable → real live iframe
   },
+  {
+    id: "dikkiconnect",
+    dealer: "keni",
+    rank: "10",
+    suit: "clubs",
+    demo: "geo",
+    title: "DikkiConnect",
+    subtitle: "Deliver anything, anywhere",
+    blurb:
+      "Intercity parcel delivery riding the empty boot space of cars already making your route — four apps (sender, traveler, hub, passenger) with Aadhaar KYC and an OTP custody chain.",
+    role: "PWA · Marketplace · Product Design",
+    outcomes: "Four-sided marketplace, one app",
+    skills: [
+      { group: "Build", items: ["PWA / Offline", "App Dev", "Product Design"] },
+      { group: "Trust", items: ["Aadhaar e-KYC", "OTP Custody Chain"] },
+      { group: "Money", items: ["Wallet & Payouts", "Weekly Settlement"] },
+    ],
+    live: "https://dikkiconnect.vercel.app/",
+    embed: true, // no X-Frame-Options / CSP → real live iframe
+  },
 ].map((p) => ({
   ...(p as Project),
   image: siteShot((p as Project).live),

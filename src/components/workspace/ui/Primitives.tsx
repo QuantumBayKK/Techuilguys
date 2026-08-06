@@ -288,17 +288,21 @@ export function Avatar({
     );
   }
 
+  // A translucent tint rather than opaque colours: the per-person hue still
+  // distinguishes faces at a glance, but it composites over whatever surface is
+  // behind it, so one rule works in both themes. The initials use the theme's
+  // own ink instead of a hand-picked light-on-dark pair, which was unreadable
+  // in light mode.
   return (
     <span
       title={label}
       aria-label={label}
-      className="inline-flex shrink-0 items-center justify-center rounded-full border border-[var(--ws-line)] font-semibold"
+      className="inline-flex shrink-0 items-center justify-center rounded-full border border-[var(--ws-line)] font-semibold text-[var(--ws-text)]"
       style={{
         width: size,
         height: size,
         fontSize: size * 0.38,
-        background: `hsl(${hueFor(seed)} 45% 22%)`,
-        color: `hsl(${hueFor(seed)} 70% 82%)`,
+        background: `hsl(${hueFor(seed)} 30% 50% / 0.22)`,
       }}
     >
       {initials(name, email)}

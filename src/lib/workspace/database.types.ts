@@ -41,6 +41,10 @@ export type Profile = {
   role: Role;
   organization_id: string | null;
   weekly_capacity_hours: number;
+  /** Short unique name for chat @mentions. Derived from the email local part. */
+  handle: string;
+  /** Heartbeat fallback for presence when no socket is open. */
+  last_seen_at: string | null;
   created_at: string;
 };
 
@@ -174,14 +178,219 @@ export type AuditEntry = {
 };
 
 export type SearchHit = {
-  kind: "project" | "task" | "update" | "file";
+  kind: "project" | "task" | "update" | "file" | "document" | "meeting" | "message";
   id: string;
-  project_id: string;
-  project_slug: string;
+  /** Null for workspace-level documents, meetings and channels. */
+  project_id: string | null;
+  project_slug: string | null;
   title: string;
   subtitle: string | null;
+  /**
+   * Set by SQL for kinds that have one role-agnostic route. Null for the four
+   * project-scoped kinds, whose path depends on whether you're staff (/projects)
+   * or a client (/portal) — only the caller knows that.
+   */
+  href: string | null;
   rank: number;
 };
+
+/* ---------------------------------------------------------------------------
+ * 0002 — collaboration surface
+ * ------------------------------------------------------------------------ */
+
+export type EventKind = "session" | "deadline" | "review" | "launch" | "holiday" | "other";
+export type DocKind = "doc" | "wiki";
+export type MeetingStatus = "scheduled" | "live" | "ended" | "cancelled";
+export type Rsvp = "pending" | "yes" | "no" | "maybe";
+export type ChannelKind = "project" | "workspace" | "direct";
+export type ShapeKind = "note" | "rect" | "ellipse" | "arrow" | "text" | "path";
+export type NodeKind =
+  | "project"
+  | "task"
+  | "document"
+  | "meeting"
+  | "file"
+  | "milestone"
+  | "person"
+  | "channel"
+  | "board";
+
+export type CalendarEvent = {
+  id: string;
+  project_id: string | null;
+  title: string;
+  description: string | null;
+  kind: EventKind;
+  starts_at: string;
+  ends_at: string;
+  all_day: boolean;
+  location: string | null;
+  client_visible: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** One row of `calendar_feed` — events, meetings and milestone dates unified. */
+export type CalendarItem = {
+  id: string;
+  source: "event" | "meeting" | "milestone";
+  kind: string;
+  title: string;
+  starts_at: string;
+  ends_at: string;
+  all_day: boolean;
+  project_id: string | null;
+  project_name: string | null;
+  href: string;
+};
+
+export type Doc = {
+  id: string;
+  project_id: string | null;
+  parent_id: string | null;
+  kind: DocKind;
+  title: string;
+  slug: string;
+  icon: string | null;
+  body_md: string;
+  order_index: number;
+  client_visible: boolean;
+  is_archived: boolean;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DocVersion = {
+  id: string;
+  document_id: string;
+  title: string;
+  body_md: string;
+  edited_by: string | null;
+  created_at: string;
+};
+
+export type Meeting = {
+  id: string;
+  project_id: string | null;
+  title: string;
+  agenda_md: string;
+  notes_md: string;
+  status: MeetingStatus;
+  starts_at: string;
+  ends_at: string | null;
+  join_url: string | null;
+  recording_url: string | null;
+  client_visible: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type MeetingAttendee = {
+  meeting_id: string;
+  profile_id: string;
+  response: Rsvp;
+};
+
+export type ActionItem = {
+  id: string;
+  meeting_id: string;
+  body: string;
+  owner_id: string | null;
+  task_id: string | null;
+  done: boolean;
+  created_at: string;
+};
+
+export type Channel = {
+  id: string;
+  project_id: string | null;
+  kind: ChannelKind;
+  name: string;
+  topic: string | null;
+  client_visible: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ChannelMember = {
+  channel_id: string;
+  profile_id: string;
+  last_read_at: string;
+};
+
+export type Message = {
+  id: string;
+  channel_id: string;
+  author_id: string | null;
+  body: string;
+  reply_to: string | null;
+  attachment_path: string | null;
+  attachment_name: string | null;
+  attachment_size: number | null;
+  edited_at: string | null;
+  created_at: string;
+};
+
+export type MessageReaction = {
+  message_id: string;
+  profile_id: string;
+  emoji: string;
+};
+
+export type Board = {
+  id: string;
+  project_id: string | null;
+  title: string;
+  client_visible: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Shape = {
+  id: string;
+  board_id: string;
+  kind: ShapeKind;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  text: string;
+  /** Index into the app's neutral swatch set, 0–5. */
+  tone: number;
+  points: [number, number][] | null;
+  z: number;
+  created_by: string | null;
+  updated_at: string;
+};
+
+export type GraphLink = {
+  id: string;
+  project_id: string | null;
+  source_kind: NodeKind;
+  source_id: string;
+  target_kind: NodeKind;
+  target_id: string;
+  relation: string;
+  created_by: string | null;
+  created_at: string;
+};
+
+/** Shape of the `knowledge_graph()` jsonb payload. */
+export type GraphNode = {
+  id: string;
+  kind: NodeKind;
+  label: string;
+  href: string;
+  project: string | null;
+};
+export type GraphEdge = { source: string; target: string; rel: string };
+export type Graph = { nodes: GraphNode[]; edges: GraphEdge[] };
 
 /** Row + Insert + Update triple in the shape `supabase-js` wants. */
 type T<Row, Required extends keyof Row = never> = {
@@ -207,6 +416,20 @@ export type Database = {
       requests: T<ClientRequest, "organization_id" | "title" | "description">;
       notifications: T<Notification, "profile_id" | "type" | "title">;
       audit_log: T<AuditEntry, "action" | "entity_type">;
+
+      events: T<CalendarEvent, "title" | "starts_at" | "ends_at">;
+      documents: T<Doc, "title" | "slug">;
+      document_versions: T<DocVersion, "document_id" | "title" | "body_md">;
+      meetings: T<Meeting, "title" | "starts_at">;
+      meeting_attendees: T<MeetingAttendee, "meeting_id" | "profile_id">;
+      meeting_action_items: T<ActionItem, "meeting_id" | "body">;
+      channels: T<Channel, "name">;
+      channel_members: T<ChannelMember, "channel_id" | "profile_id">;
+      messages: T<Message, "channel_id" | "body">;
+      message_reactions: T<MessageReaction, "message_id" | "profile_id" | "emoji">;
+      boards: T<Board, "title">;
+      board_shapes: T<Shape, "board_id">;
+      links: T<GraphLink, "source_kind" | "source_id" | "target_kind" | "target_id">;
     };
     Views: Record<string, never>;
     Functions: {
@@ -224,6 +447,18 @@ export type Database = {
         Args: { p_ids: string[]; p_status: TaskStatus };
         Returns: undefined;
       };
+      calendar_feed: {
+        Args: { p_from: string; p_to: string; p_project?: string | null };
+        Returns: CalendarItem[];
+      };
+      unread_counts: {
+        Args: Record<string, never>;
+        Returns: { channel_id: string; unread: number }[];
+      };
+      mark_channel_read: { Args: { p_channel: string }; Returns: undefined };
+      touch_presence: { Args: Record<string, never>; Returns: undefined };
+      knowledge_graph: { Args: { p_project?: string | null }; Returns: Graph };
+      action_item_to_task: { Args: { p_item: string }; Returns: string };
     };
     Enums: {
       user_role: Role;
@@ -236,6 +471,13 @@ export type Database = {
       comment_parent: ParentType;
       request_type: RequestType;
       request_status: RequestStatus;
+      event_kind: EventKind;
+      doc_kind: DocKind;
+      meeting_status: MeetingStatus;
+      rsvp: Rsvp;
+      channel_kind: ChannelKind;
+      shape_kind: ShapeKind;
+      node_kind: NodeKind;
     };
     CompositeTypes: Record<string, never>;
   };

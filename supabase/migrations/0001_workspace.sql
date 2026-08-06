@@ -720,14 +720,25 @@ create index if not exists updates_fts_idx on public.updates
 create index if not exists files_fts_idx on public.files
   using gin (to_tsvector('english', name));
 
-create or replace function public.workspace_search(q text)
+-- Dropped rather than replaced: 0002 widens this function's return type, and
+-- CREATE OR REPLACE cannot change a signature — so without the drop, re-running
+-- THIS file on a database that already has 0002 aborts the whole script.
+-- (Doing so does roll the function back to the narrower shape here; re-run
+-- 0002 afterwards to restore the newer columns.)
+drop function if exists public.workspace_search(text);
+
+create function public.workspace_search(q text)
 returns table (
   kind text, id uuid, project_id uuid, project_slug text,
   title text, subtitle text, rank real
 ) language sql stable security invoker set search_path = public as $$
   with query as (select websearch_to_tsquery('english', q) as ts)
+  -- `as rank` is load-bearing: in a UNION, ORDER BY resolves against the
+  -- OUTPUT column names of the first branch, not the RETURNS TABLE signature.
+  -- Unaliased, that column is called `ts_rank` and `order by rank` fails to
+  -- compile the whole function.
   select 'project', p.id, p.id, p.slug, p.name, p.description,
-         ts_rank(to_tsvector('english', p.name || ' ' || coalesce(p.description,'')), query.ts)
+         ts_rank(to_tsvector('english', p.name || ' ' || coalesce(p.description,'')), query.ts) as rank
   from public.projects p, query
   where to_tsvector('english', p.name || ' ' || coalesce(p.description,'')) @@ query.ts
   union all

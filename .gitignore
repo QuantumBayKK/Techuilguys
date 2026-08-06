@@ -16,3 +16,6 @@ next-env.d.ts
 
 # local dev/test logs
 *.log
+
+# Supabase CLI scratch — machine-local, not part of the schema
+/supabase/.temp

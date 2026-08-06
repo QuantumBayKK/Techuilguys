@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Zilla_Slab, Inter, Pinyon_Script, Gochi_Hand, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -82,6 +83,27 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${display.variable} ${body.variable} ${script.variable} ${ink.variable} ${mono.variable}`}
     >
+      <head>
+        {/*
+          Stamps the saved workspace theme onto <html> before first paint, so
+          light mode never flashes dark.
+
+          It lives in the ROOT layout, not the workspace one, for two reasons.
+          A raw <script> element inside a component gets reconciled on client
+          renders — where React never executes it and warns about it — whereas
+          `beforeInteractive` is injected into the initial HTML instead of the
+          React tree. And it has to run on the FIRST load of any page: the
+          marketing nav links into /workspace client-side, which executes no
+          new scripts, so a script scoped to the workspace layout would simply
+          never fire for anyone arriving that way.
+
+          `beforeInteractive` is only honoured in the root layout, which is
+          also the only place it would be correct.
+        */}
+        <Script id="ws-theme-preload" strategy="beforeInteractive">
+          {`try{var t=localStorage.getItem("ws-theme");document.documentElement.dataset.wsTheme=t==="light"?"light":"dark"}catch(e){}`}
+        </Script>
+      </head>
       <body>
         {children}
         <Analytics />

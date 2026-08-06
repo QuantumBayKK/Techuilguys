@@ -903,27 +903,57 @@ html[data-timeband="lateNight"] { --room-warmth: 0.10; --room-dim: 0.16; --room-
    A different product from the marketing site: no grain, no custom
    cursor, no Lenis. Dark-first with a real light mode. All tokens are
    scoped under `.ws` so nothing here can bleed into the cinematic site.
+
+   PALETTE DISCIPLINE (Linear / Notion / Apple / 無印-minimal):
+   the chrome is monochrome. `--ws-accent` is not a hue — it is simply the
+   highest-contrast ink, so a primary button is black-on-white or
+   white-on-black and an active nav row is full-strength text on a raised
+   plate. Hue is reserved for MEANING and nothing else: green/amber/red for
+   status, and one amber wash for "internal only". If you find yourself
+   reaching for a colour to make something look nice, use spacing instead.
    ============================================================ */
 .ws {
-  --ws-bg: #0a0907;
-  --ws-surface: #100d0a;
-  --ws-raised: #17120e;
-  --ws-hover: #1e1813;
-  --ws-line: rgba(233, 225, 207, 0.1);
-  --ws-line-strong: rgba(233, 225, 207, 0.18);
-  --ws-text: #ece4d6;
-  --ws-muted: #9a8f7d;
-  --ws-faint: #6b6252;
-  --ws-accent: #ff9d2f;
-  --ws-accent-soft: rgba(255, 157, 47, 0.12);
-  --ws-accent-ink: #0a0907;
-  --ws-live: #37e6cf;
-  --ws-green: #3ecf8e;
-  --ws-amber: #f5b544;
-  --ws-red: #f2615c;
-  --ws-internal: rgba(245, 181, 68, 0.07);
-  --ws-internal-line: rgba(245, 181, 68, 0.28);
-  --ws-shadow: 0 18px 50px -22px rgba(0, 0, 0, 0.9);
+  /* Neutral ramp — a single cool grey, no warmth, no second hue. */
+  --ws-bg: #08090a;
+  --ws-surface: #0e0f11;
+  --ws-raised: #131417;
+  --ws-hover: #1a1c1f;
+  --ws-line: rgba(255, 255, 255, 0.08);
+  --ws-line-strong: rgba(255, 255, 255, 0.145);
+  --ws-text: #f7f8f8;
+  --ws-muted: #8a8f98;
+  --ws-faint: #5c6169;
+
+  /* Monochrome "accent": maximum ink, inverted fill. */
+  --ws-accent: #f7f8f8;
+  --ws-accent-soft: rgba(255, 255, 255, 0.07);
+  --ws-accent-ink: #08090a;
+
+  /* Meaning only. Desaturated so they never shout. */
+  --ws-green: #4cb782;
+  --ws-amber: #d6a03c;
+  --ws-red: #e0504f;
+  --ws-live: #4cb782;
+  --ws-internal: rgba(214, 160, 60, 0.06);
+  --ws-internal-line: rgba(214, 160, 60, 0.26);
+
+  /* Elevation is a hairline plus a whisper of shadow — never a glow. */
+  --ws-shadow: 0 16px 44px -24px rgba(0, 0, 0, 0.85);
+
+  /* One spacing scale. Gutters, stack rhythm, and page padding all read
+     from these so every module lines up without bespoke numbers. */
+  --ws-1: 0.25rem;
+  --ws-2: 0.5rem;
+  --ws-3: 0.75rem;
+  --ws-4: 1rem;
+  --ws-5: 1.5rem;
+  --ws-6: 2rem;
+  --ws-7: 3rem;
+  --ws-8: 4rem;
+
+  /* Two radii. Controls, and the surfaces that hold them. */
+  --ws-r-sm: 6px;
+  --ws-r-md: 10px;
 
   background: var(--ws-bg);
   color: var(--ws-text);
@@ -936,25 +966,28 @@ html[data-timeband="lateNight"] { --room-warmth: 0.10; --room-dim: 0.16; --room-
    correct on first frame; `.ws[data-theme]` covers portaled surfaces. */
 .ws[data-theme="light"],
 html[data-ws-theme="light"] .ws {
-  --ws-bg: #f7f4ee;
+  --ws-bg: #fbfbfa;
   --ws-surface: #ffffff;
   --ws-raised: #ffffff;
-  --ws-hover: #f0ebe1;
-  --ws-line: rgba(26, 20, 16, 0.1);
-  --ws-line-strong: rgba(26, 20, 16, 0.2);
-  --ws-text: #1a1410;
-  --ws-muted: #6d6455;
-  --ws-faint: #99917f;
-  --ws-accent: #c46a00;
-  --ws-accent-soft: rgba(196, 106, 0, 0.1);
+  --ws-hover: #f1f1ef;
+  --ws-line: rgba(0, 0, 0, 0.09);
+  --ws-line-strong: rgba(0, 0, 0, 0.16);
+  --ws-text: #191918;
+  --ws-muted: #6b6b68;
+  --ws-faint: #97968f;
+
+  --ws-accent: #191918;
+  --ws-accent-soft: rgba(0, 0, 0, 0.055);
   --ws-accent-ink: #ffffff;
-  --ws-live: #0d9488;
-  --ws-green: #16794f;
-  --ws-amber: #a06b06;
+
+  --ws-green: #217a53;
+  --ws-amber: #97690a;
   --ws-red: #c0322d;
-  --ws-internal: rgba(160, 107, 6, 0.07);
-  --ws-internal-line: rgba(160, 107, 6, 0.3);
-  --ws-shadow: 0 18px 40px -26px rgba(26, 20, 16, 0.4);
+  --ws-live: #217a53;
+  --ws-internal: rgba(151, 105, 10, 0.06);
+  --ws-internal-line: rgba(151, 105, 10, 0.28);
+
+  --ws-shadow: 0 16px 36px -28px rgba(0, 0, 0, 0.35);
   color-scheme: light;
 }
 
@@ -1045,7 +1078,7 @@ html[data-ws-theme="light"] .ws {
 }
 .ws-md pre code { background: none; padding: 0; }
 .ws-md blockquote {
-  border-left: 2px solid var(--ws-accent);
+  border-left: 2px solid var(--ws-line-strong);
   padding-left: 0.9em;
   color: var(--ws-muted);
 }
@@ -1053,7 +1086,90 @@ html[data-ws-theme="light"] .ws {
 .ws-md th, .ws-md td { border: 1px solid var(--ws-line); padding: 0.4em 0.6em; text-align: left; }
 .ws-md hr { border: 0; border-top: 1px solid var(--ws-line); }
 
+/* ------------------------------------------------------------------
+   Presence. One shared visual language wherever "who else is here"
+   appears — board, doc, wiki page, whiteboard, chat, meeting.
+   ------------------------------------------------------------------ */
+.ws-face-stack { display: flex; align-items: center; }
+.ws-face-stack > * + * { margin-left: -6px; }
+.ws-face-stack > * {
+  box-shadow: 0 0 0 2px var(--ws-surface);
+  border-radius: 999px;
+}
+
+/* The idle ring breathes; a viewer actively typing/drawing goes solid. */
+@keyframes ws-here {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.ws-here { animation: ws-here 2.6s ease-in-out infinite; }
+
+/* Remote cursor on the whiteboard. Translated via CSS vars so pointer
+   updates never trigger React reconciliation. */
+.ws-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate3d(var(--x, 0px), var(--y, 0px), 0);
+  transition: transform 90ms linear;
+  pointer-events: none;
+  will-change: transform;
+  z-index: 30;
+}
+
+/* ------------------------------------------------------------------
+   Calendar. A month is a plain 7-column grid with hairline gutters —
+   the borders come from the gap showing the surface beneath.
+   ------------------------------------------------------------------ */
+.ws-month {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--ws-line);
+  border: 1px solid var(--ws-line);
+  border-radius: var(--ws-r-md);
+  overflow: hidden;
+}
+.ws-month > * { background: var(--ws-surface); }
+
+/* ------------------------------------------------------------------
+   Chat. Messages are a bottom-anchored column; consecutive messages
+   from one author collapse into a group (no repeated avatar/name).
+   ------------------------------------------------------------------ */
+.ws-chat-scroll {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 100%;
+}
+
+/* ------------------------------------------------------------------
+   Whiteboard. The dotted field is the only decoration on the surface.
+   ------------------------------------------------------------------ */
+.ws-board-field {
+  background-image: radial-gradient(var(--ws-line-strong) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: -1px -1px;
+}
+
+/* ------------------------------------------------------------------
+   Wiki / documents prose. Wider measure and quieter headings than the
+   comment-sized `.ws-md`; long-form wants air, not weight.
+   ------------------------------------------------------------------ */
+.ws-prose { font-size: 15px; line-height: 1.75; max-width: 46rem; }
+.ws-prose > * + * { margin-top: 1em; }
+.ws-prose h1, .ws-prose h2, .ws-prose h3 {
+  font-weight: 600;
+  letter-spacing: -0.011em;
+  line-height: 1.3;
+}
+.ws-prose h1 { font-size: 1.6em; margin-top: 1.6em; }
+.ws-prose h2 { font-size: 1.25em; margin-top: 1.7em; }
+.ws-prose h3 { font-size: 1.05em; margin-top: 1.5em; }
+.ws-prose > :first-child { margin-top: 0; }
+
 @media (prefers-reduced-motion: reduce) {
-  .ws-in, .ws-ring-value, .ws-pulse, .ws-blip { animation: none; }
+  .ws-in, .ws-ring-value, .ws-pulse, .ws-blip, .ws-here { animation: none; }
   .ws-ring-value { stroke-dashoffset: var(--ring-offset); }
+  .ws-cursor { transition: none; }
 }

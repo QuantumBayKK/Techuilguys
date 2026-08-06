@@ -8,7 +8,7 @@ export default async function BoardPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  await requireStaff();
+  const session = await requireStaff();
   const { slug } = await params;
   const project = await getProject(slug);
   const supabase = await supabaseServer();
@@ -34,6 +34,7 @@ export default async function BoardPage({
       initialTasks={tasks ?? []}
       milestones={milestones ?? []}
       staff={staff}
+      me={session.profile}
     />
   );
 }

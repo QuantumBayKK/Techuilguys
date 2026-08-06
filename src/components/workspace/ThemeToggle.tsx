@@ -4,14 +4,31 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
 /**
- * Dark-first with a real light mode. The pre-paint script in the workspace
- * layout has already set the attribute; this just flips and remembers it.
+ * Dark-first with a real light mode. The `beforeInteractive` script in the root
+ * layout normally sets the attribute before paint; this flips and remembers it.
+ *
+ * The attribute is not trusted blindly — if that script was blocked, or
+ * localStorage threw in private mode, it will be missing, and reading storage
+ * again here recovers the right answer one frame late rather than silently
+ * resetting the person to dark every visit.
  */
 export default function ThemeToggle() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
-    setTheme(document.documentElement.dataset.wsTheme === "light" ? "light" : "dark");
+    const root = document.documentElement;
+    let current = root.dataset.wsTheme;
+
+    if (current !== "light" && current !== "dark") {
+      try {
+        current = localStorage.getItem("ws-theme") === "light" ? "light" : "dark";
+      } catch {
+        current = "dark";
+      }
+      root.dataset.wsTheme = current;
+    }
+
+    setTheme(current === "light" ? "light" : "dark");
   }, []);
 
   function flip() {

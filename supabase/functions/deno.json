@@ -1,0 +1,13 @@
+{
+  "//": "Deno config for the Edge Functions. Excluded from the root tsconfig — these run on Deno Deploy, not in the Next bundle.",
+  "imports": {
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@2"
+  },
+  "compilerOptions": {
+    "lib": ["deno.window", "esnext"],
+    "strict": true
+  },
+  "tasks": {
+    "check": "deno check meeting-reminders/index.ts storage-janitor/index.ts"
+  }
+}
