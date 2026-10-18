@@ -196,21 +196,19 @@ export function FoundersSection({ withBio = true }: { withBio?: boolean }) {
   return (
     <div className="grid gap-12 md:grid-cols-2 md:gap-10">
       {FOUNDERS.map((f) => (
-        <article key={f.id} className="grid gap-6 sm:grid-cols-[180px_1fr] sm:gap-7">
-          <div className="relative aspect-[4/5] w-full max-w-[220px] overflow-hidden rounded-2xl bg-paper-2 sm:max-w-none">
-            <Image
-              src={f.portrait}
-              alt={`Portrait of ${f.name}`}
-              fill
-              sizes="220px"
-              className="object-cover grayscale-[35%]"
-            />
-          </div>
+        <article key={f.id} className="border-t border-ink pt-6">
+          <h3 className="t-2">{f.name}</h3>
+          <p className="mt-2 text-muted">{f.role}</p>
+          {withBio && <p className="mt-5 max-w-xl">{f.bio}</p>}
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {f.focus.map((x) => (
+              <li key={x} className="rounded-md border border-rule px-2.5 py-1 text-sm">
+                {x}
+              </li>
+            ))}
+          </ul>
           <div>
-            <h3 className="t-3">{f.name}</h3>
-            <p className="mt-1 text-muted">{f.role}</p>
-            {withBio && <p className="mt-4 text-[0.98rem]">{f.bio}</p>}
-            <div className="mt-4 flex flex-col gap-1 text-[0.95rem]">
+            <div className="mt-5 flex flex-col gap-1 text-[0.95rem]">
               <a href={`mailto:${f.email}`} className="link-u link w-fit break-all">
                 {f.email}
               </a>

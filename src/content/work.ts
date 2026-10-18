@@ -19,6 +19,26 @@ export type CaseStudy = {
 /** Real products, live today. Order = order on the site. */
 export const WORK: CaseStudy[] = [
   {
+    slug: "smartguta",
+    name: "SmartGuta",
+    sector: "PropTech marketplace",
+    platform: "Web platform",
+    headline: "A marketplace for climate-ready housing plans across Africa.",
+    summary:
+      "A marketplace where African architects sell compliance-checked housing plans — drawings, schedules and bills of quantities — with escrow-protected payments.",
+    product:
+      "Buyers browse and compare plans designed for their climate and council rules. Architects open a studio, list their work and enter design competitions. Payments sit in escrow until the files are delivered.",
+    built: [
+      "Plan marketplace with search and side-by-side comparison",
+      "Architect studios and design competitions",
+      "Escrow-protected checkout",
+      "Editorial design system with a print-drawing feel",
+    ],
+    services: ["Product design", "Web applications", "Payments and billing"],
+    live: "https://smartguta.vercel.app/",
+    image: "/work/smartguta.webp",
+  },
+  {
     slug: "northwind-quest",
     name: "Northwind Quest",
     note: "Built as WisdomJR",
@@ -38,26 +58,6 @@ export const WORK: CaseStudy[] = [
     services: ["Product design", "Web applications", "Payments and billing"],
     live: "https://wisdomjr-web-alpha.vercel.app/",
     image: "/work/wisdomjr.webp",
-  },
-  {
-    slug: "smartguta",
-    name: "SmartGuta",
-    sector: "PropTech marketplace",
-    platform: "Web platform",
-    headline: "A marketplace for climate-ready housing plans across Africa.",
-    summary:
-      "A marketplace where African architects sell compliance-checked housing plans — drawings, schedules and bills of quantities — with escrow-protected payments.",
-    product:
-      "Buyers browse and compare plans designed for their climate and council rules. Architects open a studio, list their work and enter design competitions. Payments sit in escrow until the files are delivered.",
-    built: [
-      "Plan marketplace with search and side-by-side comparison",
-      "Architect studios and design competitions",
-      "Escrow-protected checkout",
-      "Editorial design system with a print-drawing feel",
-    ],
-    services: ["Product design", "Web applications", "Payments and billing"],
-    live: "https://smartguta.vercel.app/",
-    image: "/work/smartguta.webp",
   },
   {
     slug: "dikkiconnect",
