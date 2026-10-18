@@ -1,10 +1,7 @@
-# Techuila Guys — Cinematic Portfolio (v2)
+# Techuila Guys — website
 
-A high-end poker table where every project is a playing card. Tap to enter →
-chip spins, rolls, drops → the table reveals → pick a dealer (Kailosh / Kenny) →
-get dealt a five-card hand → inspect & flip each card to read the project and its
-tech stack on the back → scroll into the lounge → reach across the colorizing
-hands to make contact.
+Marketing site for Techuila Guys, a product studio, plus the client workspace
+at `/workspace`.
 
 ## Run
 
@@ -15,72 +12,43 @@ npm run dev      # http://localhost:3000
 
 ## Stack
 
-Next.js 16 (App Router) · React 19 · TypeScript (strict) · Tailwind v4 (CSS
-custom-property tokens) · React Three Fiber + drei (persistent WebGL canvas) ·
-GSAP + ScrollTrigger + CustomEase (intro choreography) · Lenis (weighty smooth
-scroll, velocity piped to `scrollSignal`) · Framer Motion (HUD/overlays) ·
-Web Audio (procedural SFX — see below).
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · Framer Motion
+(menu, accordion, showcase only) · Resend (contact form) · Cal.com embed.
 
-## How it's wired
+## Editing content
 
-- **One state machine** drives everything: `src/lib/experience.ts`
-  (`gate → intro → dealers → dealt → inspect → body`). Both the WebGL scene and
-  the DOM HUD subscribe to it through a framework-agnostic external store, so the
-  canvas persists across stage changes (the seamless-transition trick).
-- **Persistent canvas** lives in `layout.tsx` (`CanvasRoot`). The 3D layer owns
-  the environment (chip, felt table, brass rail, cinematic lights, fog); the DOM
-  HUD layers above it (dealers, cards, body, cursor).
-- **The intro** is a directed GSAP timeline in `three/Scene.tsx`: spin-up →
-  edge-roll across frame with wobble → drop flat → crane-up table reveal →
-  settle to player POV. Skippable; reduced-motion snaps straight to the table.
-- **Cards** are DOM + 3D-transform (crisp text, accessible, reliable flip).
-  `cards/CardFaces.tsx` = front (branded face) + back (blurb / role / outcome /
-  **tech-stack skill chips**). `sections/InspectCard.tsx` = drag-to-rotate with
-  inertia + Y-axis flip.
-- **Contact colorize-hands** (`sections/ColorizeHands.tsx`): grayscale line-art
-  hands with a cursor-following radial **mask** revealing a vivid color copy —
-  color paints on where the cursor moves.
+All marketing copy lives in `src/content/` — components only lay it out.
 
-## Key directories
+| File | What's in it |
+| --- | --- |
+| `site.ts` | Emails, booking link, nav, services, process, engagement models, commitments, FAQ |
+| `work.ts` | Case studies (one entry = one `/work/<slug>` page) |
+| `team.ts` | Founder bios, portraits, emails |
 
-```
-src/lib/        experience (state machine), scrollSignal, gsap, audio, useCapability
-src/data/       dealers.ts, projects.ts   ← all content lives here, swappable
-src/components/three/    Chip, Table, Lights, Scene, CanvasRoot
-src/components/sections/ EntryGate, DealerStage, Hand, InspectCard, Body, ColorizeHands
-src/components/cards/    CardFaces (front + skills back)
-src/components/ui/       Cursor, MuteToggle, Marquee
-```
+Case-study screenshots are in `public/work/` (1920px WebP). To add a project,
+drop a screenshot there and add an entry to `work.ts`.
 
-## Decisions / what's stubbed (vs. the full spec)
+## Pages
 
-These are deliberate scope choices for a runnable first milestone, not blockers:
+`/` · `/work` · `/work/[slug]` · `/services` · `/about` · `/contact` — plus
+`sitemap.xml`, `robots.txt`, an Open Graph image and a branded 404.
 
-- **No GLB/Blender assets** — the chip and table are procedural geometry. Drop a
-  Draco GLB into `Chip`/`Table` later for richer detail.
-- **Procedural audio** — every cue (spin, roll, clack, thud, deal, flip, hover)
-  is synthesized in `lib/audio.ts` so sound works with zero asset weight. Swap
-  the `synth` bodies for Howler one-shots when real SFX land in `/public/audio`.
-- **Choreographed deal**, not Rapier physics — deterministic and performant.
-  Layer `@react-three/rapier` in for true throw physics if desired.
-- **Single-page experience** — `/works` and `/contact` routes can be split out
-  later; the body section already contains the full deck and contact.
-- **Velocity-distortion shaders** — the velocity signal is plumbed
-  (`scrollSignal`, marquee reacts to it); the WebGL RGB-split/displacement
-  shader on covers is the next enhancement.
-- **Hands art** is original stylized SVG line-art (placeholder for commissioned
-  hand art); the colorize mechanic is final.
+## Contact form
 
-## Content to replace (data-driven, no code changes)
+`POST /api/contact` emails both founders (Reply-To = the sender). It needs
+`RESEND_API_KEY`, and `RESEND_FROM` on a domain verified in Resend for reliable
+delivery. Without the key the form doesn't pretend to send — it shows both email
+addresses instead.
 
-- `src/data/dealers.ts` — **confirm which photo is Kailosh vs Kenny** (currently
-  a guess), ranks, taglines.
-- `src/data/projects.ts` — real five-card hand per dealer: title, blurb, role,
-  outcomes, skills, links.
+## Design system
 
-## Accessibility / fallbacks
+Tokens are in `src/app/globals.css` (`@theme`): paper `#f2f3ef`, ink `#0d1a15`,
+felt `#103b2d`, brass `#c6a050`. Headings use Schibsted Grotesk (`t-hero`,
+`t-1`, `t-2`, `t-3` — deliberately not `h-*`, which is Tailwind's height
+utility), body text Instrument Sans.
 
-`lib/useCapability.ts` is the single source of truth (reduced-motion, touch,
-low-power). Reduced motion skips the cinematic and the cursor mask; touch hides
-the custom cursor; low-power caps DPR. Cards/dealers are real buttons with ARIA
-labels and keyboard focus.
+## Workspace
+
+The client portal / internal workspace under `/workspace` is a separate product
+with its own styles (scoped under `.ws`). See `WORKSPACE.md` and
+`docs/ARCHITECTURE.md`.

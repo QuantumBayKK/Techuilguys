@@ -1,9 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Zilla_Slab, Inter, Pinyon_Script, Gochi_Hand, JetBrains_Mono } from "next/font/google";
+import { Zilla_Slab, Inter, JetBrains_Mono, Schibsted_Grotesk, Instrument_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import { SITE } from "@/content/site";
 
+// Marketing site: Schibsted Grotesk for headings, Instrument Sans for text.
+const heading = Schibsted_Grotesk({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--nf-heading",
+  display: "swap",
+});
+
+const sans = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--nf-sans",
+  display: "swap",
+});
+
+// Workspace faces — /workspace headings, body and numerics.
 const display = Zilla_Slab({
   subsets: ["latin"],
   weight: ["500", "700"],
@@ -17,47 +33,34 @@ const body = Inter({
   display: "swap",
 });
 
-const script = Pinyon_Script({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-script",
-  display: "swap",
-});
-
-// #8 — the hand-drawn ink font for annotations / labels (structure-vs-spontaneity)
-const ink = Gochi_Hand({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-ink",
-  display: "swap",
-});
-
-// Workspace numerics: task ids, commit hashes, durations, byte counts.
 const mono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
 });
 
+const TITLE = SITE.title;
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://techuila-guys.vercel.app"),
+  metadataBase: new URL(SITE.url),
   title: {
-    default: "Techuila Guys — SaaS products that ship",
+    default: TITLE,
     template: "%s",
   },
-  description:
-    "We design & build SaaS products that ship — web, apps, AI, automation & payments. Idea to live, in weeks. Built by Kailosh & Keni.",
+  description: SITE.description,
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Techuila Guys",
-    description:
-      "We design & build SaaS products that ship — web, apps, AI, automation & payments. Idea to live, in weeks.",
+    title: TITLE,
+    description: SITE.description,
+    url: SITE.url,
+    siteName: SITE.name,
     type: "website",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Techuila Guys",
-    description:
-      "We design & build SaaS products that ship — web, apps, AI, automation & payments. Idea to live, in weeks.",
+    title: TITLE,
+    description: SITE.description,
   },
 };
 
@@ -65,14 +68,13 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0a0907",
+  themeColor: "#f2f3ef",
 };
 
 /**
- * Root layout is deliberately bare: fonts, tokens, analytics. The cinematic
- * chrome (custom cursor, Lenis, grain, poker nav) belongs to the marketing site
- * only and lives in `(site)/layout.tsx` — the workspace under `(workspace)`
- * is a different product and must not inherit any of it.
+ * Root layout is deliberately bare: fonts, tokens, analytics. The marketing
+ * chrome (nav, footer, page transitions) lives in `(site)/layout.tsx` — the
+ * workspace under `(workspace)` is a different product and inherits none of it.
  */
 export default function RootLayout({
   children,
@@ -81,7 +83,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${display.variable} ${body.variable} ${script.variable} ${ink.variable} ${mono.variable}`}
+      className={`${heading.variable} ${sans.variable} ${display.variable} ${body.variable} ${mono.variable}`}
     >
       <head>
         {/*

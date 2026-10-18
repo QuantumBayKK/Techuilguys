@@ -1,43 +1,40 @@
 import Link from "next/link";
-import Ambience from "@/components/Ambience";
+import Nav from "@/components/site/Nav";
+import Footer from "@/components/site/Footer";
+import { WORK } from "@/content/work";
 
-export const metadata = { title: "Dead hand — Techuila Guys" };
+export const metadata = { title: "Page not found — Techuila Guys" };
 
-/**
- * Themed 404: you played a card that isn't in the deck. Root-level, so it paints
- * its own grain/vignette rather than inheriting the `(site)` chrome.
- */
+/** Root-level, so it brings its own site chrome rather than inheriting `(site)`. */
 export default function NotFound() {
   return (
-    <main className="film-grain vignette relative z-10 flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-6 text-center">
-      {/* the room backdrop lives here (the home page paints its own) */}
-      <Ambience />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute select-none text-[40vw] font-bold leading-none text-[var(--color-brass)]/[0.05]"
-        style={{ fontFamily: "var(--font-display), serif" }}
-      >
-        404
-      </span>
-      <p className="font-script relative text-2xl text-[var(--color-brass-bright)] sm:text-3xl">
-        that card isn&apos;t in the deck
-      </p>
-      <h1 className="font-display relative mt-1 text-4xl font-bold uppercase tracking-tight sm:text-6xl">
-        Dead <span className="text-[var(--color-neon-amber)]">hand</span>
-      </h1>
-      <p className="relative mt-4 max-w-sm text-sm text-[var(--color-muted)]">
-        You folded into a page that doesn&apos;t exist. The dealer&apos;s waiting
-        — come back to the table.
-      </p>
-      <div className="relative mt-8 flex flex-wrap items-center justify-center gap-4">
-        <Link
-          href="/"
-          data-cursor="Home"
-          className="font-display rounded-full border border-[var(--color-line-warm)] px-6 py-3 text-[11px] uppercase tracking-[0.3em] transition-colors hover:bg-[var(--color-neon-amber)]/10"
-        >
-          ← Back to the table
-        </Link>
-      </div>
-    </main>
+    <div className="site flex min-h-svh flex-col">
+      <Nav />
+      <main id="main" className="wrap flex-1 pb-24 pt-36 md:pt-44">
+        <p className="text-muted">Error 404</p>
+        <h1 className="t-hero mt-3 max-w-[14ch]">This page doesn&apos;t exist.</h1>
+        <p className="lede mt-6 text-muted">
+          The link may be old or mistyped. Try the home page, or jump straight to one of our case studies.
+        </p>
+        <div className="mt-9 flex flex-wrap gap-3">
+          <Link href="/" className="btn btn-ink">
+            Go to the home page
+          </Link>
+          <Link href="/contact" className="btn btn-line">
+            Contact us
+          </Link>
+        </div>
+        <ul className="mt-16 flex flex-wrap gap-x-8 gap-y-3 border-t border-rule pt-6">
+          {WORK.map((w) => (
+            <li key={w.slug}>
+              <Link href={`/work/${w.slug}`} className="link-u link">
+                {w.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </main>
+      <Footer />
+    </div>
   );
 }
