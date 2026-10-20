@@ -28,7 +28,7 @@ export default function ServicesPage() {
           <article
             key={s.id}
             id={s.id}
-            className="grid scroll-mt-28 gap-8 rounded-[28px] border border-black/5 bg-card p-6 md:grid-cols-2 md:p-8"
+            className="grid scroll-mt-28 gap-8 rounded-[28px] border border-white/8 bg-card p-6 md:grid-cols-2 md:p-8"
           >
             <div className={`flex flex-col ${i % 2 ? "md:order-2" : ""}`}>
               <span className="figure text-sm text-accent-deep">{String(i + 1).padStart(2, "0")}</span>
@@ -77,7 +77,7 @@ export default function ServicesPage() {
               ))}
             </ul>
           </div>
-          <div className="rounded-[24px] border border-black/5 bg-card p-7">
+          <div className="rounded-[24px] border border-white/8 bg-card p-7">
             <h2 className="t-3">What we don&apos;t do</h2>
             <ul className="mt-5 space-y-2.5">
               {EXCLUSIONS.map((e) => (

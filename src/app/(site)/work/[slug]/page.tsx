@@ -44,12 +44,12 @@ export default async function CaseStudyPage({ params }: Props) {
       </PageHero>
 
       <section className="wrap -mt-2 pt-10">
-        <div className="relative aspect-[16/10] overflow-hidden rounded-[28px] border border-black/5 bg-night shadow-[0_30px_60px_-30px_rgba(0,0,0,0.45)]">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-[28px] border border-white/8 bg-night shadow-[0_30px_60px_-30px_rgba(0,0,0,0.45)]">
           <Image src={work.image} alt={`${work.name} product screen`} fill priority sizes="(min-width: 1240px) 1180px, 100vw" className="object-cover object-top" />
         </div>
         <dl className="mt-4 grid gap-3 sm:grid-cols-3">
           {[work.hero, ...work.facts].map((f) => (
-            <div key={f.label} className="rounded-[20px] border border-black/5 bg-card p-5">
+            <div key={f.label} className="rounded-[20px] border border-white/8 bg-card p-5">
               <dt className="sr-only">{f.label}</dt>
               <dd>
                 <span className="figure block text-3xl">{f.value}</span>
@@ -61,7 +61,7 @@ export default async function CaseStudyPage({ params }: Props) {
       </section>
 
       <section className="wrap grid gap-12 py-20 md:grid-cols-12 md:py-28">
-        <aside className="h-fit space-y-6 rounded-[22px] border border-black/5 bg-card p-6 md:sticky md:top-28 md:col-span-4">
+        <aside className="h-fit space-y-6 rounded-[22px] border border-white/8 bg-card p-6 md:sticky md:top-28 md:col-span-4">
           <Meta label="Status">{work.status}</Meta>
           <Meta label="Our role">{work.role}</Meta>
           <Meta label="Built with">{work.stack.join(", ")}</Meta>
@@ -92,7 +92,7 @@ export default async function CaseStudyPage({ params }: Props) {
             </ul>
           </Block>
           <Block title="What shipped">
-            <ul className="divide-y divide-rule rounded-[20px] border border-black/5 bg-card">
+            <ul className="divide-y divide-rule rounded-[20px] border border-white/8 bg-card">
               {work.shipped.map((s) => (
                 <li key={s} className="flex gap-3 px-5 py-4">
                   <Check size={17} aria-hidden className="mt-1 shrink-0 text-accent-deep" />
@@ -110,7 +110,7 @@ export default async function CaseStudyPage({ params }: Props) {
       <section className="wrap">
         <Link
           href={`/work/${next.slug}`}
-          className="lift group flex items-center justify-between gap-6 rounded-[24px] border border-black/5 bg-card p-6 md:p-8"
+          className="lift group flex items-center justify-between gap-6 rounded-[24px] border border-white/8 bg-card p-6 md:p-8"
         >
           <span>
             <span className="eyebrow">Next case study</span>

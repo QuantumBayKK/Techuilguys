@@ -14,7 +14,7 @@ type State =
   | { kind: "fallback" };
 
 const input =
-  "mt-2 block w-full rounded-[14px] border border-rule bg-white px-4 py-3 text-[0.98rem] text-ink placeholder:text-muted/70 transition-colors focus:border-ink focus:outline-none";
+  "mt-2 block w-full rounded-[14px] border border-rule bg-night-2 px-4 py-3 text-[0.98rem] text-ink placeholder:text-muted/70 transition-colors focus:border-ink focus:outline-none";
 
 /**
  * Posts to /api/contact, which validates on the server and emails both
@@ -63,7 +63,7 @@ export default function ContactForm() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         role="status"
-        className="rounded-[24px] border border-black/5 bg-card p-8 md:p-10"
+        className="rounded-[24px] border border-white/8 bg-card p-8 md:p-10"
       >
         <h2 className="t-2">Brief sent.</h2>
         <p className="mt-3 text-muted">Both founders have it, and we'll reply by email. Want to talk sooner? Book a call.</p>
@@ -82,7 +82,7 @@ export default function ContactForm() {
   const sending = state.kind === "sending";
 
   return (
-    <form id="brief" onSubmit={onSubmit} className="relative scroll-mt-28 rounded-[24px] border border-black/5 bg-card p-6 md:p-9">
+    <form id="brief" onSubmit={onSubmit} className="relative scroll-mt-28 rounded-[24px] border border-white/8 bg-card p-6 md:p-9">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block text-sm font-medium">
           Your name

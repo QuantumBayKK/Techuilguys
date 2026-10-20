@@ -63,7 +63,7 @@ export function HeroTeasers() {
           <li key={w.slug}>
             <Link
               href={`/work/${w.slug}`}
-              className="lift group flex h-full flex-col rounded-[20px] border border-black/5 bg-card p-5 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.35)]"
+              className="lift group flex h-full flex-col rounded-[20px] border border-white/8 bg-card p-5 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.35)]"
             >
               <span className="eyebrow">{w.category}</span>
               <span className="mt-2 font-[family-name:var(--font-heading)] text-[1.05rem] leading-snug">{w.headline}</span>
@@ -93,7 +93,7 @@ export function ServiceCards() {
         <li key={s.id} className={i === 1 ? "md:-translate-y-8" : ""}>
           <Link href={`/services#${s.id}`} className="lift group block">
             <div className="relative overflow-hidden rounded-[24px] bg-night p-3 pb-20 shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)]">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(233,162,59,0.35),transparent)]" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(214,31,44,0.35),transparent)]" />
               <div className="relative aspect-[4/3] overflow-hidden rounded-[16px] bg-night-3">
                 <Image
                   src={s.image}
@@ -138,7 +138,7 @@ export function WorkingSection() {
               {FOUNDERS.map((f) => (
                 <span
                   key={f.id}
-                  className="grid h-11 w-11 place-items-center rounded-full bg-night font-[family-name:var(--font-heading)] text-sm text-accent"
+                  className="grid h-11 w-11 place-items-center rounded-full bg-night font-[family-name:var(--font-heading)] text-sm text-accent-deep"
                 >
                   {f.name[0]}
                 </span>
@@ -177,7 +177,7 @@ export function WorkingSection() {
             <p className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-accent-deep">{WORKING.yoursLabel}</p>
             <ul className="mt-4 flex flex-wrap gap-2">
               {WORKING.yours.map((y) => (
-                <li key={y} className="rounded-full border border-ink/15 bg-white/70 px-3 py-1 font-mono text-xs">
+                <li key={y} className="rounded-full border border-ink/15 bg-white/5 px-3 py-1 font-mono text-xs">
                   {y}
                 </li>
               ))}
@@ -201,7 +201,7 @@ export function WorkCard({ work, index }: { work: CaseStudy; index: number }) {
       className={`dark grid gap-8 rounded-[28px] p-6 text-white shadow-[0_30px_60px_-30px_rgba(0,0,0,0.45)] md:grid-cols-2 md:p-8 ${CARD_TONES[index % 2]}`}
     >
       <div className="flex flex-col">
-        <span className="figure text-sm text-white/40">{String(index + 1).padStart(2, "0")}</span>
+        <span className="figure text-sm text-white/60">{String(index + 1).padStart(2, "0")}</span>
         <p className="eyebrow mt-4">{work.category}</p>
         <h3 className="t-2 mt-2 max-w-md">{work.headline}</h3>
         <p className="mt-4 max-w-md text-[0.95rem] text-white/75">{work.summary}</p>
@@ -282,7 +282,7 @@ export function InHouseSection() {
             <div className="flex flex-col rounded-[24px] border border-white/10 bg-night-2 p-6 md:col-span-2">
               <div className="flex items-center justify-between">
                 <h3 className="t-2">{w.name}</h3>
-                <span className="rounded-full border border-accent/40 px-2.5 py-1 font-mono text-[0.65rem] tracking-[0.2em] text-accent">LIVE</span>
+                <span className="rounded-full border border-accent/40 px-2.5 py-1 font-mono text-[0.65rem] tracking-[0.2em] text-accent-deep">LIVE</span>
               </div>
               <p className="eyebrow mt-2 !text-white/50">{w.category}</p>
               <p className="mt-4 text-[0.95rem] text-white/80">{w.summary}</p>
@@ -323,7 +323,7 @@ export function ProcessSection() {
         <SectionHead eyebrow="Delivery" title="From first call" accent="to a live product." intro={PROCESS_NOTE} />
         <ol className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {PROCESS.map((p, i) => (
-            <li key={p.name} className="rounded-[20px] border border-black/5 bg-card p-6">
+            <li key={p.name} className="rounded-[20px] border border-white/8 bg-card p-6">
               <span className="figure text-sm text-accent-deep">{String(i + 1).padStart(2, "0")}</span>
               <h3 className="t-3 mt-3">{p.name}</h3>
               <p className="mt-2 text-sm text-muted">{p.body}</p>
@@ -344,7 +344,7 @@ export function FitSection() {
     <section className="wrap py-24 md:py-28">
       <SectionHead eyebrow="Project fit" title={FIT.title} />
       <div className="mt-12 grid gap-4 md:grid-cols-2">
-        <div className="rounded-[22px] border border-black/5 bg-card p-7">
+        <div className="rounded-[22px] border border-white/8 bg-card p-7">
           <h3 className="t-3">We're the right studio for</h3>
           <ul className="mt-5 space-y-3">
             {FIT.bestFor.map((x) => (
@@ -419,8 +419,8 @@ export function CtaPanel({ title = CTA.title, accent = CTA.titleAccent }: { titl
     <section className="py-16 md:py-24">
       <div className="panel dark mx-2 md:mx-4">
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="blob -right-24 top-[-20%] h-[140%] w-[60%] bg-[radial-gradient(closest-side,rgba(233,162,59,0.75),rgba(150,80,10,0.35),transparent)]" />
-          <div className="blob bottom-[-30%] right-[20%] h-[70%] w-[35%] bg-[radial-gradient(closest-side,rgba(233,162,59,0.45),transparent)] [animation-delay:-6s]" />
+          <div className="blob -right-24 top-[-20%] h-[140%] w-[60%] bg-[radial-gradient(closest-side,rgba(214,31,44,0.75),rgba(110,8,16,0.35),transparent)]" />
+          <div className="blob bottom-[-30%] right-[20%] h-[70%] w-[35%] bg-[radial-gradient(closest-side,rgba(214,31,44,0.45),transparent)] [animation-delay:-6s]" />
         </div>
         <div className="wrap py-16 md:py-24">
           <p className="eyebrow">{CTA.eyebrow}</p>

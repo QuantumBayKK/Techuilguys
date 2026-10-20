@@ -8,7 +8,7 @@ export default function Footer() {
   return (
     <footer className="pb-2 md:pb-4">
       <div className="panel dark dots">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-[radial-gradient(60%_80%_at_50%_120%,rgba(233,162,59,0.18),transparent)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-[radial-gradient(60%_80%_at_50%_120%,rgba(214,31,44,0.18),transparent)]" />
         <div className="wrap pt-16 md:pt-20">
           <div className="flex flex-col gap-8 border-b border-white/10 pb-12 md:flex-row md:items-start md:justify-between">
             <div className="max-w-md">

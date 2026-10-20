@@ -39,7 +39,7 @@ export default function HeroPrompt() {
         <button
           type="submit"
           aria-label="Continue to the brief"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-accent hover:text-night"
+          className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-white transition-colors hover:bg-accent hover:text-white"
         >
           <ArrowRight size={18} aria-hidden />
         </button>

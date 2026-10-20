@@ -25,7 +25,7 @@ export default function ContactPage() {
         </div>
 
         <aside className="space-y-4 lg:col-span-4">
-          <div className="rounded-[24px] border border-black/5 bg-card p-6">
+          <div className="rounded-[24px] border border-white/8 bg-card p-6">
             <h2 className="t-3">What happens next</h2>
             <ol className="mt-5 space-y-4">
               {CONTACT.next.map((step, i) => (
@@ -74,7 +74,7 @@ export default function ContactPage() {
               Open in a new tab <ArrowUpRight size={14} aria-hidden />
             </a>
           </div>
-          <div className="mt-10 overflow-hidden rounded-[28px] border border-black/5 bg-card p-2 md:p-4">
+          <div className="mt-10 overflow-hidden rounded-[28px] border border-white/8 bg-card p-2 md:p-4">
             <CalEmbed calLink={SITE.calLink} fallbackHref={SITE.bookCall} />
           </div>
         </div>

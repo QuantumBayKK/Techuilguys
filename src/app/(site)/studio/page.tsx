@@ -43,8 +43,8 @@ export default function StudioPage() {
       <section className="wrap py-20 md:py-28">
         <div className="grid gap-4 md:grid-cols-2">
           {FOUNDERS.map((f) => (
-            <article key={f.id} className="flex flex-col rounded-[28px] border border-black/5 bg-card p-7 md:p-9">
-              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-night font-[family-name:var(--font-heading)] text-xl text-accent">
+            <article key={f.id} className="flex flex-col rounded-[28px] border border-white/8 bg-card p-7 md:p-9">
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-night font-[family-name:var(--font-heading)] text-xl text-accent-deep">
                 {f.name[0]}
               </span>
               <h2 className="t-1 mt-6">{f.name}</h2>

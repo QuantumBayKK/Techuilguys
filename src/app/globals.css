@@ -2,24 +2,24 @@
 
 /* ============================================================
    TECHUILA GUYS — marketing site
-   Light grey page, near-black rounded panels, one amber accent.
+   Black site, red accent. Near-black panels sit on a black page, lifted by hairlines.
    Tokens only; no hex in components.
    ============================================================ */
 
 @theme {
-  --color-page: #f5f5f3;        /* page ground */
-  --color-band: #ececea;        /* recessed light band */
-  --color-card: #ffffff;        /* light card */
-  --color-ink: #141414;         /* text on light */
-  --color-muted: #5c5c5a;       /* secondary text on light */
-  --color-rule: #dcdcd8;        /* hairline on light */
-  --color-night: #0b0b0b;       /* dark panels */
-  --color-night-2: #151515;     /* card on dark */
-  --color-night-3: #1e1e1e;     /* raised card on dark */
-  --color-mist: #a6a6a2;        /* secondary text on dark */
-  --color-accent: #e9a23b;      /* amber: buttons, accents on dark */
-  --color-accent-deep: #94570b; /* amber text on light (AA) */
-  --color-bronze: #22170a;      /* alternate dark card */
+  --color-page: #050505;        /* page ground */
+  --color-band: #0c0c0c;        /* recessed band */
+  --color-card: #131313;        /* card */
+  --color-ink: #f4f4f4;         /* primary text */
+  --color-muted: #a3a3a3;       /* secondary text */
+  --color-rule: #262626;        /* hairline */
+  --color-night: #0d0d0d;       /* panels */
+  --color-night-2: #141414;     /* card on a panel */
+  --color-night-3: #1c1c1c;     /* raised card on a panel */
+  --color-mist: #a3a3a3;        /* secondary text on a panel */
+  --color-accent: #d61f2c;      /* red: buttons, dots, glows (white text on it passes AA) */
+  --color-accent-deep: #ff4d57; /* red for text on black (AA) */
+  --color-bronze: #1a0709;      /* alternate card, red-black */
 
   --font-heading: var(--nf-heading), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
@@ -72,7 +72,7 @@ html:has(.site) {
 
 .site ::selection {
   background: var(--color-accent);
-  color: var(--color-night);
+  color: #fff;
 }
 
 .site :focus-visible {
@@ -80,7 +80,7 @@ html:has(.site) {
   outline-offset: 3px;
 }
 .dark :focus-visible {
-  outline-color: var(--color-accent);
+  outline-color: var(--color-accent-deep);
 }
 
 .wrap {
@@ -99,6 +99,7 @@ html:has(.site) {
   border-radius: 24px;
   background: var(--color-night);
   color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.07);
   overflow: hidden;
   position: relative;
   isolation: isolate;
@@ -148,9 +149,9 @@ html:has(.site) {
   text-transform: uppercase;
   color: var(--color-accent-deep);
 }
-.dark .eyebrow { color: var(--color-accent); }
+.dark .eyebrow { color: var(--color-accent-deep); }
 .accent { color: var(--color-accent-deep); }
-.dark .accent { color: var(--color-accent); }
+.dark .accent { color: var(--color-accent-deep); }
 .figure {
   font-family: var(--font-mono);
   font-weight: 500;
@@ -179,16 +180,16 @@ html:has(.site) {
 .btn-lg { min-height: 50px; padding: 0 1.6rem; font-size: 0.95rem; }
 .btn-sm { min-height: 36px; padding: 0 0.95rem; font-size: 0.82rem; }
 
-.btn-accent { background: var(--color-accent); color: var(--color-night); }
-.btn-accent:hover { background: #f3b75c; }
-.btn-ink { background: var(--color-ink); color: #fff; }
-.btn-ink:hover { background: #2a2a2a; }
-.btn-white { background: #fff; color: var(--color-ink); }
-.btn-white:hover { background: #ececea; }
+.btn-accent { background: var(--color-accent); color: #fff; }
+.btn-accent:hover { background: #e8333f; }
+.btn-ink { background: var(--color-ink); color: var(--color-page); }
+.btn-ink:hover { background: #fff; }
+.btn-white { background: #fff; color: #0a0a0a; }
+.btn-white:hover { background: #e5e5e5; }
 .btn-ghost { border: 1px solid rgba(255, 255, 255, 0.22); color: #fff; }
 .btn-ghost:hover { border-color: #fff; background: rgba(255, 255, 255, 0.06); }
 .btn-line { border: 1px solid var(--color-rule); color: var(--color-ink); background: transparent; }
-.btn-line:hover { border-color: var(--color-ink); }
+.btn-line:hover { border-color: var(--color-ink); background: rgba(255, 255, 255, 0.04); }
 
 .link {
   background-image: linear-gradient(currentColor, currentColor);
@@ -228,21 +229,21 @@ html:has(.site) {
 
 /* The glowing prompt field. */
 .prompt {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 60px -8px rgba(233, 162, 59, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 60px -8px rgba(214, 31, 44, 0.45);
   transition: box-shadow 300ms var(--ease-out-quint);
 }
 .prompt:focus-within {
-  box-shadow: 0 0 0 1px rgba(233, 162, 59, 0.8), 0 0 80px -6px rgba(233, 162, 59, 0.6);
+  box-shadow: 0 0 0 1px rgba(214, 31, 44, 0.8), 0 0 80px -6px rgba(214, 31, 44, 0.6);
 }
 
-/* Soft amber light behind dark panels. */
+/* Soft red light behind dark panels. */
 .glow {
   background:
-    radial-gradient(60% 50% at 50% 100%, rgba(233, 162, 59, 0.16), transparent 70%),
-    radial-gradient(40% 40% at 85% 10%, rgba(233, 162, 59, 0.08), transparent 70%);
+    radial-gradient(60% 50% at 50% 100%, rgba(214, 31, 44, 0.16), transparent 70%),
+    radial-gradient(40% 40% at 85% 10%, rgba(214, 31, 44, 0.08), transparent 70%);
 }
 
-/* Drifting amber shape in the closing CTA. */
+/* Drifting red shape in the closing CTA. */
 .blob {
   position: absolute;
   border-radius: 46% 54% 60% 40% / 50% 42% 58% 50%;
@@ -254,12 +255,13 @@ html:has(.site) {
   to { transform: translate(-6%, 8%) rotate(24deg) scale(1.12); }
 }
 
-/* Light bento tiles with soft colour. */
+/* Bento tiles with a soft red light. */
 .tile-soft {
   background:
-    radial-gradient(70% 60% at 85% 15%, rgba(233, 162, 59, 0.22), transparent 70%),
-    radial-gradient(60% 60% at 10% 100%, rgba(214, 120, 160, 0.16), transparent 70%),
-    #f4f2ee;
+    radial-gradient(70% 60% at 85% 15%, rgba(214, 31, 44, 0.28), transparent 70%),
+    radial-gradient(60% 60% at 10% 100%, rgba(214, 31, 44, 0.1), transparent 70%),
+    var(--color-night-2);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   color: var(--color-ink);
 }
 

@@ -57,7 +57,7 @@ export default function Constellation({ className = "" }: { className?: string }
           const b = points[j];
           const d = Math.hypot(a.x - b.x, a.y - b.y);
           if (d < LINK) {
-            ctx.strokeStyle = `rgba(233,162,59,${0.18 * (1 - d / LINK)})`;
+            ctx.strokeStyle = `rgba(214,31,44,${0.18 * (1 - d / LINK)})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
