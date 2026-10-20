@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Techuila Guys — we design and build software products, and ship them in weeks";
+export const alt = "Techuila Guys — we design and build SaaS products that ship";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -16,8 +16,8 @@ export default function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 80,
-          background: "#103b2d",
-          color: "#f2f3ef",
+          background: "radial-gradient(70% 90% at 80% 110%, #6b4210, #0b0b0b 65%)",
+          color: "#ffffff",
           fontFamily: "sans-serif",
         }}
       >
@@ -27,11 +27,11 @@ export default function OpengraphImage() {
               width: 64,
               height: 64,
               borderRadius: 16,
-              background: "#0a2a20",
+              background: "#e9a23b",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#c6a050",
+              color: "#0b0b0b",
               fontSize: 40,
             }}
           >
@@ -40,11 +40,11 @@ export default function OpengraphImage() {
           Techuila Guys
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ fontSize: 78, fontWeight: 700, lineHeight: 1.02, letterSpacing: -2.5, maxWidth: 980 }}>
-            We design and build software products, and ship them in weeks.
+          <div style={{ fontSize: 78, fontWeight: 400, lineHeight: 1.04, letterSpacing: -2.5, maxWidth: 980 }}>
+            We design and build SaaS products that ship.
           </div>
-          <div style={{ marginTop: 28, fontSize: 28, color: "#b9c6bf" }}>
-            SaaS platforms, web and mobile apps, AI features and payment systems.
+          <div style={{ marginTop: 28, fontSize: 28, color: "#a6a6a2" }}>
+            Independent product studio — web, mobile, AI, automation and payments.
           </div>
         </div>
       </div>

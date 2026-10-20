@@ -2,32 +2,35 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus } from "lucide-react";
-import { FAQ } from "@/content/site";
+import { ChevronDown } from "lucide-react";
+import { FAQ } from "@/content/site-copy";
 
 export default function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <ul className="border-t border-ink">
+    <ul className="space-y-2">
       {FAQ.map((item, i) => {
         const isOpen = open === i;
         const id = `faq-${i}`;
         return (
-          <li key={item.q} className="border-b border-rule">
+          <li
+            key={item.q}
+            className={`rounded-[18px] border transition-colors ${isOpen ? "border-white/15 bg-night-3" : "border-white/8 bg-night-2"}`}
+          >
             <h3>
               <button
                 type="button"
                 aria-expanded={isOpen}
                 aria-controls={id}
                 onClick={() => setOpen(isOpen ? null : i)}
-                className="flex w-full items-center justify-between gap-6 py-6 text-left font-[family-name:var(--font-heading)] text-lg font-semibold tracking-[-0.01em] md:text-xl"
+                className="flex w-full items-center justify-between gap-6 px-5 py-4 text-left text-[0.95rem] font-medium text-white"
               >
                 {item.q}
-                <Plus
+                <ChevronDown
                   aria-hidden
-                  size={20}
-                  className={`shrink-0 transition-transform duration-300 ${isOpen ? "rotate-45" : ""}`}
+                  size={18}
+                  className={`shrink-0 text-white/60 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
                 />
               </button>
             </h3>
@@ -38,10 +41,10 @@ export default function Faq() {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   className="overflow-hidden"
                 >
-                  <p className="max-w-2xl pb-7 text-muted">{item.a}</p>
+                  <p className="max-w-2xl px-5 pb-5 text-sm leading-relaxed text-mist">{item.a}</p>
                 </motion.div>
               )}
             </AnimatePresence>

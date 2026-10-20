@@ -1,19 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { SITE } from "@/content/site";
+import { ArrowRight } from "lucide-react";
+import { CONTACT, SITE } from "@/content/site-copy";
 
-const BUDGETS = ["Under $10k", "$10k to $25k", "$25k to $50k", "$50k to $100k", "Over $100k", "Not sure yet"];
-const TIMELINES = ["As soon as possible", "Within 1 to 3 months", "In 3 to 6 months", "Just exploring"];
-
-type State = { kind: "idle" } | { kind: "sending" } | { kind: "sent" } | { kind: "error"; message: string } | { kind: "fallback" };
+type State =
+  | { kind: "idle" }
+  | { kind: "sending" }
+  | { kind: "sent" }
+  | { kind: "error"; message: string }
+  | { kind: "fallback" };
 
 const input =
-  "mt-2 block w-full rounded-[10px] border border-rule bg-white px-4 py-3 text-[1rem] text-ink placeholder:text-muted/70 transition-colors focus:border-ink focus:outline-none";
+  "mt-2 block w-full rounded-[14px] border border-rule bg-white px-4 py-3 text-[0.98rem] text-ink placeholder:text-muted/70 transition-colors focus:border-ink focus:outline-none";
 
+/**
+ * Posts to /api/contact, which validates on the server and emails both
+ * founders. "Sent" is only shown after the server confirms delivery. Without a
+ * mail key the form says so and shows our addresses — it never fakes success.
+ */
 export default function ContactForm() {
+  const params = useSearchParams();
   const [state, setState] = useState<State>({ kind: "idle" });
+  const [brief, setBrief] = useState("");
+
+  // Carry over the one-liner typed into the hero prompt.
+  useEffect(() => {
+    const b = params.get("brief");
+    if (b) setBrief(b.slice(0, 500));
+  }, [params]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,6 +45,7 @@ export default function ContactForm() {
       const json = await res.json().catch(() => ({}));
       if (res.ok) {
         form.reset();
+        setBrief("");
         setState({ kind: "sent" });
       } else if (json.error === "unconfigured") {
         setState({ kind: "fallback" });
@@ -45,18 +63,16 @@ export default function ContactForm() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         role="status"
-        className="rounded-2xl border border-rule bg-white p-8 md:p-10"
+        className="rounded-[24px] border border-black/5 bg-card p-8 md:p-10"
       >
-        <h2 className="t-2">Message sent.</h2>
-        <p className="mt-3 text-muted">
-          Thanks — both founders have it. {SITE.responseTime} If it&apos;s urgent, book a call and we&apos;ll talk sooner.
-        </p>
+        <h2 className="t-2">Brief sent.</h2>
+        <p className="mt-3 text-muted">Both founders have it, and we'll reply by email. Want to talk sooner? Book a call.</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-ink">
-            Book a call
+            Book a call <ArrowRight size={14} aria-hidden />
           </a>
           <button type="button" onClick={() => setState({ kind: "idle" })} className="btn btn-line">
-            Send another message
+            Send another brief
           </button>
         </div>
       </motion.div>
@@ -66,45 +82,58 @@ export default function ContactForm() {
   const sending = state.kind === "sending";
 
   return (
-    <form onSubmit={onSubmit} className="relative rounded-2xl border border-rule bg-white p-6 md:p-10">
+    <form id="brief" onSubmit={onSubmit} className="relative scroll-mt-28 rounded-[24px] border border-black/5 bg-card p-6 md:p-9">
       <div className="grid gap-5 sm:grid-cols-2">
-        <label className="block text-[0.95rem] font-medium">
+        <label className="block text-sm font-medium">
           Your name
           <input name="name" required autoComplete="name" className={input} />
         </label>
-        <label className="block text-[0.95rem] font-medium">
-          Work email
+        <label className="block text-sm font-medium">
+          Email
           <input name="email" type="email" required autoComplete="email" className={input} />
         </label>
-        <label className="block text-[0.95rem] font-medium sm:col-span-2">
+        <label className="block text-sm font-medium">
           Company <span className="font-normal text-muted">(optional)</span>
           <input name="company" autoComplete="organization" className={input} />
         </label>
-        <label className="block text-[0.95rem] font-medium">
-          Budget <span className="font-normal text-muted">(optional)</span>
-          <select name="budget" defaultValue="" className={input}>
-            <option value="">Choose a range</option>
-            {BUDGETS.map((b) => (
-              <option key={b}>{b}</option>
-            ))}
-          </select>
-        </label>
-        <label className="block text-[0.95rem] font-medium">
-          Timeline <span className="font-normal text-muted">(optional)</span>
-          <select name="timeline" defaultValue="" className={input}>
-            <option value="">Choose a timeline</option>
-            {TIMELINES.map((t) => (
+        <label className="block text-sm font-medium">
+          Project type
+          <select name="projectType" required defaultValue="" className={input}>
+            <option value="" disabled>
+              Choose one
+            </option>
+            {CONTACT.projectTypes.map((t) => (
               <option key={t}>{t}</option>
             ))}
           </select>
         </label>
-        <label className="block text-[0.95rem] font-medium sm:col-span-2">
+        <label className="block text-sm font-medium">
+          Budget <span className="font-normal text-muted">(optional)</span>
+          <select name="budget" defaultValue="" className={input}>
+            <option value="">Choose a range</option>
+            {CONTACT.budgets.map((b) => (
+              <option key={b}>{b}</option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm font-medium">
+          Timeline
+          <select name="timeline" defaultValue="" className={input}>
+            <option value="">Choose a timeline</option>
+            {CONTACT.timelines.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+          </select>
+        </label>
+        <label className="block text-sm font-medium sm:col-span-2">
           What are you building?
           <textarea
             name="message"
             required
             rows={6}
-            placeholder="The problem, who it's for, and anything that already exists."
+            value={brief}
+            onChange={(e) => setBrief(e.target.value)}
+            placeholder="Who it's for, what it must do, and anything that already exists."
             className={`${input} resize-y`}
           />
         </label>
@@ -126,16 +155,16 @@ export default function ContactForm() {
             role="alert"
             className="overflow-hidden"
           >
-            <div className="mt-6 rounded-[10px] border border-brass-deep/40 bg-brass/10 px-4 py-3 text-[0.95rem]">
+            <div className="mt-6 rounded-[14px] border border-accent-deep/40 bg-accent/10 px-4 py-3 text-sm">
               {state.kind === "error" ? (
                 state.message
               ) : (
                 <>
-                  The form can&apos;t send right now, so your message hasn&apos;t gone anywhere yet. Email us directly at{" "}
+                  The form can&apos;t send right now, so your brief hasn&apos;t gone anywhere yet. Email it to{" "}
                   {SITE.emails.map((e, i) => (
                     <span key={e.address}>
                       {i > 0 && " or "}
-                      <a href={`mailto:${e.address}`} className="link-u link font-medium break-all">
+                      <a href={`mailto:${e.address}`} className="link-u link break-all font-medium">
                         {e.address}
                       </a>
                     </span>
@@ -148,10 +177,9 @@ export default function ContactForm() {
         )}
       </AnimatePresence>
 
-      <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted">{SITE.responseTime}</p>
-        <button type="submit" disabled={sending} className="btn btn-ink disabled:opacity-60">
-          {sending ? "Sending…" : "Send message"}
+      <div className="mt-7 flex justify-end">
+        <button type="submit" disabled={sending} className="btn btn-ink btn-lg disabled:opacity-60">
+          {sending ? "Sending…" : "Send brief"} {!sending && <ArrowRight size={16} aria-hidden />}
         </button>
       </div>
     </form>

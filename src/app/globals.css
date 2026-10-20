@@ -2,25 +2,29 @@
 
 /* ============================================================
    TECHUILA GUYS — marketing site
-   Felt green and brass, carried over from the original brand,
-   set on a cool paper ground. Tokens only; no hex in components.
+   Light grey page, near-black rounded panels, one amber accent.
+   Tokens only; no hex in components.
    ============================================================ */
 
 @theme {
-  --color-paper: #f2f3ef;      /* page ground */
-  --color-paper-2: #e7e9e3;    /* recessed band */
-  --color-ink: #0d1a15;        /* text, primary buttons */
-  --color-muted: #55625c;      /* secondary text on paper */
-  --color-rule: #cfd4cc;       /* hairlines on paper */
-  --color-felt: #103b2d;       /* dark sections */
-  --color-felt-deep: #0a2a20;  /* footer, closing band */
-  --color-brass: #c6a050;      /* accent on felt */
-  --color-brass-deep: #8a6a24; /* accent on paper (AA contrast) */
-  --color-mist: #b9c6bf;       /* secondary text on felt */
+  --color-page: #f5f5f3;        /* page ground */
+  --color-band: #ececea;        /* recessed light band */
+  --color-card: #ffffff;        /* light card */
+  --color-ink: #141414;         /* text on light */
+  --color-muted: #5c5c5a;       /* secondary text on light */
+  --color-rule: #dcdcd8;        /* hairline on light */
+  --color-night: #0b0b0b;       /* dark panels */
+  --color-night-2: #151515;     /* card on dark */
+  --color-night-3: #1e1e1e;     /* raised card on dark */
+  --color-mist: #a6a6a2;        /* secondary text on dark */
+  --color-accent: #e9a23b;      /* amber: buttons, accents on dark */
+  --color-accent-deep: #94570b; /* amber text on light (AA) */
+  --color-bronze: #22170a;      /* alternate dark card */
 
   --font-heading: var(--nf-heading), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--nf-sans), ui-sans-serif, system-ui, sans-serif;
-  /* Workspace keeps its own faces. */
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+  /* Workspace faces. */
   --font-display: var(--font-display);
   --font-body: var(--font-body);
 
@@ -44,7 +48,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Workspace headings (kept from the previous site). */
+/* Workspace headings. */
 .font-display {
   font-family: var(--font-display), serif;
   letter-spacing: -0.01em;
@@ -53,32 +57,30 @@ body {
 /* ---------- Site shell ---------- */
 
 html:has(.site) {
-  background: var(--color-paper);
+  background: var(--color-page);
   scroll-behavior: smooth;
-  scroll-padding-top: 88px;
+  scroll-padding-top: 96px;
 }
 
 .site {
-  background: var(--color-paper);
+  background: var(--color-page);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.6;
 }
 
 .site ::selection {
-  background: var(--color-felt);
-  color: var(--color-paper);
+  background: var(--color-accent);
+  color: var(--color-night);
 }
 
 .site :focus-visible {
-  outline: 2px solid var(--color-brass-deep);
+  outline: 2px solid var(--color-accent-deep);
   outline-offset: 3px;
-  border-radius: 4px;
 }
-
-.on-felt :focus-visible {
-  outline-color: var(--color-brass);
+.dark :focus-visible {
+  outline-color: var(--color-accent);
 }
 
 .wrap {
@@ -88,82 +90,106 @@ html:has(.site) {
   padding-inline: 20px;
 }
 @media (min-width: 768px) {
-  .wrap { padding-inline: 40px; }
+  .wrap { padding-inline: 32px; }
 }
 
-/* Type scale — a 1.25 modular scale, headings tight, body loose. */
+/* Rounded dark panel inset from the page edge (hero, CTA, footer). */
+.panel {
+  margin-inline: 8px;
+  border-radius: 24px;
+  background: var(--color-night);
+  color: #fff;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+}
+@media (min-width: 768px) {
+  .panel { margin-inline: 16px; border-radius: 28px; }
+}
+
+/* ---------- Type ---------- */
+
 .t-hero {
   font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: clamp(2.5rem, 6.2vw, 5.25rem);
-  line-height: 0.98;
-  letter-spacing: -0.035em;
+  font-weight: 300;
+  font-size: clamp(2.5rem, 5.6vw, 4.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
   text-wrap: balance;
 }
 .t-1 {
   font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: clamp(2.125rem, 4.4vw, 3.75rem);
-  line-height: 1.02;
-  letter-spacing: -0.03em;
+  font-weight: 300;
+  font-size: clamp(2.1rem, 4.2vw, 3.3rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
   text-wrap: balance;
 }
 .t-2 {
   font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  line-height: 1.08;
-  letter-spacing: -0.025em;
+  font-weight: 300;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
   text-wrap: balance;
 }
 .t-3 {
   font-family: var(--font-heading);
-  font-weight: 600;
-  font-size: 1.375rem;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
+  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
-.lede {
-  font-size: clamp(1.125rem, 1.6vw, 1.3rem);
-  line-height: 1.55;
-  max-width: 38em;
-  text-wrap: pretty;
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent-deep);
+}
+.dark .eyebrow { color: var(--color-accent); }
+.accent { color: var(--color-accent-deep); }
+.dark .accent { color: var(--color-accent); }
+.figure {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
-/* ---------- Buttons ---------- */
+/* ---------- Buttons (pills) ---------- */
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  min-height: 48px;
-  padding: 0 1.4rem;
-  border-radius: 10px;
-  font-family: var(--font-heading);
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
   font-weight: 600;
-  font-size: 0.98rem;
-  letter-spacing: -0.005em;
   white-space: nowrap;
   transition: background-color 200ms var(--ease-out-quint), color 200ms var(--ease-out-quint),
-    border-color 200ms var(--ease-out-quint), transform 200ms var(--ease-out-quint);
+    border-color 200ms var(--ease-out-quint), transform 160ms var(--ease-out-quint);
 }
-.btn:active { transform: translateY(1px); }
-.btn-sm { min-height: 40px; padding: 0 1rem; font-size: 0.9rem; }
+.btn:active { transform: scale(0.97); }
+.btn svg { transition: transform 220ms var(--ease-out-quint); }
+.btn:hover svg { transform: translateX(3px); }
+.btn-lg { min-height: 50px; padding: 0 1.6rem; font-size: 0.95rem; }
+.btn-sm { min-height: 36px; padding: 0 0.95rem; font-size: 0.82rem; }
 
-.btn-ink { background: var(--color-ink); color: var(--color-paper); }
-.btn-ink:hover { background: var(--color-felt); }
+.btn-accent { background: var(--color-accent); color: var(--color-night); }
+.btn-accent:hover { background: #f3b75c; }
+.btn-ink { background: var(--color-ink); color: #fff; }
+.btn-ink:hover { background: #2a2a2a; }
+.btn-white { background: #fff; color: var(--color-ink); }
+.btn-white:hover { background: #ececea; }
+.btn-ghost { border: 1px solid rgba(255, 255, 255, 0.22); color: #fff; }
+.btn-ghost:hover { border-color: #fff; background: rgba(255, 255, 255, 0.06); }
+.btn-line { border: 1px solid var(--color-rule); color: var(--color-ink); background: transparent; }
+.btn-line:hover { border-color: var(--color-ink); }
 
-.btn-line { border: 1px solid var(--color-ink); color: var(--color-ink); }
-.btn-line:hover { background: var(--color-ink); color: var(--color-paper); }
-
-.btn-brass { background: var(--color-brass); color: var(--color-felt-deep); }
-.btn-brass:hover { background: #d8b466; }
-
-.btn-ghost-light { border: 1px solid rgba(242, 243, 239, 0.35); color: var(--color-paper); }
-.btn-ghost-light:hover { border-color: var(--color-paper); background: rgba(242, 243, 239, 0.08); }
-
-/* Inline text link with an underline that draws in. */
 .link {
   background-image: linear-gradient(currentColor, currentColor);
   background-size: 0% 1px;
@@ -176,67 +202,93 @@ html:has(.site) {
 .link-u { background-size: 100% 1px; }
 .link-u:hover { background-size: 0% 1px; }
 
-/* ---------- Hero load sequence (the one orchestrated moment) ---------- */
-
-.rise {
-  display: block;
-  overflow: hidden;
-  padding-bottom: 0.08em;
-  margin-bottom: -0.08em;
+/* Cards that respond to hover/focus with a small lift. */
+.lift {
+  transition: transform 260ms var(--ease-out-quint), box-shadow 260ms var(--ease-out-quint);
 }
-.rise > span {
-  display: block;
-  transform: translateY(105%);
-  animation: rise 900ms var(--ease-out-quint) forwards;
-  animation-delay: calc(var(--i, 0) * 90ms + 80ms);
-}
-@keyframes rise { to { transform: none; } }
+.lift:hover, .lift:focus-visible { transform: translateY(-4px); }
 
-.fade-in {
+/* ---------- Hero ---------- */
+
+/* Line two lights up word by word, as if typed in. */
+.type-in > span {
+  opacity: 0.18;
+  animation: type-in 600ms var(--ease-out-quint) forwards;
+  animation-delay: calc(var(--i, 0) * 140ms + 350ms);
+}
+@keyframes type-in { to { opacity: 1; } }
+
+.fade-up {
   opacity: 0;
-  animation: fade-in 800ms var(--ease-out-quint) forwards;
-  animation-delay: var(--d, 400ms);
+  transform: translateY(12px);
+  animation: fade-up 800ms var(--ease-out-quint) forwards;
+  animation-delay: var(--d, 300ms);
 }
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: none; }
+@keyframes fade-up { to { opacity: 1; transform: none; } }
+
+/* The glowing prompt field. */
+.prompt {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 60px -8px rgba(233, 162, 59, 0.45);
+  transition: box-shadow 300ms var(--ease-out-quint);
+}
+.prompt:focus-within {
+  box-shadow: 0 0 0 1px rgba(233, 162, 59, 0.8), 0 0 80px -6px rgba(233, 162, 59, 0.6);
 }
 
-.frame-in {
-  opacity: 0;
-  transform: translateY(24px) scale(0.98);
-  animation: frame-in 1100ms var(--ease-out-quint) 350ms forwards;
+/* Soft amber light behind dark panels. */
+.glow {
+  background:
+    radial-gradient(60% 50% at 50% 100%, rgba(233, 162, 59, 0.16), transparent 70%),
+    radial-gradient(40% 40% at 85% 10%, rgba(233, 162, 59, 0.08), transparent 70%);
 }
-@keyframes frame-in { to { opacity: 1; transform: none; } }
 
-/* Showcase tab progress bar. */
-.tab-progress {
-  transform-origin: left;
-  transform: scaleX(0);
+/* Drifting amber shape in the closing CTA. */
+.blob {
+  position: absolute;
+  border-radius: 46% 54% 60% 40% / 50% 42% 58% 50%;
+  filter: blur(40px);
+  animation: blob 16s ease-in-out infinite alternate;
 }
-.tab-progress.is-running {
-  animation: tab-progress var(--dur, 5000ms) linear forwards;
+@keyframes blob {
+  from { transform: translate(0, 0) rotate(0deg) scale(1); }
+  to { transform: translate(-6%, 8%) rotate(24deg) scale(1.12); }
 }
-.tab-progress.is-paused { animation-play-state: paused; }
-@keyframes tab-progress { to { transform: scaleX(1); } }
+
+/* Light bento tiles with soft colour. */
+.tile-soft {
+  background:
+    radial-gradient(70% 60% at 85% 15%, rgba(233, 162, 59, 0.22), transparent 70%),
+    radial-gradient(60% 60% at 10% 100%, rgba(214, 120, 160, 0.16), transparent 70%),
+    #f4f2ee;
+  color: var(--color-ink);
+}
+
+/* Dotted grid on the footer. */
+.dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Capability ticker. */
+.ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker 40s linear infinite;
+}
+.ticker[data-paused="true"] { animation-play-state: paused; }
+@keyframes ticker { to { transform: translateX(-50%); } }
 
 /* Page transition (app/(site)/template.tsx). */
-.page-enter {
-  animation: page-enter 500ms var(--ease-out-quint) both;
-}
+.page-enter { animation: page-enter 450ms var(--ease-out-quint) both; }
 @keyframes page-enter {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html:has(.site) { scroll-behavior: auto; }
-  .rise > span, .fade-in, .frame-in, .page-enter {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-  .tab-progress.is-running { animation: none; transform: scaleX(1); }
+  .type-in > span, .fade-up, .page-enter { animation: none; opacity: 1; transform: none; }
+  .blob, .ticker { animation: none; }
   .site *, .site *::before, .site *::after { transition-duration: 1ms !important; }
 }
 

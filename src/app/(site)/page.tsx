@@ -1,112 +1,98 @@
 import Link from "next/link";
-import HeroShowcase from "@/components/site/HeroShowcase";
-import Faq from "@/components/site/Faq";
+import { ArrowRight } from "lucide-react";
+import Constellation from "@/components/site/Constellation";
+import HeroPrompt from "@/components/site/HeroPrompt";
+import Ticker from "@/components/site/Ticker";
 import {
-  CtaBand,
-  EngagementsSection,
-  FoundersSection,
+  CtaPanel,
+  FaqSection,
+  HeroTeasers,
+  InHouseSection,
   ProcessSection,
   SectionHead,
-  ServicesList,
-  WorkGrid,
+  ServiceCards,
+  WorkingSection,
+  WorkList,
 } from "@/components/site/Sections";
-import { SITE } from "@/content/site";
-
-const HEADLINE = ["We design and build", "software products,", "and ship them in weeks."];
+import { HERO, SITE } from "@/content/site-copy";
 
 export default function Home() {
   return (
     <>
-      {/* Hero — the headline rises line by line, then the live products slide in. */}
-      <section className="wrap pb-8 pt-32 md:pb-20 md:pt-40 lg:pb-28">
-        <h1 className="t-hero">
-          {HEADLINE.map((line, i) => (
-            <span key={line} className="rise" style={{ ["--i" as string]: i }}>
-              <span>{line}</span>
-            </span>
-          ))}
-        </h1>
-        <div className="mt-12 grid gap-14 lg:mt-16 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-4 lg:pt-2">
-            <p className="lede fade-in text-muted" style={{ ["--d" as string]: "450ms" }}>
-              Techuila Guys is a product studio for founders and companies worldwide. We take SaaS platforms, web and
-              mobile apps, AI features and payment systems from idea to launch.
+      {/* Hero — a dark panel with the drifting network, the line, the prompt, the two ways in. */}
+      <div className="pt-2 md:pt-4">
+        <section className="panel dark min-h-[min(100svh,960px)]">
+          <Constellation />
+          <div className="glow pointer-events-none absolute inset-0" />
+          <div className="wrap relative flex min-h-[min(100svh,960px)] flex-col items-center justify-center pb-40 pt-32 text-center md:pb-44">
+            <p className="eyebrow fade-up" style={{ ["--d" as string]: "100ms" }}>
+              {HERO.eyebrow}
             </p>
-            <div className="fade-in mt-9 flex flex-wrap gap-3" style={{ ["--d" as string]: "600ms" }}>
-              <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-ink">
-                Book a call
+            <h1 className="t-hero mt-6 max-w-4xl">
+              <span className="block">{HERO.lineOne}</span>
+              <span className="type-in block">
+                {HERO.lineTwo.split(" ").map((word, i) => (
+                  <span key={`${word}-${i}`} style={{ ["--i" as string]: i }}>
+                    {word}{" "}
+                  </span>
+                ))}
+              </span>
+            </h1>
+            <div className="fade-up mt-12 flex w-full justify-center" style={{ ["--d" as string]: "700ms" }}>
+              <HeroPrompt />
+            </div>
+            <div className="fade-up mt-8 flex flex-wrap justify-center gap-3" style={{ ["--d" as string]: "850ms" }}>
+              <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-accent btn-lg">
+                Book a call <ArrowRight size={16} aria-hidden />
               </a>
-              <Link href="/work" className="btn btn-line">
-                See our work
+              <Link href="/work" className="btn btn-ghost btn-lg">
+                See the work
               </Link>
             </div>
           </div>
-          <div className="lg:col-span-8">
-            <HeroShowcase />
+        </section>
+      </div>
+
+      <HeroTeasers />
+
+      <Ticker />
+
+      <section className="bg-band">
+        <div className="wrap pb-24 pt-20 md:pb-32 md:pt-28">
+          <SectionHead
+            eyebrow="What we build"
+            title="Three things we build,"
+            accent="end to end."
+            action={{ href: "/services", label: "All services" }}
+          />
+          <div className="mt-14 md:mt-20">
+            <ServiceCards />
           </div>
         </div>
       </section>
+
+      <WorkingSection />
 
       <section className="wrap py-24 md:py-32">
         <SectionHead
-          title="What we build"
-          intro="One senior team across design, engineering and launch, so nothing gets lost in a hand-off."
-          action={{ href: "/services", label: "All services" }}
+          eyebrow="Selected work"
+          title="Products we designed,"
+          accent="built and shipped."
+          intro="Real products, with honest status. Where we don't have a measured outcome, we show what was built instead of inventing a number."
+          action={{ href: "/work", label: "All case studies" }}
         />
         <div className="mt-14">
-          <ServicesList />
+          <WorkList />
         </div>
       </section>
 
-      <section className="bg-paper-2">
-        <div className="wrap py-24 md:py-32">
-          <SectionHead
-            title="Products we've shipped"
-            intro="Every one of these is live. Open them, click around, then read how we built them."
-            action={{ href: "/work", label: "All case studies" }}
-          />
-          <div className="mt-14">
-            <WorkGrid />
-          </div>
-        </div>
-      </section>
+      <InHouseSection />
 
       <ProcessSection />
 
-      <EngagementsSection />
+      <FaqSection />
 
-      <section className="border-t border-rule">
-        <div className="wrap py-24 md:py-32">
-          <SectionHead
-            title="You work with the founders"
-            intro="No account managers in between. The two people on your call are the two people building your product."
-            action={{ href: "/about", label: "About the studio" }}
-          />
-          <div className="mt-14">
-            <FoundersSection withBio={false} />
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-rule">
-        <div className="wrap grid gap-10 py-24 md:grid-cols-12 md:py-32">
-          <div className="md:col-span-4">
-            <h2 className="t-1">Questions clients ask</h2>
-            <p className="mt-5 text-muted">
-              Something else on your mind?{" "}
-              <Link href="/contact" className="link-u link text-ink">
-                Ask us directly
-              </Link>
-              .
-            </p>
-          </div>
-          <div className="md:col-span-8">
-            <Faq />
-          </div>
-        </div>
-      </section>
-
-      <CtaBand />
+      <CtaPanel />
     </>
   );
 }

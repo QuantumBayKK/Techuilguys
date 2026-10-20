@@ -1,24 +1,27 @@
 import type { Metadata } from "next";
-import { CtaBand, PageHeader, WorkGrid } from "@/components/site/Sections";
+import { CtaPanel, InHouseSection, PageHero, WorkList } from "@/components/site/Sections";
 
 export const metadata: Metadata = {
   title: "Work",
   description:
-    "Case studies from Techuila Guys: EdTech, PropTech, logistics, fintech and sales automation products we designed, built and launched.",
+    "Case studies from Techuila Guys: a PropTech marketplace, an EdTech app, a logistics app, a fintech tool and our own sales-automation product.",
   alternates: { canonical: "/work" },
 };
 
 export default function WorkPage() {
   return (
     <>
-      <PageHeader
-        title="Products we've designed, built and launched."
-        lede="From a kids' money-skills platform to a four-sided logistics marketplace. Every product here is live — open it and try it."
+      <PageHero
+        eyebrow="Selected work"
+        title="Products we designed,"
+        accent="built and shipped."
+        lede="Each case study says what the problem was, what we did, what shipped and where the product stands today."
       />
-      <section className="wrap pb-24 md:pb-32">
-        <WorkGrid />
+      <section className="wrap py-20 md:py-28">
+        <WorkList />
       </section>
-      <CtaBand title="Want your product on this page?" />
+      <InHouseSection />
+      <CtaPanel title="Want your product" accent="on this page?" />
     </>
   );
 }

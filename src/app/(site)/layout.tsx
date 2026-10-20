@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Nav from "@/components/site/Nav";
 import Footer from "@/components/site/Footer";
-import { SITE } from "@/content/site";
+import { SITE } from "@/content/site-copy";
 
 export const metadata: Metadata = {
   title: { default: SITE.title, template: `%s — ${SITE.name}` },

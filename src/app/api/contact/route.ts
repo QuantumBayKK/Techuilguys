@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { Resend } from "resend";
-import { SITE } from "@/content/site";
+import { SITE } from "@/content/site-copy";
 
 /**
  * Project enquiries from /contact → both founders' inboxes, with Reply-To set to
@@ -11,7 +11,7 @@ import { SITE } from "@/content/site";
  * email us directly — it never pretends to have sent.
  */
 
-const LIMITS = { name: 120, email: 200, company: 160, budget: 60, timeline: 60, message: 5000 };
+const LIMITS = { name: 120, email: 200, company: 160, projectType: 80, budget: 60, timeline: 60, message: 5000 };
 
 // Best-effort throttle per serverless instance: 5 enquiries / 10 min / IP.
 const hits = new Map<string, number[]>();
@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     name: field("name"),
     email: field("email"),
     company: field("company"),
+    projectType: field("projectType"),
     budget: field("budget"),
     timeline: field("timeline"),
     message: field("message"),
@@ -70,6 +71,7 @@ export async function POST(req: NextRequest) {
     ["Name", data.name],
     ["Email", data.email],
     ["Company", data.company || "—"],
+    ["Project type", data.projectType || "—"],
     ["Budget", data.budget || "—"],
     ["Timeline", data.timeline || "—"],
   ]

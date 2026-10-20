@@ -1,21 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Zilla_Slab, Inter, JetBrains_Mono, Schibsted_Grotesk, Instrument_Sans } from "next/font/google";
+import { Zilla_Slab, Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
-import { SITE } from "@/content/site";
+import { SITE } from "@/content/site-copy";
 
-// Marketing site: Schibsted Grotesk for headings, Instrument Sans for text.
-const heading = Schibsted_Grotesk({
+// Marketing-site headings. Body text (Inter) and labels (JetBrains Mono) share
+// the workspace faces below.
+const heading = Space_Grotesk({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["300", "400", "500"],
   variable: "--nf-heading",
-  display: "swap",
-});
-
-const sans = Instrument_Sans({
-  subsets: ["latin"],
-  variable: "--nf-sans",
   display: "swap",
 });
 
@@ -68,7 +63,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f2f3ef",
+  themeColor: "#0b0b0b",
 };
 
 /**
@@ -83,7 +78,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${heading.variable} ${sans.variable} ${display.variable} ${body.variable} ${mono.variable}`}
+      className={`${heading.variable} ${display.variable} ${body.variable} ${mono.variable}`}
     >
       <head>
         {/*

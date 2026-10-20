@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
 import Logo from "./Logo";
-import { NAV, SITE } from "@/content/site";
+import { NAV, SITE } from "@/content/site-copy";
 
 /**
- * Sticky header. Transparent over the top of the page, then a paper bar with a
- * hairline once you scroll, so it never fights the hero but stays legible.
+ * Floating pill navigation. Sits over the top of the hero panel, then gains a
+ * blurred dark backing once the page scrolls.
  */
 export default function Nav() {
   const pathname = usePathname();
@@ -18,47 +18,47 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close the mobile menu on navigation and lock scroll while it's open.
   useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
-  const solid = scrolled || open;
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-300 ${
-        solid ? "border-b border-rule bg-paper/90 backdrop-blur-md" : "border-b border-transparent"
-      }`}
-    >
+    <header className="dark pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-5">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:rounded-md focus:bg-ink focus:px-3 focus:py-2 focus:text-paper"
+        className="pointer-events-auto sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-ink"
       >
         Skip to content
       </a>
-      <div className="wrap flex h-[72px] items-center justify-between gap-6">
+      <div
+        className={`pointer-events-auto mx-auto flex h-14 max-w-[1080px] items-center justify-between gap-4 rounded-full border pl-5 pr-2 transition-[background-color,border-color,box-shadow] duration-300 ${
+          scrolled || open
+            ? "border-white/12 bg-night/85 shadow-[0_10px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+            : "border-white/10 bg-white/[0.03] backdrop-blur-sm"
+        }`}
+      >
         <Logo />
 
         <nav aria-label="Main" className="hidden md:block">
-          <ul className="flex items-center gap-8 text-[0.95rem]">
+          <ul className="flex items-center gap-7 text-[0.92rem]">
             {NAV.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   aria-current={isActive(item.href) ? "page" : undefined}
-                  className="link text-ink"
+                  className={`link transition-colors ${isActive(item.href) ? "text-white" : "text-white/70 hover:text-white"}`}
                 >
                   {item.label}
                 </Link>
@@ -67,11 +67,9 @@ export default function Nav() {
           </ul>
         </nav>
 
-        <div className="hidden items-center gap-5 md:flex">
-          <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-ink btn-sm">
-            Book a call
-          </a>
-        </div>
+        <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-accent btn-sm max-[380px]:!hidden">
+          Book a call
+        </a>
 
         <button
           type="button"
@@ -79,49 +77,41 @@ export default function Nav() {
           aria-expanded={open}
           aria-controls="mobile-menu"
           aria-label={open ? "Close menu" : "Open menu"}
-          className="-mr-2 grid h-11 w-11 place-items-center rounded-lg text-ink md:hidden"
+          className="grid h-11 w-11 place-items-center rounded-full text-white md:hidden"
         >
-          {open ? <X size={22} /> : <Menu size={22} />}
+          {open ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <motion.nav
             id="mobile-menu"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "calc(100svh - 72px)" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden bg-paper md:hidden"
+            aria-label="Mobile"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="pointer-events-auto mx-auto mt-2 max-w-[1080px] rounded-3xl border border-white/12 bg-night/95 p-3 backdrop-blur-xl md:hidden"
           >
-            <nav aria-label="Mobile" className="wrap flex h-full flex-col pb-8 pt-4">
-              <ul className="flex flex-col">
-                {NAV.map((item, i) => (
-                  <motion.li
-                    key={item.href}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.06 * i + 0.08 }}
-                    className="border-b border-rule"
+            <ul>
+              {NAV.map((item) => (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    aria-current={isActive(item.href) ? "page" : undefined}
+                    className="flex items-center justify-between rounded-2xl px-4 py-3.5 font-[family-name:var(--font-heading)] text-xl text-white hover:bg-white/5"
                   >
-                    <Link
-                      href={item.href}
-                      aria-current={isActive(item.href) ? "page" : undefined}
-                      className="block py-4 font-[family-name:var(--font-heading)] text-3xl font-semibold tracking-[-0.025em]"
-                    >
-                      {item.label}
-                    </Link>
-                  </motion.li>
-                ))}
-              </ul>
-              <div className="mt-auto flex flex-col gap-3">
-                <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-ink">
-                  Book a call
-                </a>
-              </div>
-            </nav>
-          </motion.div>
+                    {item.label}
+                    <ArrowRight size={18} className="text-white/40" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-accent btn-lg mt-2 w-full">
+              Book a call <ArrowRight size={16} aria-hidden />
+            </a>
+          </motion.nav>
         )}
       </AnimatePresence>
     </header>
