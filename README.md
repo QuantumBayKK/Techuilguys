@@ -49,6 +49,6 @@ utility), body text Instrument Sans.
 
 ## Workspace
 
-The client portal / internal workspace under `/workspace` is a separate product
-with its own styles (scoped under `.ws`). See `WORKSPACE.md` and
+The internal workspace under `/workspace` is a separate product (no longer linked
+from the marketing site) with its own styles (scoped under `.ws`). See `WORKSPACE.md` and
 `docs/ARCHITECTURE.md`.

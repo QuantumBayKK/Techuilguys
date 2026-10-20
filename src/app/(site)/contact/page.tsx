@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import CalEmbed from "@/components/site/CalEmbed";
 import ContactForm from "@/components/site/ContactForm";
 import { SITE } from "@/content/site";
@@ -38,15 +37,6 @@ export default function ContactPage() {
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="border-t border-rule pt-5">
-            <h2 className="t-3">Already a client?</h2>
-            <p className="mt-3 text-muted">
-              Timelines, approvals, files and requests live in your workspace.
-            </p>
-            <Link href="/workspace" className="btn btn-line btn-sm mt-4">
-              Client login
-            </Link>
           </div>
           <div className="border-t border-rule pt-5">
             <h2 className="t-3">Where we are</h2>

@@ -31,11 +31,6 @@ export default function Footer() {
               </Link>
             </li>
           ))}
-          <li>
-            <Link href="/workspace" className="link">
-              Client login
-            </Link>
-          </li>
         </FooterCol>
 
         <FooterCol title="Services" className="md:col-span-3">

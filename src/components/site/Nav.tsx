@@ -68,9 +68,6 @@ export default function Nav() {
         </nav>
 
         <div className="hidden items-center gap-5 md:flex">
-          <Link href="/workspace" className="link text-[0.95rem] text-muted hover:text-ink">
-            Client login
-          </Link>
           <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-ink btn-sm">
             Book a call
           </a>
@@ -122,9 +119,6 @@ export default function Nav() {
                 <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-ink">
                   Book a call
                 </a>
-                <Link href="/workspace" className="btn btn-line">
-                  Client login
-                </Link>
               </div>
             </nav>
           </motion.div>
