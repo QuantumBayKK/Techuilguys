@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Zilla_Slab, Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Zilla_Slab, Inter, JetBrains_Mono, Space_Grotesk, Archivo } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
@@ -11,6 +11,14 @@ const heading = Space_Grotesk({
   subsets: ["latin"],
   weight: ["300", "400", "500"],
   variable: "--nf-heading",
+  display: "swap",
+});
+
+// The logo's heavy uppercase: wordmark and the hero headline.
+const brand = Archivo({
+  subsets: ["latin"],
+  weight: ["800", "900"],
+  variable: "--nf-display",
   display: "swap",
 });
 
@@ -78,7 +86,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${heading.variable} ${display.variable} ${body.variable} ${mono.variable}`}
+      className={`${heading.variable} ${brand.variable} ${display.variable} ${body.variable} ${mono.variable}`}
     >
       <head>
         {/*

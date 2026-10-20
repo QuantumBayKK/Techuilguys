@@ -1,6 +1,8 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import Constellation from "@/components/site/Constellation";
+import HeroShader from "@/components/site/HeroShader";
+import HeroIntro from "@/components/site/HeroIntro";
 import HeroPrompt from "@/components/site/HeroPrompt";
 import Ticker from "@/components/site/Ticker";
 import {
@@ -16,39 +18,59 @@ import {
 } from "@/components/site/Sections";
 import { HERO, SITE } from "@/content/site-copy";
 
+/** Each word in its own clipped span so the intro can raise it into place. */
+function Words({ text, className = "" }: { text: string; className?: string }) {
+  return (
+    <>
+      {text.split(" ").map((w, i, all) => (
+        <Fragment key={`${w}-${i}`}>
+          <span className="sw">
+            <span data-hero-word className={`sw-i ${className}`}>
+              {w}
+            </span>
+          </span>
+          {i < all.length - 1 && " "}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
 export default function Home() {
   return (
     <>
-      {/* Hero — a dark panel with the drifting network, the line, the prompt, the two ways in. */}
+      {/* Hero — WebGL liquid smoke, the animated mark, the line, the prompt, two ways in. */}
       <div className="pt-2 md:pt-4">
-        <section className="panel dark min-h-[min(100svh,960px)]">
-          <Constellation />
-          <div className="glow pointer-events-none absolute inset-0" />
-          <div className="wrap relative flex min-h-[min(100svh,960px)] flex-col items-center justify-center pb-40 pt-32 text-center md:pb-44">
-            <p className="eyebrow fade-up" style={{ ["--d" as string]: "100ms" }}>
-              {HERO.eyebrow}
-            </p>
-            <h1 className="t-hero mt-6 max-w-4xl">
-              <span className="block">{HERO.lineOne}</span>
-              <span className="type-in block">
-                {HERO.lineTwo.split(" ").map((word, i) => (
-                  <span key={`${word}-${i}`} style={{ ["--i" as string]: i }}>
-                    {word}{" "}
-                  </span>
-                ))}
-              </span>
-            </h1>
-            <div className="fade-up mt-12 flex w-full justify-center" style={{ ["--d" as string]: "700ms" }}>
-              <HeroPrompt />
-            </div>
-            <div className="fade-up mt-8 flex flex-wrap justify-center gap-3" style={{ ["--d" as string]: "850ms" }}>
-              <a href={SITE.bookCall} target="_blank" rel="noreferrer" className="btn btn-accent btn-lg">
-                Book a call <ArrowRight size={16} aria-hidden />
-              </a>
-              <Link href="/work" className="btn btn-ghost btn-lg">
-                See the work
-              </Link>
-            </div>
+        <section className="panel dark min-h-[min(100svh,980px)] bg-[radial-gradient(80%_60%_at_50%_110%,rgba(214,31,44,0.25),transparent),#0a0506]">
+          <HeroShader />
+          <div className="wrap relative flex min-h-[min(100svh,980px)] flex-col items-center justify-center pb-40 pt-28 text-center md:pb-44">
+            <HeroIntro>
+              <p data-hero-eyebrow className="eyebrow mt-8">
+                {HERO.eyebrow}
+              </p>
+              <h1 className="t-display mt-5 max-w-5xl" aria-label={`${HERO.lineOne} ${HERO.lineTwo}`}>
+                <span aria-hidden className="block">
+                  <Words text={HERO.lineOne} />
+                </span>
+                <span aria-hidden className="block">
+                  <Words text={HERO.lineTwo} className="shadow-red" />
+                </span>
+              </h1>
+              <div data-hero-after className="mt-10 flex w-full justify-center">
+                <HeroPrompt />
+              </div>
+              <div data-hero-after className="mt-8 flex flex-wrap justify-center gap-3">
+                <a href={SITE.bookCall} target="_blank" rel="noreferrer" data-magnetic className="btn btn-accent btn-lg">
+                  Book a call <ArrowRight size={16} aria-hidden />
+                </a>
+                <Link href="/work" data-magnetic className="btn btn-ghost btn-lg">
+                  See the work
+                </Link>
+              </div>
+            </HeroIntro>
+          </div>
+          <div aria-hidden className="scroll-cue absolute bottom-6 left-1/2 hidden h-10 w-[22px] -translate-x-1/2 rounded-full border border-white/25 md:block">
+            <span className="absolute left-1/2 top-2 h-2 w-[3px] -translate-x-1/2 rounded-full bg-accent-deep" />
           </div>
         </section>
       </div>

@@ -98,9 +98,10 @@ export default function Footer() {
 
         <p
           aria-hidden
-          className="pointer-events-none select-none overflow-hidden whitespace-nowrap text-center font-[family-name:var(--font-heading)] text-[22vw] font-medium leading-[0.72] tracking-[-0.05em] text-white/[0.05]"
+          data-split
+          className="footer-mark pointer-events-none select-none overflow-hidden whitespace-nowrap pb-2 text-center"
         >
-          techuila
+          TECHUILA GUYS
         </p>
       </div>
     </footer>

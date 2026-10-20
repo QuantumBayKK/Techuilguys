@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Nav from "@/components/site/Nav";
 import Footer from "@/components/site/Footer";
+import MotionRoot from "@/components/site/MotionRoot";
+import CursorRing from "@/components/site/CursorRing";
 import { SITE } from "@/content/site-copy";
 
 export const metadata: Metadata = {
@@ -35,6 +37,9 @@ export default function SiteLayout({ children }: Readonly<{ children: React.Reac
         {children}
       </main>
       <Footer />
+      {/* After the page content so it sees the current route's DOM. */}
+      <MotionRoot />
+      <CursorRing />
     </div>
   );
 }

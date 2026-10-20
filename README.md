@@ -55,6 +55,26 @@ in `src/app/globals.css` (`@theme`). Headings use Space Grotesk (`t-hero`, `t-1`
 `t-2`, `t-3` — deliberately not `h-*`, which is a Tailwind height utility);
 body text uses Inter; labels and figures use JetBrains Mono.
 
+## Brand and motion
+
+- **Logo** — `public/brand/logo.png` is the source artwork (also the share
+  image). `components/site/BrandMark.tsx` redraws the laptop-and-shot mark as
+  SVG for the nav and the hero; the wordmark uses Archivo 900 with the logo's
+  red offset shadow.
+- **WebGL** — `HeroShader.tsx` is one raw-WebGL fragment shader (red liquid
+  smoke that follows the cursor). It renders at reduced resolution, pauses
+  off-screen, and draws a single still frame for reduced motion, Save-Data or
+  low-power devices.
+- **GSAP** — `HeroIntro.tsx` plays the logo build-up and headline. Everything
+  else is driven by data attributes read in `MotionRoot.tsx`: `data-split`
+  (word reveal), `data-reveal` / `data-reveal-item` (stagger), `data-parallax`,
+  `data-count`, `data-tilt` (3D tilt and glare), `data-magnetic`. Add the
+  attribute to new markup and it animates; no new code needed.
+- **Cursor** — `CursorRing.tsx` adds a trailing ring; `data-cursor="Label"`
+  shows a label on hover. The native cursor stays visible.
+- All of it is skipped for `prefers-reduced-motion`, and hover effects only run
+  on mouse/trackpad devices. Content is fully visible without JavaScript.
+
 ## Hero film
 
 `public/film/` holds an 8-second silent loop (WebM + MP4, about 0.55 MB each)

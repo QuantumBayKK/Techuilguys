@@ -34,7 +34,8 @@ export const NAV = [
 ];
 
 export const HERO = {
-  eyebrow: "Independent product studio",
+  /** The logo's tagline. */
+  eyebrow: "Ideas · Products · Impact",
   /** Rendered as two lines; the second fades in word by word. */
   lineOne: "We design and build",
   lineTwo: "SaaS products that ship.",
